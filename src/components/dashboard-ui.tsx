@@ -12,7 +12,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-oak/10 bg-white p-6 shadow-soft",
+        "rounded-2xl border border-oak/10 bg-white p-6 shadow-soft transition-shadow duration-300 hover:shadow-lift",
         className,
       )}
     >
@@ -88,10 +88,13 @@ export function StatCard({
   sub?: string;
 }) {
   return (
-    <Card>
-      <p className="text-sm text-soil/60">{label}</p>
-      <p className="mt-1 font-display text-3xl text-oak">{value}</p>
-      {sub && <p className="mt-1 text-xs text-soil/50">{sub}</p>}
-    </Card>
+    <div className="relative overflow-hidden rounded-2xl border border-oak/10 bg-white p-6 shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lift">
+      <span className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br from-sand/40 to-transparent" />
+      <p className="relative text-sm uppercase tracking-widest text-ochre">
+        {label}
+      </p>
+      <p className="relative mt-2 font-display text-4xl text-oak">{value}</p>
+      {sub && <p className="relative mt-1 text-xs text-soil/50">{sub}</p>}
+    </div>
   );
 }
