@@ -76,6 +76,7 @@ export function AuthForm({
         {tabs.map((t) => (
           <button
             key={t.id}
+            type="button"
             onClick={() => setMode(t.id)}
             className={`relative flex-1 rounded-full px-3 py-2 text-sm transition-colors ${
               mode === t.id ? "text-ivory" : "text-soil/60 hover:text-oak"
