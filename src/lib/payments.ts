@@ -34,7 +34,7 @@ export function manualInstructions(
 }
 
 /**
- * Create a Stripe Checkout session — server only. Returns a friendly disabled
+ * Create a Stripe Checkout session, server only. Returns a friendly disabled
  * result when no key is set so the caller can keep the UI coherent.
  */
 export async function createCardCheckout(args: {

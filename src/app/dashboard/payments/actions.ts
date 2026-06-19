@@ -45,7 +45,7 @@ export async function recordManualPayment(
     ok: true,
     message:
       method === "transfer"
-        ? "Recorded. Use your quote number as the transfer reference — we'll confirm once funds arrive."
+        ? "Recorded. Use your quote number as the transfer reference, we'll confirm once funds arrive."
         : "Recorded. Pay your team at the appointment and we'll mark it complete.",
   };
 }

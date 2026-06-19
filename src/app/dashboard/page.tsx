@@ -59,7 +59,7 @@ export default async function DashboardOverview() {
         {data.quotes.length === 0 ? (
           <EmptyState
             title="No quotes yet"
-            body="Draw your space and get an instant estimate — it takes less than a minute."
+            body="Draw your space and get an instant estimate, it takes less than a minute."
             ctaHref="/quote"
             ctaLabel="Start a quote"
           />

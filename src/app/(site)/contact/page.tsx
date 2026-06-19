@@ -16,7 +16,7 @@ export default function ContactPage() {
           <Eyebrow>Contact</Eyebrow>
           <h1 className="mt-4 text-5xl text-oak">Let&apos;s talk</h1>
           <p className="mt-5 max-w-md text-lg text-soil/70">
-            The fastest way to a price is our instant quote tool — but we&apos;re
+            The fastest way to a price is our instant quote tool, but we&apos;re
             always happy to hear from you directly.
           </p>
           <dl className="mt-8 space-y-4">

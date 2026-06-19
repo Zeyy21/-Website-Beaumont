@@ -22,7 +22,7 @@ type ButtonVariant = "primary" | "outline" | "ghost" | "light";
 type ButtonSize = "sm" | "md" | "lg";
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-full font-medium tracking-wide transition-all duration-200 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ochre focus-visible:ring-offset-2 focus-visible:ring-offset-ivory";
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium tracking-wide transition-all duration-200 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 hover:scale-[1.02] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ochre focus-visible:ring-offset-2 focus-visible:ring-offset-ivory";
 
 const variants: Record<ButtonVariant, string> = {
   primary: "bg-cinnamon text-ivory hover:bg-oak shadow-soft",
@@ -89,7 +89,7 @@ export function Wordmark({
       width={360}
       height={84}
       priority={priority}
-      className={cn("h-auto w-auto object-contain", dark && "invert", className)}
+      className={cn("object-contain", dark && "invert", className)}
     />
   );
 }
@@ -152,7 +152,7 @@ export function SectionHeading({
       {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
       <h2
         className={cn(
-          "mt-3 text-4xl leading-[1.05] md:text-5xl",
+          "mt-3 font-display text-4xl leading-[1.05] md:text-5xl lg:text-[56px] font-normal tracking-tight",
           light ? "text-ivory" : "text-oak",
         )}
       >

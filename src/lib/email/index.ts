@@ -1,7 +1,7 @@
 import { renderEmail, type EmailTemplate } from "./templates";
 
 /**
- * Email adapter. One entry point — `sendEmail()` — with swappable drivers.
+ * Email adapter. One entry point, `sendEmail()`, with swappable drivers.
  *
  * Default driver is "console": emails print to the server log so the whole app
  * works on an empty .env. To go live, set in .env.local:
@@ -133,11 +133,11 @@ async function sendResend({ to, subject, html, text }: DriverArgs) {
 async function sendSmtp({ to, subject, html, text }: DriverArgs) {
   let nodemailer: typeof import("nodemailer") | null = null;
   try {
-    // Optional dependency — only required if you choose the smtp provider.
+    // Optional dependency, only required if you choose the smtp provider.
     nodemailer = (await import("nodemailer")) as typeof import("nodemailer");
   } catch {
     console.warn(
-      "[email:smtp] nodemailer not installed — run `npm i nodemailer`. Falling back to console.",
+      "[email:smtp] nodemailer not installed, run `npm i nodemailer`. Falling back to console.",
     );
     return sendConsole({ to, subject, text });
   }

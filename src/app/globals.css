@@ -6,7 +6,7 @@
 @tailwind utilities;
 
 /*
- * Bombay Black Unicode — the brand display font (provided by the owner).
+ * Bombay Black Unicode, the brand display font (provided by the owner).
  * Loaded from /public/fonts. If the file is ever removed, the stack falls back
  * to Cormorant (declared in tailwind.config.ts fontFamily.display). For best
  * performance you can additionally export a .woff2 and add it as the first src.
@@ -57,6 +57,10 @@ body {
 h1, h2, h3, h4, .font-display {
   font-family: var(--font-display);
   letter-spacing: 0.01em;
+  /* Bombay Black Unicode renders a very narrow space glyph, so words visually
+     collide. Restore a comfortable word gap proportionally at every size. The
+     Cormorant fallback already spaces well, so a touch extra here is harmless. */
+  word-spacing: 0.16em;
 }
 
 /* Body copy comfortable defaults */
@@ -130,4 +134,9 @@ p {
 }
 .leaflet-bar a {
   color: var(--soil) !important;
+}
+
+/* Hide Geoman default toolbar so our custom programmatic UI takes over */
+.leaflet-pm-toolbar {
+  display: none !important;
 }

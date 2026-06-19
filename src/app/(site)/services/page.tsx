@@ -14,7 +14,7 @@ import { BeforeAfter } from "@/components/before-after";
 export const metadata: Metadata = {
   title: "Services",
   description:
-    "Explore Beaumont's premium cleaning services — residential, deep clean, move-in/out, and estate care.",
+    "Explore Beaumont's premium cleaning services, residential, deep clean, move-in/out, and estate care.",
 };
 
 export default async function ServicesPage() {
@@ -31,7 +31,7 @@ export default async function ServicesPage() {
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-lg text-ivory/70">
               Choose a service below, then build a transparent quote in under a
-              minute — area-based pricing, no surprises.
+              minute, area-based pricing, no surprises.
             </p>
           </Reveal>
         </Container>
@@ -72,7 +72,7 @@ export default async function ServicesPage() {
       <section className="bg-sand/30 py-24">
         <Container className="grid items-center gap-14 lg:grid-cols-2">
           <Reveal>
-            <BeforeAfter caption="Estate & Luxury Care — living room" />
+            <BeforeAfter caption="Estate & Luxury Care, living room" />
           </Reveal>
           <Reveal delay={0.1}>
             <SectionHeading

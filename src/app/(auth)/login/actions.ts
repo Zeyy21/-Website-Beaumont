@@ -81,10 +81,10 @@ export async function signInWithMagicLink(
     options: { emailRedirectTo: `${site.url}/auth/callback` },
   });
   if (error) return { error: error.message };
-  return { message: "Magic link sent — check your inbox." };
+  return { message: "Magic link sent, check your inbox." };
 }
 
-/** Google OAuth — usable directly as a <form action>. Redirects on success. */
+/** Google OAuth, usable directly as a <form action>. Redirects on success. */
 export async function signInWithGoogle(): Promise<void> {
   const supabase = createClient();
   if (!supabase) redirect("/login?error=disabled");

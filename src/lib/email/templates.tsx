@@ -87,7 +87,7 @@ export function renderEmail(t: EmailTemplate): Rendered {
       };
     case "payment_receipt":
       return {
-        subject: `Payment received — thank you`,
+        subject: `Payment received, thank you`,
         text: `${t.name}, we've recorded your ${t.method} payment of ${formatCurrency(
           t.amount,
         )}. Thank you.`,
@@ -104,12 +104,12 @@ export function renderEmail(t: EmailTemplate): Rendered {
     case "referral_credited":
       return {
         subject: `You earned ${t.points} reward points`,
-        text: `${t.name}, a referral just paid off — ${t.points} points added to your balance.`,
+        text: `${t.name}, a referral just paid off, ${t.points} points added to your balance.`,
         html: shell(
           "Referral reward",
           p(`Wonderful news, ${t.name}.`) +
             p(
-              `A friend you referred just booked — <strong>${t.points} points</strong> have been added to your balance.`,
+              `A friend you referred just booked, <strong>${t.points} points</strong> have been added to your balance.`,
             ),
         ),
       };

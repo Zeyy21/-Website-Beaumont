@@ -54,11 +54,24 @@ export async function getCurrentUser(): Promise<{
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data: profile } = await supabase
+  let { data: profile } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", user.id)
     .single();
+
+  // Resilience: if the signup DB trigger didn't create a profile row (e.g. it
+  // wasn't installed), create it now so the dashboard never breaks. Best-effort.
+  if (!profile) {
+    const fullName =
+      (user.user_metadata?.full_name as string | undefined) ?? null;
+    const { data: created } = await supabase
+      .from("profiles")
+      .upsert({ id: user.id, full_name: fullName }, { onConflict: "id" })
+      .select("*")
+      .single();
+    profile = created ?? null;
+  }
 
   return { id: user.id, email: user.email ?? null, profile: profile ?? null };
 }

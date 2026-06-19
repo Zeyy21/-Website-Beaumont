@@ -1,4 +1,4 @@
-/** Central site configuration — copy edits live here, not scattered in JSX. */
+/** Central site configuration, copy edits live here, not scattered in JSX. */
 
 export const site = {
   name: "Beaumont",
@@ -26,7 +26,7 @@ export const frequencies = [
     id: "biweekly",
     label: "Bi-weekly",
     modifier: 0.9,
-    note: "Every 2 weeks — most popular",
+    note: "Every 2 weeks, most popular",
   },
   { id: "weekly", label: "Weekly", modifier: 0.85, note: "Every week" },
 ] as const;
@@ -60,7 +60,7 @@ export const fallbackServices = [
     id: "residential",
     name: "Residential Cleaning",
     description:
-      "Recurring care for your home — surfaces, floors, kitchens and baths returned to a quiet, ordered calm.",
+      "Recurring care for your home, surfaces, floors, kitchens and baths returned to a quiet, ordered calm.",
     base_price: 80,
     rate_per_m2: 1.8,
     multiplier: 1.0,
@@ -78,7 +78,7 @@ export const fallbackServices = [
     id: "move",
     name: "Move-In / Move-Out",
     description:
-      "Empty-home detailing so a space is flawless for its next chapter — or for handing back the keys.",
+      "Empty-home detailing so a space is flawless for its next chapter, or for handing back the keys.",
     base_price: 160,
     rate_per_m2: 2.9,
     multiplier: 1.0,

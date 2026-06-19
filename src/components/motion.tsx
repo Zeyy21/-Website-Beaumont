@@ -31,7 +31,7 @@ export function Reveal({
   );
 }
 
-/** Stagger container — children using `staggerItem` animate in sequence. */
+/** Stagger container, children using `staggerItem` animate in sequence. */
 const container: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },

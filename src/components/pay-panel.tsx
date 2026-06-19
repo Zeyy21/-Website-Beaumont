@@ -35,7 +35,7 @@ export function PayPanel({
       const res = await startCardPayment(quoteId, amount);
       if (res.url) window.location.href = res.url;
       else if (res.disabled)
-        setMsg("Card payments aren't enabled yet — choose transfer or cash.");
+        setMsg("Card payments aren't enabled yet, choose transfer or cash.");
       else setMsg(res.error ?? "Could not start payment.");
     });
 

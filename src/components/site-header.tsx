@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { nav, site } from "@/lib/config";
 import { cn } from "@/lib/cn";
-import { ButtonLink, Container, Monogram } from "./ui";
+import { ButtonLink, Container, Wordmark } from "./ui";
 
 export function SiteHeader({ signedIn }: { signedIn: boolean }) {
   const pathname = usePathname();
@@ -34,13 +34,10 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
       <Container className="flex h-[72px] items-center justify-between">
         <Link
           href="/"
-          className="flex items-center gap-3"
+          className="group flex items-center"
           aria-label={`${site.name} home`}
         >
-          <Monogram size={34} dark />
-          <span className="font-display text-xl tracking-[0.18em] text-oak">
-            BEAUMONT
-          </span>
+          <Wordmark dark className="h-8 md:h-9 transition-opacity duration-200 group-hover:opacity-70" />
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
@@ -51,7 +48,7 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "relative rounded-full px-4 py-2 text-sm transition-colors",
+                  "relative whitespace-nowrap rounded-full px-4 py-2 text-sm transition-colors",
                   active ? "text-oak" : "text-soil/70 hover:text-oak",
                 )}
               >

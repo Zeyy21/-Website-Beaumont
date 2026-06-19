@@ -26,7 +26,7 @@ const values = [
   },
   {
     t: "Honest pricing",
-    d: "Area-based quotes you can see and understand. No hidden fees, no pressure — ever.",
+    d: "Area-based quotes you can see and understand. No hidden fees, no pressure, ever.",
   },
   {
     t: "Lasting relationships",

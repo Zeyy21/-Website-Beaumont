@@ -45,7 +45,7 @@ export function computeQuote(input: QuoteInput): QuoteResult {
     area * service.rate_per_m2 * service.multiplier * freq.modifier;
 
   const lineItems: LineItem[] = [
-    { label: `${service.name} — base`, amount: round2(service.base_price) },
+    { label: `${service.name}, base`, amount: round2(service.base_price) },
     {
       label: `Area · ${Math.round(area)} m² · ${freq.label}`,
       amount: round2(areaCost),

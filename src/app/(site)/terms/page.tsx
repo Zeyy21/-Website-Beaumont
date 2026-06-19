@@ -63,7 +63,7 @@ const sections = [
   {
     h: "9. Privacy",
     p: [
-      "We collect only the information needed to provide quotes and services — such as your address, contact details, and job history. We do not sell your data. Address lookups are processed through privacy-respecting open mapping services.",
+      "We collect only the information needed to provide quotes and services, such as your address, contact details, and job history. We do not sell your data. Address lookups are processed through privacy-respecting open mapping services.",
     ],
   },
   {

@@ -38,7 +38,7 @@ export default async function QuotePage({
           </h1>
           {zone && (
             <p className="mt-3 text-sm text-ochre">
-              Welcome, neighbour in {zone} — your estimate is pre-tuned for your area.
+              Welcome, neighbour in {zone}, your estimate is pre-tuned for your area.
             </p>
           )}
         </div>

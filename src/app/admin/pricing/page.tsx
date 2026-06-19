@@ -19,7 +19,7 @@ export default async function AdminPricing() {
         <CardTitle>Pricing</CardTitle>
         <p className="mt-1 text-sm text-soil/60">
           Edit the base price, per-m² rate, and multiplier for each service.
-          Changes apply instantly to new quotes — no deploy needed.
+          Changes apply instantly to new quotes, no deploy needed.
         </p>
       </div>
 
