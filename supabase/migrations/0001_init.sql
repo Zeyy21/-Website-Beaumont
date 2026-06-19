@@ -1,23 +1,13 @@
--- Beaumont — initial schema, RLS, seed.
+-- Beaumont: initial schema, RLS, seed.
 -- Apply with: supabase db push   (or paste into the Supabase SQL editor)
 -- Safe to re-run: uses IF NOT EXISTS / idempotent policies where practical.
 
 -- ───────────────────────── extensions ─────────────────────────
 create extension if not exists "pgcrypto";
 
--- ───────────────────────── helper: role check ─────────────────────────
--- SECURITY DEFINER avoids RLS recursion when policies query profiles.
-create or replace function public.is_staff()
-returns boolean
-language sql
-security definer
-set search_path = public
-as $$
-  select exists (
-    select 1 from public.profiles
-    where id = auth.uid() and role = 'staff'
-  );
-$$;
+-- NOTE: the public.is_staff() helper is defined AFTER the tables exist (just
+-- before the RLS section), because its body references public.profiles and
+-- Postgres validates that reference at function-creation time.
 
 -- ───────────────────────── profiles ─────────────────────────
 create table if not exists public.profiles (
@@ -164,6 +154,21 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
 
+-- ───────────────────────── helper: role check ─────────────────────────
+-- Defined here (after tables exist) so its reference to public.profiles is
+-- valid. SECURITY DEFINER avoids RLS recursion when policies call it.
+create or replace function public.is_staff()
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.profiles
+    where id = auth.uid() and role = 'staff'
+  );
+$$;
+
 -- ═════════════════════════ ROW LEVEL SECURITY ═════════════════════════
 alter table public.profiles       enable row level security;
 alter table public.services        enable row level security;
@@ -261,13 +266,15 @@ create policy scans_staff_select on public.door_tag_scans
   for select using (public.is_staff());
 
 -- ═════════════════════════ SEED ═════════════════════════
+-- Seed services only when the table is empty, so re-running never duplicates.
 insert into public.services (name, description, base_price, rate_per_m2, multiplier, sort)
-values
-  ('Residential Cleaning','Recurring care for your home — surfaces, floors, kitchens and baths returned to a quiet, ordered calm.',80,1.8,1.0,1),
+select * from (values
+  ('Residential Cleaning','Recurring care for your home, surfaces, floors, kitchens and baths returned to a quiet, ordered calm.',80,1.8,1.0,1),
   ('Signature Deep Clean','A meticulous top-to-bottom reset. Grout, baseboards, fixtures and the details most services overlook.',140,2.6,1.0,2),
-  ('Move-In / Move-Out','Empty-home detailing so a space is flawless for its next chapter — or for handing back the keys.',160,2.9,1.0,3),
+  ('Move-In / Move-Out','Empty-home detailing so a space is flawless for its next chapter, or for handing back the keys.',160,2.9,1.0,3),
   ('Estate & Luxury Care','Discreet, white-glove housekeeping for larger residences, with a dedicated team and bespoke checklist.',240,3.4,1.0,4)
-on conflict do nothing;
+) as v(name, description, base_price, rate_per_m2, multiplier, sort)
+where not exists (select 1 from public.services);
 
 insert into public.pricing_rates (key, value, note) values
   ('points_per_dollar', 100, '100 points = $1 discount'),
