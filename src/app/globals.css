@@ -1,0 +1,133 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap");
+@import "leaflet/dist/leaflet.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Bombay Black Unicode — the brand display font (provided by the owner).
+ * Loaded from /public/fonts. If the file is ever removed, the stack falls back
+ * to Cormorant (declared in tailwind.config.ts fontFamily.display). For best
+ * performance you can additionally export a .woff2 and add it as the first src.
+ */
+@font-face {
+  font-family: "Bombay Black Unicode";
+  src: url("/fonts/BombayBlackUnicode.ttf") format("truetype");
+  font-weight: 400 900;
+  font-display: swap;
+}
+
+:root {
+  --ivory: #f9f8e7;
+  --sand: #d7be96;
+  --ochre: #a1794f;
+  --cinnamon: #7a4327;
+  --oak: #40261a;
+  --soil: #1d170f;
+
+  /* Display = brand font first, then next/font Cormorant, then system serif. */
+  --font-display: "Bombay Black Unicode", var(--font-cormorant), "Cormorant",
+    Georgia, serif;
+  --font-body: var(--font-inter), "Inter", system-ui, sans-serif;
+
+  /* z-index scale */
+  --z-nav: 50;
+  --z-overlay: 40;
+  --z-modal: 60;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--ivory);
+  color: var(--soil);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  margin: 0;
+}
+
+h1, h2, h3, h4, .font-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.01em;
+}
+
+/* Body copy comfortable defaults */
+p {
+  line-height: 1.7;
+}
+
+/* Selection in brand tone */
+::selection {
+  background: var(--ochre);
+  color: var(--ivory);
+}
+
+/* Thin custom scrollbar on dark sections */
+.dark-scope {
+  scrollbar-color: var(--ochre) transparent;
+}
+
+/* Subtle organic texture for dark sections (CSS fallback for texture-dark.jpg).
+   Layered radial gradients evoke the plaster/wood look behind the logo. */
+.texture-soil {
+  background-color: var(--soil);
+  background-image:
+    radial-gradient(at 20% 15%, rgba(122, 67, 39, 0.35) 0px, transparent 55%),
+    radial-gradient(at 85% 20%, rgba(64, 38, 26, 0.5) 0px, transparent 50%),
+    radial-gradient(at 75% 90%, rgba(122, 67, 39, 0.22) 0px, transparent 55%),
+    radial-gradient(at 10% 85%, rgba(64, 38, 26, 0.45) 0px, transparent 50%);
+}
+
+/* Reusable shimmer skeleton */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: rgba(64, 38, 26, 0.08);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(249, 248, 231, 0.45),
+    transparent
+  );
+  animation: shimmer 1.6s infinite;
+}
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Honor reduced motion globally */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Leaflet controls themed to brand */
+.leaflet-container {
+  font-family: var(--font-body);
+  background: var(--sand);
+}
+.leaflet-bar a {
+  color: var(--soil) !important;
+}
