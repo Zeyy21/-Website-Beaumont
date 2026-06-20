@@ -86,8 +86,8 @@ export function Wordmark({
     <Image
       src="/brand/wordmark-ivory.png"
       alt="Beaumont"
-      width={360}
-      height={84}
+      width={1500}
+      height={500}
       priority={priority}
       className={cn("object-contain", dark && "invert", className)}
     />

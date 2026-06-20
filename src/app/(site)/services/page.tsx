@@ -72,7 +72,11 @@ export default async function ServicesPage() {
       <section className="bg-sand/30 py-24">
         <Container className="grid items-center gap-14 lg:grid-cols-2">
           <Reveal>
-            <BeforeAfter caption="Estate & Luxury Care, living room" />
+            <BeforeAfter
+              beforeUrl="/images/pressure-washing-before.png"
+              afterUrl="/images/pressure-washing-after.png"
+              caption="Driveway restoration, before and after"
+            />
           </Reveal>
           <Reveal delay={0.1}>
             <SectionHeading

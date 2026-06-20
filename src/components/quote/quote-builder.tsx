@@ -62,7 +62,7 @@ export function QuoteBuilder({
     [service, areaM2, frequency, selectedAddOns],
   );
 
-  const canAdvance = step === 0 ? areaM2 > 0 : true;
+  const canAdvance = step === 0 ? Boolean(place) && areaM2 > 0 : true;
 
   const submit = (intent: "save" | "request") => {
     if (!service || !place) return;
@@ -153,11 +153,17 @@ export function QuoteBuilder({
               <div className="space-y-6">
                 <div>
                   <h2 className="text-3xl text-oak tracking-tight">Where is your home?</h2>
-                  <p className="mt-2 text-soil/70 text-lg">
+                  <p className="mt-2 text-soil/80 text-lg">
                     Search your address, then click <span className="font-medium text-oak">Start Drawing</span> to trace your property and measure its area.
                   </p>
                 </div>
-                <AddressSearch onSelect={setPlace} />
+                <AddressSearch
+                  onSelect={(selection) => {
+                    setPlace(selection);
+                    setAreaM2(0);
+                    setClearNonce((nonce) => nonce + 1);
+                  }}
+                />
 
                 <div className="relative">
                   <MapCanvas
@@ -262,7 +268,7 @@ export function QuoteBuilder({
                         }`}
                       >
                         <span className="block text-xl text-oak font-medium group-hover:text-cinnamon transition-colors">{s.name}</span>
-                        <span className="mt-2 block text-sm text-soil/60">
+                    <span className="mt-2 block text-sm font-medium text-soil/75">
                           From {formatCurrency(s.base_price)}
                         </span>
                       </button>
@@ -311,7 +317,7 @@ export function QuoteBuilder({
                           }`}
                         >
                           <span className={`font-medium ${on ? "text-cinnamon" : "text-oak"}`}>{a.label}</span>
-                          <span className="text-soil/60">
+                          <span className="text-soil/75">
                             +{formatCurrency(a.price)}
                           </span>
                         </button>
@@ -326,7 +332,7 @@ export function QuoteBuilder({
               <div className="space-y-8">
                 <div>
                   <h2 className="text-3xl text-oak tracking-tight">Your instant estimate</h2>
-                  <p className="mt-2 text-soil/70 text-lg">
+                  <p className="mt-2 text-soil/80 text-lg">
                     {place?.label ?? "Your home"} · <span className="font-medium text-oak">{service?.name}</span>
                   </p>
                 </div>
@@ -356,7 +362,7 @@ export function QuoteBuilder({
                     <p className="font-display text-3xl text-oak">
                       {result.persisted ? "All set" : "Estimate ready"}
                     </p>
-                    <p className="mt-3 text-soil/70 text-lg">{result.message}</p>
+                    <p className="mt-3 text-soil/80 text-lg">{result.message}</p>
                     <div className="mt-6 flex justify-center gap-4">
                       <Button
                         variant="outline"
@@ -431,18 +437,18 @@ export function QuoteBuilder({
              {quote && areaM2 > 0 ? (
                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
                  <AnimatedPrice value={quote.total} />
-                 <p className="mt-2 text-ivory/60 text-sm">
+                 <p className="mt-2 text-ivory/80 text-sm">
                    Typically {formatCurrency(quote.low)} – {formatCurrency(quote.high)}
                  </p>
                </motion.div>
              ) : (
-               <p className="font-display text-3xl text-ivory/40 leading-tight">
+               <p className="font-display text-3xl text-ivory/70 leading-tight">
                  Draw your space to see a price
                </p>
              )}
           </div>
 
-          <div className="mt-8 space-y-3 border-t border-ivory/10 pt-8 text-sm text-ivory/70">
+          <div className="mt-8 space-y-3 border-t border-ivory/20 pt-8 text-sm text-ivory/85">
             <Row label="Service" value={service?.name ?? ", "} />
             <Row
               label="Area"
@@ -457,7 +463,7 @@ export function QuoteBuilder({
               value={selectedAddOns.length ? `${selectedAddOns.length} selected` : "None"}
             />
           </div>
-          <p className="mt-8 text-xs text-ivory/30 leading-relaxed">
+          <p className="mt-8 text-xs text-ivory/70 leading-relaxed">
             Final price confirmed after a quick review. No charge to request.
           </p>
         </div>
@@ -469,7 +475,7 @@ export function QuoteBuilder({
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between gap-4">
-      <span className="text-ivory/40">{label}</span>
+      <span className="text-ivory/70">{label}</span>
       <span className="text-right text-ivory/90 font-medium">{value}</span>
     </div>
   );

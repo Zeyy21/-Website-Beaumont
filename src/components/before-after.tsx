@@ -24,6 +24,7 @@ export function BeforeAfter({
   className?: string;
 }) {
   const [pos, setPos] = useState(50);
+  const [isDragging, setIsDragging] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
 
@@ -39,16 +40,22 @@ export function BeforeAfter({
     <figure className={cn("group", className)}>
       <div
         ref={ref}
-        className="relative aspect-[4/3] w-full select-none overflow-hidden rounded-2xl shadow-soft"
-        onMouseDown={(e) => {
+        className="relative aspect-[4/3] w-full touch-none select-none overflow-hidden rounded-2xl shadow-soft cursor-ew-resize"
+        onPointerDown={(e) => {
           dragging.current = true;
+          setIsDragging(true);
+          e.currentTarget.setPointerCapture(e.pointerId);
           update(e.clientX);
         }}
-        onMouseMove={(e) => dragging.current && update(e.clientX)}
-        onMouseUp={() => (dragging.current = false)}
-        onMouseLeave={() => (dragging.current = false)}
-        onTouchStart={(e) => update(e.touches[0].clientX)}
-        onTouchMove={(e) => update(e.touches[0].clientX)}
+        onPointerMove={(e) => dragging.current && update(e.clientX)}
+        onPointerUp={() => {
+          dragging.current = false;
+          setIsDragging(false);
+        }}
+        onPointerCancel={() => {
+          dragging.current = false;
+          setIsDragging(false);
+        }}
       >
         {/* AFTER (full background) */}
         <div className="absolute inset-0">
@@ -67,8 +74,11 @@ export function BeforeAfter({
 
         {/* BEFORE (clipped to the slider position) */}
         <div
-          className="absolute inset-0 overflow-hidden"
-          style={{ width: `${pos}%` }}
+          className={cn(
+            "absolute inset-0 overflow-hidden will-change-[clip-path]",
+            !isDragging && "transition-[clip-path] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+          )}
+          style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}
         >
           {beforeUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -76,13 +86,9 @@ export function BeforeAfter({
               src={beforeUrl}
               alt={beforeLabel}
               className="h-full w-full object-cover"
-              style={{ width: ref.current?.clientWidth ?? "100%" }}
             />
           ) : (
-            <div
-              className="flex h-full items-center justify-center bg-gradient-to-br from-oak to-soil"
-              style={{ width: ref.current?.clientWidth ?? "100%" }}
-            >
+            <div className="flex h-full items-center justify-center bg-gradient-to-br from-oak to-soil">
               <span className="font-display text-2xl text-ivory/40">Before</span>
             </div>
           )}
@@ -93,12 +99,19 @@ export function BeforeAfter({
 
         {/* Handle */}
         <div
-          className="absolute inset-y-0 z-10 w-0.5 bg-ivory"
+          className={cn(
+            "absolute inset-y-0 z-10 w-0.5 bg-ivory will-change-[left]",
+            !isDragging && "transition-[left] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+          )}
           style={{ left: `${pos}%` }}
         >
           <button
             className="absolute top-1/2 left-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize items-center justify-center rounded-full bg-ivory text-oak shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ochre"
+            role="slider"
             aria-label="Drag to compare before and after"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(pos)}
             onKeyDown={(e) => {
               if (e.key === "ArrowLeft") setPos((p) => Math.max(0, p - 4));
               if (e.key === "ArrowRight") setPos((p) => Math.min(100, p + 4));

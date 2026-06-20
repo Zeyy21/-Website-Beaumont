@@ -1,16 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { site } from "@/lib/config";
 
-/**
- * Server-side geocoding proxy. Keeps us compliant with OSM usage policy:
- *  - sends a proper User-Agent identifying the app,
- *  - runs server-side (Nominatim forbids client-side autocomplete),
- *  - caches responses at the edge.
- * Primary: Photon (Komoot, autocomplete-friendly). Fallback: Nominatim.
- * No API key required. A paid GEOCODER can be slotted in here later.
- */
-
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 interface Suggestion {
   label: string;
@@ -18,54 +9,90 @@ interface Suggestion {
   lon: number;
 }
 
-export async function GET(req: NextRequest) {
-  const q = req.nextUrl.searchParams.get("q")?.trim() ?? "";
-  if (q.length < 3) {
-    return NextResponse.json({ results: [] as Suggestion[] });
-  }
+const requestHeaders = {
+  "User-Agent": `BeaumontPressureWashing/1.0 (${site.url})`,
+  "Accept-Language": "en-CA,en;q=0.9",
+  Accept: "application/json",
+};
 
-  const headers = {
-    "User-Agent": `BeaumontApp/1.0 (${site.url})`,
-    "Accept-Language": "en",
-  };
+export async function GET(request: NextRequest) {
+  const q = normalizeCanadianQuery(request.nextUrl.searchParams.get("q")?.trim() ?? "");
+  const latParam = request.nextUrl.searchParams.get("lat");
+  const lonParam = request.nextUrl.searchParams.get("lon");
+  const lat = latParam === null ? Number.NaN : Number(latParam);
+  const lon = lonParam === null ? Number.NaN : Number(lonParam);
+
+  if (latParam !== null && lonParam !== null && Number.isFinite(lat) && Number.isFinite(lon)) {
+    return reverseGeocode(lat, lon);
+  }
+  if (q.length < 3) return NextResponse.json({ results: [] as Suggestion[] });
+
+  const biasLat = request.nextUrl.searchParams.get("biasLat");
+  const biasLon = request.nextUrl.searchParams.get("biasLon");
+  const bias = biasLat && biasLon ? `&lat=${encodeURIComponent(biasLat)}&lon=${encodeURIComponent(biasLon)}` : "";
 
   try {
     const photon = await fetch(
-      `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=5`,
-      { headers, next: { revalidate: 86400 } },
+      `https://photon.komoot.io/api/?q=${encodeURIComponent(`${q}, Canada`)}&limit=8&lang=en${bias}`,
+      { headers: requestHeaders, signal: AbortSignal.timeout(7000), cache: "no-store" },
     );
     if (photon.ok) {
       const data = (await photon.json()) as PhotonResponse;
-      const results = (data.features ?? [])
+      const results = dedupe((data.features ?? [])
         .map(featureToSuggestion)
-        .filter((s): s is Suggestion => s !== null);
-      if (results.length) return NextResponse.json({ results });
+        .filter((result): result is Suggestion => result !== null));
+      if (results.length) return NextResponse.json({ results, source: "photon" });
     }
   } catch {
-    // fall through to Nominatim
+    // Continue to the second provider.
   }
 
   try {
     const nominatim = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=5&q=${encodeURIComponent(
-        q,
-      )}`,
-      { headers, next: { revalidate: 86400 } },
+      `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&countrycodes=ca&limit=8&q=${encodeURIComponent(q)}`,
+      { headers: requestHeaders, signal: AbortSignal.timeout(7000), cache: "no-store" },
     );
     if (nominatim.ok) {
       const data = (await nominatim.json()) as NominatimItem[];
-      const results: Suggestion[] = data.map((d) => ({
-        label: d.display_name,
-        lat: Number(d.lat),
-        lon: Number(d.lon),
-      }));
-      return NextResponse.json({ results });
+      return NextResponse.json({
+        results: data.map((item) => ({
+          label: item.display_name,
+          lat: Number(item.lat),
+          lon: Number(item.lon),
+        })),
+        source: "nominatim",
+      });
     }
   } catch {
-    // both failed
+    // The client receives a useful failure state below.
   }
 
-  return NextResponse.json({ results: [] as Suggestion[] }, { status: 200 });
+  return NextResponse.json(
+    { results: [] as Suggestion[], error: "Address search is temporarily unavailable. Please try again." },
+    { status: 502 },
+  );
+}
+
+async function reverseGeocode(lat: number, lon: number) {
+  if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+    return NextResponse.json({ error: "Invalid coordinates." }, { status: 400 });
+  }
+  try {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=18&addressdetails=1&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`,
+      { headers: requestHeaders, signal: AbortSignal.timeout(7000), cache: "no-store" },
+    );
+    if (response.ok) {
+      const data = (await response.json()) as NominatimItem;
+      return NextResponse.json({
+        result: { label: data.display_name || "Your approximate location", lat, lon },
+        source: "nominatim",
+      });
+    }
+  } catch {
+    // Return coordinates so the map can still move even if reverse lookup fails.
+  }
+  return NextResponse.json({ result: { label: "Your approximate location", lat, lon } });
 }
 
 interface PhotonResponse {
@@ -74,25 +101,45 @@ interface PhotonResponse {
     properties: Record<string, string | undefined>;
   }>;
 }
+
 interface NominatimItem {
   display_name: string;
   lat: string;
   lon: string;
 }
 
-function featureToSuggestion(
-  f: NonNullable<PhotonResponse["features"]>[number],
-): Suggestion | null {
-  const c = f.geometry?.coordinates;
-  if (!c) return null;
-  const p = f.properties ?? {};
+function featureToSuggestion(feature: NonNullable<PhotonResponse["features"]>[number]): Suggestion | null {
+  const coordinates = feature.geometry?.coordinates;
+  if (!coordinates || !Number.isFinite(coordinates[0]) || !Number.isFinite(coordinates[1])) return null;
+  const properties = feature.properties ?? {};
+  const countryCode = (properties.countrycode ?? "").toLowerCase();
+  if (countryCode && countryCode !== "ca") return null;
   const label = [
-    [p.housenumber, p.street].filter(Boolean).join(" "),
-    p.city ?? p.name,
-    p.state,
-    p.country,
+    [properties.housenumber, properties.street].filter(Boolean).join(" "),
+    properties.city ?? properties.district ?? properties.name,
+    properties.state,
+    properties.postcode,
+    properties.country,
   ]
     .filter(Boolean)
     .join(", ");
-  return { label: label || (p.name ?? "Unknown"), lat: c[1], lon: c[0] };
+  return { label: label || properties.name || "Selected location", lat: coordinates[1], lon: coordinates[0] };
+}
+
+function normalizeCanadianQuery(value: string) {
+  const compactPostal = value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (/^[ABCEGHJ-NPRSTVXY]\d[ABCEGHJ-NPRSTV-Z]\d[ABCEGHJ-NPRSTV-Z]\d$/.test(compactPostal)) {
+    return `${compactPostal.slice(0, 3)} ${compactPostal.slice(3)}`;
+  }
+  return value.replace(/\s+/g, " ").trim();
+}
+
+function dedupe(results: Suggestion[]) {
+  const seen = new Set<string>();
+  return results.filter((result) => {
+    const key = result.label.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }

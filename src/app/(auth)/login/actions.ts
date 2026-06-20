@@ -1,5 +1,6 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { site } from "@/lib/config";
@@ -10,44 +11,57 @@ export interface AuthState {
   message?: string;
 }
 
-/** Email + password sign-in. */
-export async function signIn(
-  _prev: AuthState,
-  formData: FormData,
-): Promise<AuthState> {
-  const supabase = createClient();
-  if (!supabase) return { error: "Accounts are not enabled yet." };
+function safeNext(value: FormDataEntryValue | string | null, fallback = "/dashboard") {
+  const next = String(value ?? fallback);
+  return next.startsWith("/") && !next.startsWith("//") ? next : fallback;
+}
 
-  const email = String(formData.get("email") ?? "");
+function requestOrigin() {
+  const requestHeaders = headers();
+  const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
+  const protocol = requestHeaders.get("x-forwarded-proto") ?? (host?.includes("localhost") || host?.startsWith("127.") ? "http" : "https");
+  return host ? `${protocol}://${host}` : site.url;
+}
+
+export async function signIn(_prev: AuthState, formData: FormData): Promise<AuthState> {
+  const supabase = createClient();
+  if (!supabase) return { error: "Supabase is not available in this local build. Add the public URL and client key, then restart the site." };
+
+  const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  const next = String(formData.get("next") ?? "/dashboard");
+  const next = safeNext(formData.get("next"));
+  if (!email || !password) return { error: "Enter both your email and password." };
 
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return { error: error.message };
   redirect(next);
 }
 
-/** Email + password sign-up; seeds a welcome email + signup reward. */
-export async function signUp(
-  _prev: AuthState,
-  formData: FormData,
-): Promise<AuthState> {
+export async function signUp(_prev: AuthState, formData: FormData): Promise<AuthState> {
   const supabase = createClient();
-  if (!supabase) return { error: "Accounts are not enabled yet." };
+  if (!supabase) return { error: "Supabase is not available in this local build. Add the public URL and client key, then restart the site." };
 
-  const email = String(formData.get("email") ?? "");
+  const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  const fullName = String(formData.get("full_name") ?? "");
+  const fullName = String(formData.get("full_name") ?? "").trim();
   const referral = String(formData.get("referral") ?? "").trim();
+  const next = safeNext(formData.get("next"));
+  if (!fullName) return { error: "Enter your full name." };
+  if (!email) return { error: "Enter your email address." };
+  if (password.length < 8) return { error: "Use a password with at least 8 characters." };
 
+  const callback = `${requestOrigin()}/auth/callback?next=${encodeURIComponent(next)}`;
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { full_name: fullName } },
+    options: {
+      emailRedirectTo: callback,
+      data: { full_name: fullName, referral_code: referral || null },
+    },
   });
   if (error) return { error: error.message };
+  if (data.user?.identities?.length === 0) return { error: "An account already exists for this email. Try signing in instead." };
 
-  // Best-effort onboarding side effects (don't block on failure).
   if (data.user) {
     await sendEmail({
       to: email,
@@ -55,45 +69,43 @@ export async function signUp(
     });
   }
 
-  if (data.session) {
-    // Email confirmation disabled → signed in immediately.
-    redirect("/dashboard");
-  }
-  // Store referral code for processing after confirmation.
+  if (data.session) redirect(next);
   return {
     message:
-      "Check your email to confirm your account." +
-      (referral ? " Your referral will be applied once you sign in." : ""),
+      "Your account was created. Check your email to confirm it, then return here to sign in." +
+      (referral ? " Your referral code has been saved." : ""),
   };
 }
 
-/** Passwordless magic-link sign-in. */
-export async function signInWithMagicLink(
-  _prev: AuthState,
-  formData: FormData,
-): Promise<AuthState> {
+export async function signInWithMagicLink(_prev: AuthState, formData: FormData): Promise<AuthState> {
   const supabase = createClient();
-  if (!supabase) return { error: "Accounts are not enabled yet." };
+  if (!supabase) return { error: "Supabase is not available in this local build. Add the public URL and client key, then restart the site." };
 
-  const email = String(formData.get("email") ?? "");
+  const email = String(formData.get("email") ?? "").trim();
+  const next = safeNext(formData.get("next"));
+  if (!email) return { error: "Enter your email address." };
+
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: `${site.url}/auth/callback` },
+    options: {
+      emailRedirectTo: `${requestOrigin()}/auth/callback?next=${encodeURIComponent(next)}`,
+      shouldCreateUser: true,
+    },
   });
   if (error) return { error: error.message };
-  return { message: "Magic link sent, check your inbox." };
+  return { message: "Magic link sent. Check your inbox to continue." };
 }
 
-/** Google OAuth, usable directly as a <form action>. Redirects on success. */
-export async function signInWithGoogle(): Promise<void> {
+export async function signInWithGoogle(formData: FormData): Promise<void> {
   const supabase = createClient();
   if (!supabase) redirect("/login?error=disabled");
 
+  const next = safeNext(formData.get("next"));
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: `${site.url}/auth/callback` },
+    options: { redirectTo: `${requestOrigin()}/auth/callback?next=${encodeURIComponent(next)}` },
   });
-  if (error) redirect(`/login?error=${encodeURIComponent(error.message)}`);
+  if (error) redirect(`/login?error=oauth&message=${encodeURIComponent(error.message)}`);
   if (data.url) redirect(data.url);
   redirect("/login?error=oauth");
 }

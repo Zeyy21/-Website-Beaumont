@@ -12,13 +12,24 @@ export const metadata: Metadata = {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: { next?: string };
+  searchParams: { next?: string; error?: string; message?: string };
 }) {
   // Already signed in? Skip the form.
   const user = await getCurrentUser();
   if (user) redirect(searchParams.next ?? "/dashboard");
 
+  const fallbackErrors: Record<string, string> = {
+    disabled: "Supabase is not configured in this local build.",
+    auth: "That sign-in link could not be completed. It may have expired.",
+    oauth: "Google sign-in could not be completed.",
+    "missing-code": "The sign-in link is missing its authorization code.",
+  };
+
   return (
-    <AuthForm enabled={supabaseConfigured} next={searchParams.next ?? "/dashboard"} />
+    <AuthForm
+      enabled={supabaseConfigured}
+      next={searchParams.next ?? "/dashboard"}
+      initialError={searchParams.message ?? (searchParams.error ? fallbackErrors[searchParams.error] : undefined)}
+    />
   );
 }

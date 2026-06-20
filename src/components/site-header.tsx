@@ -12,23 +12,27 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const home = pathname === "/";
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
+    const onScroll = () =>
+      setScrolled(window.scrollY > (home ? window.innerHeight * 1.92 : 12));
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [home]);
 
   useEffect(() => setOpen(false), [pathname]);
+
+  const onDark = home && !scrolled && !open;
 
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 transition-all duration-300",
-        scrolled
-          ? "border-b border-oak/10 bg-ivory/85 backdrop-blur-md"
-          : "border-b border-transparent bg-transparent",
+        "sticky top-0 z-50 transition-all duration-500",
+        onDark
+          ? "border-b border-transparent bg-transparent text-ivory"
+          : "border-b border-oak/10 bg-ivory/90 text-soil backdrop-blur-md",
       )}
     >
       <Container className="flex h-[72px] items-center justify-between">
@@ -37,7 +41,7 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
           className="group flex items-center"
           aria-label={`${site.name} home`}
         >
-          <Wordmark dark className="h-8 md:h-9 transition-opacity duration-200 group-hover:opacity-70" />
+          <Wordmark dark={!onDark} priority className="h-8 w-auto transition-opacity duration-300 group-hover:opacity-70 md:h-11 lg:h-12" />
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
@@ -49,14 +53,23 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
                 href={item.href}
                 className={cn(
                   "relative whitespace-nowrap rounded-full px-4 py-2 text-sm transition-colors",
-                  active ? "text-oak" : "text-soil/70 hover:text-oak",
+                  onDark
+                    ? active
+                      ? "text-ivory"
+                      : "text-ivory/70 hover:text-ivory"
+                    : active
+                      ? "text-oak"
+                      : "text-soil/70 hover:text-oak",
                 )}
               >
                 {item.label}
                 {active && (
                   <motion.span
                     layoutId="nav-active"
-                    className="absolute inset-0 -z-10 rounded-full bg-oak/8"
+                    className={cn(
+                      "absolute inset-0 -z-10 rounded-full",
+                      onDark ? "bg-ivory/10" : "bg-oak/8",
+                    )}
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}
@@ -66,16 +79,24 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
-          <ButtonLink href={signedIn ? "/dashboard" : "/login"} variant="ghost" size="sm">
+          <ButtonLink
+            href={signedIn ? "/dashboard" : "/login"}
+            variant="ghost"
+            size="sm"
+            className={onDark ? "text-ivory hover:bg-ivory/10" : undefined}
+          >
             {signedIn ? "Dashboard" : "Sign in"}
           </ButtonLink>
-          <ButtonLink href="/quote" size="sm">
+          <ButtonLink href="/quote" size="sm" variant={onDark ? "light" : "primary"}>
             Instant Quote
           </ButtonLink>
         </div>
 
         <button
-          className="flex h-10 w-10 items-center justify-center rounded-full text-oak md:hidden"
+          className={cn(
+            "flex h-10 w-10 items-center justify-center rounded-full md:hidden",
+            onDark ? "text-ivory" : "text-oak",
+          )}
           onClick={() => setOpen((v) => !v)}
           aria-label="Toggle menu"
           aria-expanded={open}

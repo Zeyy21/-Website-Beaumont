@@ -1,18 +1,25 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-/** Exchanges an OAuth / magic-link code for a session, then redirects. */
-export async function GET(request: NextRequest) {
-  const { searchParams, origin } = request.nextUrl;
-  const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/dashboard";
+function safeNext(value: string | null) {
+  return value?.startsWith("/") && !value.startsWith("//") ? value : "/dashboard";
+}
 
-  if (code) {
-    const supabase = createClient();
-    if (supabase) {
-      const { error } = await supabase.auth.exchangeCodeForSession(code);
-      if (!error) return NextResponse.redirect(`${origin}${next}`);
-    }
+/** Exchange OAuth, email-confirmation, or magic-link codes for a cookie session. */
+export async function GET(request: NextRequest) {
+  const code = request.nextUrl.searchParams.get("code");
+  const next = safeNext(request.nextUrl.searchParams.get("next"));
+  const origin = request.nextUrl.origin;
+
+  if (!code) return NextResponse.redirect(`${origin}/login?error=missing-code`);
+  const supabase = createClient();
+  if (!supabase) return NextResponse.redirect(`${origin}/login?error=disabled`);
+
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  if (error) {
+    return NextResponse.redirect(
+      `${origin}/login?error=auth&message=${encodeURIComponent(error.message)}`,
+    );
   }
-  return NextResponse.redirect(`${origin}/login?error=auth`);
+  return NextResponse.redirect(`${origin}${next}`);
 }
