@@ -1,179 +1,203 @@
-import Link from "next/link";
-import { getServices } from "@/lib/data";
-import { site, rewards } from "@/lib/config";
-import { formatCurrency } from "@/lib/pricing";
-import { ButtonLink, Container, SectionHeading, Wordmark } from "@/components/ui";
-import { Reveal, Stagger, StaggerItem } from "@/components/motion";
-import { BeforeAfter } from "@/components/before-after";
-import { CountUp } from "@/components/count-up";
-import { Testimonials } from "@/components/testimonials";
-import { RewardsShowcase } from "@/components/rewards-showcase";
+import Image from "next/image";
 import { WebglHero } from "@/components/webgl-hero";
+import { ExperienceSequence } from "@/components/home-experience";
+import { Reveal, Stagger, StaggerItem } from "@/components/motion";
+import { ButtonLink, Container, Monogram } from "@/components/ui";
 
-const stats = [
-  { value: 12000, suffix: "+", label: "Sanctuaries Restored" },
-  { value: 4.9, decimals: 1, suffix: "★", label: "Client Satisfaction" },
-  { value: 1500, suffix: "hrs", label: "Time Given Back to You" },
-  { value: 60, prefix: "<", suffix: "s", label: "To book your peace of mind" },
+const feelings = [
+  {
+    number: "01",
+    title: "An arrival restored",
+    copy: "The kind of curb appeal that makes the whole property feel considered again.",
+  },
+  {
+    number: "02",
+    title: "Time, given back",
+    copy: "No rented equipment, lost weekends, or guessing which pressure is safe for the surface.",
+  },
+  {
+    number: "03",
+    title: "The finish you feel",
+    copy: "Not merely washed—stone, concrete, and pavers returned to a brighter, cared-for state.",
+  },
 ];
 
-export default async function HomePage() {
-  const services = await getServices();
+const care = [
+  {
+    label: "The arrival",
+    title: "A driveway worth coming home to.",
+    copy: "Built-up grime and organic staining lifted with a treatment tailored to the surface beneath.",
+    image: "/images/pressure-washed-driveway-placeholder.png",
+    alt: "Freshly pressure-washed stone driveway at golden hour",
+  },
+  {
+    label: "The outdoor room",
+    title: "A patio ready to be lived in again.",
+    copy: "Pool surrounds, terraces, and pavers restored for long afternoons and effortless hosting.",
+    image: "/images/pressure-washed-patio-placeholder.png",
+    alt: "Restored stone patio and pool surround",
+  },
+  {
+    label: "The first impression",
+    title: "An entrance that feels cared for.",
+    copy: "Walkways, steps, and front approaches brightened without compromising stone, joints, or gardens.",
+    image: "/images/pressure-washed-entry-placeholder.png",
+    alt: "Clean stone walkway leading to an elegant front entrance",
+  },
+];
 
+export default function HomePage() {
   return (
     <>
       <WebglHero />
 
-      {/* This invisible spacer forces the page to scroll, allowing the WebGL shader to run its 0->1 transition. */}
-      <div className="relative z-10 h-[150vh]" />
+      <section className="relative overflow-hidden bg-ivory py-28 md:py-40">
+        <Container>
+          <Reveal className="mx-auto max-w-5xl text-center">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.36em] text-cinnamon">
+              Beyond surface clean
+            </p>
+            <h2 className="mt-7 text-balance font-display text-[clamp(3.2rem,7vw,7rem)] leading-[0.9] text-oak">
+              We don’t simply wash
+              <span className="block italic text-ochre">a driveway.</span>
+              We leave a feeling.
+            </h2>
+            <p className="mx-auto mt-9 max-w-2xl text-lg font-medium leading-relaxed text-soil/80 md:text-xl">
+              Beaumont is exterior care designed around the moment after: the water settles, the stone brightens, and your entire property feels renewed.
+            </p>
+          </Reveal>
 
-      <div className="relative z-10 bg-ivory">
-        {/* ─────────── THE EXPERIENCE INTRO ─────────── */}
-        <section className="py-32">
-          <Container className="text-center">
-            <Reveal>
-              <h2 className="mx-auto max-w-4xl font-display text-4xl leading-tight text-oak md:text-6xl">
-                We don’t just clean surfaces.<br />
-                <span className="text-cinnamon">We restore your sanctuary.</span>
-              </h2>
-              <p className="mx-auto mt-8 max-w-2xl text-xl text-soil/70 leading-relaxed">
-                Imagine walking through your front door after a long trip. 
-                The air is perfectly still, carrying a faint, clean scent. 
-                The floors gleam, the surfaces are immaculate, and every object is perfectly in its place. 
-                That immediate drop in your shoulders—that exhale of pure relief—is what Beaumont delivers.
+          <Stagger className="mt-24 grid border-y border-oak/15 md:grid-cols-3">
+            {feelings.map((feeling) => (
+              <StaggerItem
+                key={feeling.number}
+                className="group border-b border-oak/15 px-2 py-10 last:border-b-0 md:border-b-0 md:border-r md:px-9 md:last:border-r-0"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-display text-xl text-ochre">{feeling.number}</span>
+                  <span className="h-2 w-2 rounded-full border border-cinnamon transition-colors duration-500 group-hover:bg-cinnamon" />
+                </div>
+                <h3 className="mt-14 font-display text-3xl leading-tight text-oak md:text-4xl">
+                  {feeling.title}
+                </h3>
+                <p className="mt-5 text-sm font-medium leading-relaxed text-soil/80 md:text-base">{feeling.copy}</p>
+              </StaggerItem>
+            ))}
+          </Stagger>
+        </Container>
+      </section>
+
+      <ExperienceSequence />
+
+      <section className="relative overflow-hidden bg-soil py-28 text-ivory md:py-40">
+        <div className="absolute inset-0 opacity-40 [background:radial-gradient(circle_at_18%_12%,rgba(122,67,39,.65),transparent_36%),radial-gradient(circle_at_82%_78%,rgba(161,121,79,.25),transparent_38%)]" />
+        <Container className="relative">
+          <Reveal className="grid gap-10 lg:grid-cols-[0.65fr_1.35fr] lg:items-end">
+            <div>
+              <Monogram className="h-16 w-16 opacity-80" size={64} />
+              <p className="mt-7 text-[10px] font-semibold uppercase tracking-[0.34em] text-sand">
+                Care, curated
               </p>
-            </Reveal>
-          </Container>
-        </section>
-
-        {/* ─────────── STATS STRIP ─────────── */}
-        <section className="border-y border-oak/10 bg-sand/10">
-          <Container>
-            <Stagger className="grid grid-cols-2 gap-y-10 py-16 md:grid-cols-4">
-              {stats.map((s) => (
-                <StaggerItem
-                  key={s.label}
-                  className="border-oak/10 text-center md:border-r md:last:border-r-0"
-                >
-                  <p className="font-display text-5xl text-oak md:text-6xl">
-                    <CountUp
-                      value={s.value}
-                      decimals={s.decimals ?? 0}
-                      prefix={s.prefix ?? ""}
-                      suffix={s.suffix ?? ""}
-                    />
-                  </p>
-                  <p className="mt-2 text-sm uppercase tracking-widest text-ochre">
-                    {s.label}
-                  </p>
-                </StaggerItem>
-              ))}
-            </Stagger>
-          </Container>
-        </section>
-
-        {/* ─────────── THE BEAUMONT STANDARD ─────────── */}
-        <section className="relative overflow-hidden py-32">
-          <Container className="grid items-center gap-16 lg:grid-cols-2">
-            <Reveal>
-              <SectionHeading
-                eyebrow="The Standard"
-                title="A meticulous return to perfection."
-                intro="Our specialists are trained to see what others miss. From the quietest corners of your estate to the high-traffic pathways, we treat your home like the masterpiece it is."
-              />
-              <ul className="mt-10 space-y-5">
-                {[
-                  { title: "Invisible Presence", desc: "We operate with absolute discretion, ensuring your daily rhythm is entirely undisturbed." },
-                  { title: "Curated Elements", desc: "Only the most refined, sustainably-sourced solutions touch your home's delicate surfaces." },
-                  { title: "Uncompromising Precision", desc: "A rigorous multi-point inspection follows every visit. Perfection is the baseline." },
-                ].map((p) => (
-                  <li key={p.title} className="flex items-start gap-4 text-soil/80">
-                    <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-cinnamon/10 text-cinnamon">
-                      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="3">
-                        <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </span>
-                    <div>
-                      <h4 className="font-display text-xl text-oak">{p.title}</h4>
-                      <p className="mt-1 text-soil/60">{p.desc}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </Reveal>
-            <Reveal delay={0.1}>
-              <BeforeAfter caption="The Beaumont transformation." />
-            </Reveal>
-          </Container>
-        </section>
-
-        {/* ─────────── EFFORTLESS JOURNEY ─────────── */}
-        <section className="bg-sand/20 py-32">
-          <Container>
-            <Reveal>
-              <SectionHeading
-                center
-                eyebrow="Effortless"
-                title="Your time is your ultimate luxury."
-                intro="We’ve engineered our booking experience to be entirely frictionless. No lengthy consultations. No hidden fees. Just peace of mind, instantly."
-              />
-            </Reveal>
-            <div className="relative mt-24">
-              <div className="absolute left-0 right-0 top-7 hidden h-px bg-gradient-to-r from-transparent via-ochre/40 to-transparent md:block" />
-              <Stagger className="grid gap-12 md:grid-cols-3">
-                {[
-                  {
-                    t: "Define your space",
-                    d: "Interact with our intelligent mapping tool. Trace your property and receive an instantaneous, pinpoint-accurate estimate.",
-                  },
-                  {
-                    t: "Curate your care",
-                    d: "Select the frequency and depth of care your home requires. The pricing is entirely transparent and adjusts in real-time.",
-                  },
-                  {
-                    t: "Reclaim your time",
-                    d: "Confirm your appointment securely. From that moment forward, the preservation of your home is entirely in our hands.",
-                  },
-                ].map((step, i) => (
-                  <StaggerItem key={step.t} className="relative text-center">
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-ochre/30 bg-ivory font-display text-2xl text-cinnamon shadow-soft">
-                      {i + 1}
-                    </div>
-                    <h3 className="mt-6 text-2xl text-oak">{step.t}</h3>
-                    <p className="mx-auto mt-3 max-w-xs text-soil/70">{step.d}</p>
-                  </StaggerItem>
-                ))}
-              </Stagger>
             </div>
-            <Reveal className="mt-16 text-center">
-              <ButtonLink href="/quote" size="lg">
-                Experience it now
-              </ButtonLink>
-            </Reveal>
-          </Container>
-        </section>
+            <h2 className="max-w-4xl text-balance font-display text-[clamp(3.3rem,7vw,7.2rem)] leading-[0.88] text-ivory">
+              One standard.
+              <span className="block italic text-sand">Your rhythm.</span>
+            </h2>
+          </Reveal>
 
-        {/* ─────────── TESTIMONIALS ─────────── */}
-        <Testimonials />
+          <div className="mt-20 border-t border-ivory/15">
+            {care.map((item, index) => (
+              <Reveal key={item.label} delay={index * 0.06}>
+                <article className="group grid gap-6 border-b border-ivory/20 py-9 transition-colors duration-500 hover:bg-ivory/[0.05] md:grid-cols-[0.5fr_0.8fr_1fr_1fr_auto] md:items-center md:px-4 md:py-12">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-sand">
+                    {item.label}
+                  </p>
+                  <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-ivory/20 bg-oak">
+                    <Image src={item.image} alt={item.alt} fill sizes="(min-width: 768px) 180px, 100vw" className="object-cover transition duration-700 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-soil/10" />
+                  </div>
+                  <h3 className="max-w-sm font-display text-3xl leading-[1.05] text-ivory md:text-4xl">
+                    {item.title}
+                  </h3>
+                  <p className="max-w-sm text-sm font-medium leading-relaxed text-ivory/80 md:text-base">{item.copy}</p>
+                  <span className="flex h-12 w-12 items-center justify-center rounded-full border border-ivory/20 text-sand transition-all duration-500 group-hover:border-sand group-hover:bg-sand group-hover:text-soil">
+                    <Arrow />
+                  </span>
+                </article>
+              </Reveal>
+            ))}
+          </div>
 
-        {/* ─────────── REWARDS ─────────── */}
-        <RewardsShowcase referralPoints={rewards.referralSuccess} />
+          <Reveal className="mt-12 flex justify-end">
+            <ButtonLink href="/services" variant="light" size="lg">
+              Explore your care
+              <Arrow />
+            </ButtonLink>
+          </Reveal>
+        </Container>
+      </section>
 
-        {/* ─────────── CLOSING ─────────── */}
-        <section className="py-32">
-          <Container className="text-center">
-            <Reveal>
-              <Wordmark dark className="mx-auto h-12 opacity-80" />
-              <p className="mx-auto mt-8 max-w-2xl font-display text-4xl leading-tight text-oak md:text-5xl">
-                {site.promise}
+      <section className="bg-sand/25 py-28 md:py-40">
+        <Container>
+          <Reveal className="mx-auto max-w-4xl text-center">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-cinnamon">
+              Felt, not announced
+            </p>
+            <blockquote className="mt-7 text-balance font-display text-[clamp(2.8rem,6vw,5.8rem)] leading-[0.96] text-oak">
+              “It made the whole house look newer. I didn’t realize how much the driveway was changing the way the property felt.”
+            </blockquote>
+            <p className="mt-8 text-sm font-semibold uppercase tracking-[0.22em] text-soil/70">Eleanor V. · Beaumont client</p>
+          </Reveal>
+        </Container>
+      </section>
+
+      <section className="bg-ivory px-4 py-4 md:px-6 md:py-6">
+        <div className="relative min-h-[82svh] overflow-hidden rounded-[2rem] md:rounded-[3.5rem]">
+          <Image
+            src="/images/pressure-washed-entry-placeholder.png"
+            alt="A restored stone walkway and welcoming home entrance"
+            fill
+            sizes="100vw"
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-soil/95 via-soil/72 to-soil/25" />
+          <Container className="relative flex min-h-[82svh] items-center py-20">
+            <Reveal className="max-w-2xl text-ivory">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.36em] text-sand">
+                Your time is waiting
               </p>
-              <ButtonLink href="/quote" size="lg" className="mt-12">
-                Begin your journey
-              </ButtonLink>
+              <h2 className="mt-6 text-balance font-display text-[clamp(3.5rem,7vw,7rem)] leading-[0.88]">
+                Leave the exterior to us.
+                <span className="mt-2 block italic text-sand">Keep the weekend.</span>
+              </h2>
+              <p className="mt-8 max-w-lg text-lg font-medium leading-relaxed text-ivory/85">
+                Tell us about your space and receive a tailored estimate in under a minute. No calls, no waiting, no guesswork.
+              </p>
+              <div className="mt-10 flex flex-wrap gap-3">
+                <ButtonLink href="/quote" variant="light" size="lg">
+                  Begin your reset
+                  <Arrow />
+                </ButtonLink>
+                <ButtonLink
+                  href="/contact"
+                  size="lg"
+                  className="border border-ivory/25 bg-transparent text-ivory hover:bg-ivory hover:text-soil"
+                >
+                  Speak to concierge
+                </ButtonLink>
+              </div>
             </Reveal>
           </Container>
-        </section>
-      </div>
+        </div>
+      </section>
     </>
+  );
+}
+
+function Arrow() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
 }

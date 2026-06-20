@@ -52,6 +52,12 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   margin: 0;
+  overflow-x: hidden;
+}
+
+/* Editorial display text benefits from balanced line wrapping where supported. */
+.text-balance {
+  text-wrap: balance;
 }
 
 h1, h2, h3, h4, .font-display {

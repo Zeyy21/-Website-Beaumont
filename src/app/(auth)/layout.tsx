@@ -19,9 +19,9 @@ export default function AuthLayout({
           <h1 className="max-w-md font-display text-5xl leading-tight">
             Your home, returned to quiet perfection.
           </h1>
-          <p className="mt-5 max-w-sm text-ivory/60">{site.promise}</p>
+          <p className="mt-5 max-w-sm text-ivory/85">{site.promise}</p>
         </div>
-        <p className="text-sm text-ivory/40">
+        <p className="text-sm text-ivory/70">
           © {new Date().getFullYear()} {site.name}
         </p>
       </div>

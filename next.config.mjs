@@ -1,6 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [{ key: "Permissions-Policy", value: "geolocation=(self)" }],
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       // Supabase Storage (public buckets) — host filled in from env at runtime; allow any https for dev.

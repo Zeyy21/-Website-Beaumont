@@ -4,18 +4,18 @@ import { Container, Wordmark } from "./ui";
 
 export function SiteFooter() {
   return (
-    <footer className="texture-soil mt-24 text-ivory">
+    <footer className="texture-soil text-ivory">
       <Container className="grid gap-12 py-16 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
           <Wordmark className="h-9" />
-          <p className="mt-5 max-w-sm text-ivory/60">{site.description}</p>
+          <p className="mt-5 max-w-sm text-ivory/80">{site.description}</p>
         </div>
 
         <div>
           <h3 className="text-sm font-semibold uppercase tracking-widest text-ochre">
             Explore
           </h3>
-          <ul className="mt-4 space-y-3 text-ivory/75">
+          <ul className="mt-4 space-y-3 text-ivory/85">
             {nav.map((i) => (
               <li key={i.href}>
                 <Link href={i.href} className="transition-colors hover:text-ivory">
@@ -35,7 +35,7 @@ export function SiteFooter() {
           <h3 className="text-sm font-semibold uppercase tracking-widest text-ochre">
             Contact
           </h3>
-          <ul className="mt-4 space-y-3 text-ivory/75">
+          <ul className="mt-4 space-y-3 text-ivory/85">
             <li>
               <a href={`mailto:${site.email}`} className="hover:text-ivory">
                 {site.email}
@@ -51,7 +51,7 @@ export function SiteFooter() {
       </Container>
 
       <div className="border-t border-ivory/10">
-        <Container className="flex flex-col items-center justify-between gap-3 py-6 text-sm text-ivory/50 md:flex-row">
+        <Container className="flex flex-col items-center justify-between gap-3 py-6 text-sm text-ivory/70 md:flex-row">
           <p>
             © {new Date().getFullYear()} {site.name}. {site.promise}
           </p>

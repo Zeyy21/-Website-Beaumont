@@ -269,10 +269,10 @@ create policy scans_staff_select on public.door_tag_scans
 -- Seed services only when the table is empty, so re-running never duplicates.
 insert into public.services (name, description, base_price, rate_per_m2, multiplier, sort)
 select * from (values
-  ('Residential Cleaning','Recurring care for your home, surfaces, floors, kitchens and baths returned to a quiet, ordered calm.',80,1.8,1.0,1),
-  ('Signature Deep Clean','A meticulous top-to-bottom reset. Grout, baseboards, fixtures and the details most services overlook.',140,2.6,1.0,2),
-  ('Move-In / Move-Out','Empty-home detailing so a space is flawless for its next chapter, or for handing back the keys.',160,2.9,1.0,3),
-  ('Estate & Luxury Care','Discreet, white-glove housekeeping for larger residences, with a dedicated team and bespoke checklist.',240,3.4,1.0,4)
+  ('Driveway & Walkway Restoration','Concrete, stone, and pavers restored to a brighter, more welcoming arrival.',80,2.2,1.0,1),
+  ('Patio & Pool Surround','Outdoor living surfaces refreshed with careful pressure and material-aware treatment.',140,2.8,1.0,2),
+  ('Gentle House Wash','A considered low-pressure exterior wash for siding, stucco, brick, and delicate finishes.',160,2.4,1.0,3),
+  ('Complete Estate Exterior','A tailored restoration of the driveway, paths, terraces, walls, and outdoor living areas.',240,3.2,1.0,4)
 ) as v(name, description, base_price, rate_per_m2, multiplier, sort)
 where not exists (select 1 from public.services);
 

@@ -64,8 +64,8 @@ export function MapCanvas({
     if (!elRef.current || mapRef.current) return;
 
     const map = L.map(elRef.current, {
-      center: [40.7128, -74.006],
-      zoom: 18,
+      center: [43.6532, -79.3832],
+      zoom: 17,
       zoomControl: false,
       attributionControl: false,
     });

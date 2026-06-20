@@ -2,10 +2,10 @@
 
 export const site = {
   name: "Beaumont",
-  tagline: "Effortless luxury cleaning.",
+  tagline: "Exterior care, beautifully delivered.",
   description:
-    "Beaumont delivers meticulous, premium cleaning for discerning homes. Draw your space, get an instant estimate, and book in minutes.",
-  promise: "Meticulous care, quietly delivered.",
+    "Beaumont restores driveways, walkways, patios, pool surrounds, and home exteriors with meticulous pressure washing and effortless service.",
+  promise: "A brighter arrival, quietly delivered.",
   email: "concierge@beaumont.example",
   phone: "+1 (555) 014-7788",
   url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
@@ -21,24 +21,24 @@ export const nav = [
 /** Frequencies offered for recurring service. modifier multiplies the line total. */
 export const frequencies = [
   { id: "one_time", label: "One-time", modifier: 1.0, note: "A single visit" },
-  { id: "monthly", label: "Monthly", modifier: 0.95, note: "Every 4 weeks" },
+  { id: "monthly", label: "Quarterly", modifier: 0.85, note: "Four seasonal visits" },
   {
     id: "biweekly",
-    label: "Bi-weekly",
+    label: "Twice yearly",
     modifier: 0.9,
-    note: "Every 2 weeks, most popular",
+    note: "Spring and fall, most popular",
   },
-  { id: "weekly", label: "Weekly", modifier: 0.85, note: "Every week" },
+  { id: "weekly", label: "Annual", modifier: 0.95, note: "A yearly restoration" },
 ] as const;
 
 export type FrequencyId = (typeof frequencies)[number]["id"];
 
 /** Optional add-ons surfaced in the quote builder. price is a flat add. */
 export const addOns = [
-  { id: "windows", label: "Interior windows", price: 60 },
-  { id: "deep", label: "Deep clean", price: 120 },
-  { id: "fridge", label: "Inside fridge & oven", price: 45 },
-  { id: "laundry", label: "Laundry & linens", price: 35 },
+  { id: "windows", label: "Exterior window rinse", price: 60 },
+  { id: "deep", label: "Protective surface seal", price: 120 },
+  { id: "fridge", label: "Oil and rust treatment", price: 45 },
+  { id: "laundry", label: "Gutter-face brightening", price: 35 },
 ] as const;
 
 /** Reward points economy. */
@@ -57,39 +57,39 @@ export const rewards = {
  */
 export const fallbackServices = [
   {
-    id: "residential",
-    name: "Residential Cleaning",
+    id: "driveway",
+    name: "Driveway & Walkway Restoration",
     description:
-      "Recurring care for your home, surfaces, floors, kitchens and baths returned to a quiet, ordered calm.",
+      "Concrete, stone, and pavers restored to a brighter, more welcoming arrival.",
     base_price: 80,
-    rate_per_m2: 1.8,
+    rate_per_m2: 2.2,
     multiplier: 1.0,
   },
   {
-    id: "deep",
-    name: "Signature Deep Clean",
+    id: "patio",
+    name: "Patio & Pool Surround",
     description:
-      "A meticulous top-to-bottom reset. Grout, baseboards, fixtures and the details most services overlook.",
+      "Outdoor living surfaces refreshed with careful pressure and material-aware treatment.",
     base_price: 140,
-    rate_per_m2: 2.6,
+    rate_per_m2: 2.8,
     multiplier: 1.0,
   },
   {
-    id: "move",
-    name: "Move-In / Move-Out",
+    id: "house-wash",
+    name: "Gentle House Wash",
     description:
-      "Empty-home detailing so a space is flawless for its next chapter, or for handing back the keys.",
+      "A considered low-pressure exterior wash for siding, stucco, brick, and delicate finishes.",
     base_price: 160,
-    rate_per_m2: 2.9,
+    rate_per_m2: 2.4,
     multiplier: 1.0,
   },
   {
-    id: "luxury",
-    name: "Estate & Luxury Care",
+    id: "estate",
+    name: "Complete Estate Exterior",
     description:
-      "Discreet, white-glove housekeeping for larger residences, with a dedicated team and bespoke checklist.",
+      "A tailored restoration of the driveway, paths, terraces, walls, and outdoor living areas.",
     base_price: 240,
-    rate_per_m2: 3.4,
+    rate_per_m2: 3.2,
     multiplier: 1.0,
   },
 ] as const;
