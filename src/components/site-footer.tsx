@@ -56,10 +56,10 @@ export function SiteFooter() {
             © {new Date().getFullYear()} {site.name}. {site.promise}
           </p>
           <div className="flex gap-6">
-            <Link href="/terms" className="hover:text-ivory">
+            <Link href="#terms" className="hover:text-ivory">
               Terms & Conditions
             </Link>
-            <Link href="/quote" className="hover:text-ivory">
+            <Link href="#quote" className="hover:text-ivory">
               Get a quote
             </Link>
           </div>

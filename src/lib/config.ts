@@ -12,10 +12,10 @@ export const site = {
 };
 
 export const nav = [
-  { href: "/services", label: "Services" },
-  { href: "/quote", label: "Instant Quote" },
-  { href: "/about", label: "Who We Are" },
-  { href: "/terms", label: "Terms" },
+  { href: "#services", label: "Services" },
+  { href: "#quote", label: "Instant Quote" },
+  { href: "#about", label: "Who We Are" },
+  { href: "#terms", label: "Terms" },
 ];
 
 /** Frequencies offered for recurring service. modifier multiplies the line total. */

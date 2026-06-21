@@ -42,8 +42,7 @@
 }
 
 html {
-  scroll-behavior: auto;
-  scroll-padding-top: 88px;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -54,17 +53,6 @@ body {
   text-rendering: optimizeLegibility;
   margin: 0;
   overflow-x: hidden;
-  overscroll-behavior-x: none;
-}
-
-img {
-  -webkit-user-drag: none;
-}
-
-@media (max-width: 767px) {
-  body {
-    -webkit-overflow-scrolling: touch;
-  }
 }
 
 /* Editorial display text benefits from balanced line wrapping where supported. */

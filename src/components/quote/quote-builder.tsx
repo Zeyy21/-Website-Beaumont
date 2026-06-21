@@ -144,10 +144,10 @@ export function QuoteBuilder({
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
-            initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            exit={{ opacity: 0, y: -10, filter: "blur(4px)" }}
-            transition={{ duration: 0.35, ease: "easeOut" }}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.46, ease: [0.22, 1, 0.36, 1] }}
           >
             {step === 0 && (
               <div className="space-y-6">
@@ -263,7 +263,7 @@ export function QuoteBuilder({
                         onClick={() => setServiceId(s.id)}
                         className={`group rounded-2xl border p-6 text-left transition-all duration-300 ${
                           serviceId === s.id
-                            ? "border-cinnamon bg-cinnamon/5 shadow-soft scale-[1.02]"
+                            ? "border-cinnamon bg-cinnamon/5 shadow-soft"
                             : "border-oak/10 bg-white hover:border-cinnamon/30 hover:shadow-soft"
                         }`}
                       >
@@ -285,7 +285,7 @@ export function QuoteBuilder({
                         onClick={() => setFrequency(f.id)}
                         className={`rounded-xl border px-4 py-3.5 text-center text-sm transition-all duration-200 ${
                           frequency === f.id
-                            ? "border-cinnamon bg-cinnamon text-ivory shadow-soft scale-105"
+                            ? "border-cinnamon bg-cinnamon text-ivory shadow-soft"
                             : "border-oak/10 bg-white text-soil/70 hover:border-cinnamon/30"
                         }`}
                       >

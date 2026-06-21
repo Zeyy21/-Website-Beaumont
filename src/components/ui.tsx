@@ -22,7 +22,7 @@ type ButtonVariant = "primary" | "outline" | "ghost" | "light";
 type ButtonSize = "sm" | "md" | "lg";
 
 const base =
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium tracking-wide transition-colors duration-200 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ochre focus-visible:ring-offset-2 focus-visible:ring-offset-ivory";
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium tracking-wide transition-all duration-200 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 hover:scale-[1.02] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ochre focus-visible:ring-offset-2 focus-visible:ring-offset-ivory";
 
 const variants: Record<ButtonVariant, string> = {
   primary: "bg-cinnamon text-ivory hover:bg-oak shadow-soft",
@@ -71,19 +71,27 @@ export function ButtonLink({
   );
 }
 
-/** Rendered with the supplied brand font so the wordmark stays sharp at every density. */
+/** Brand wordmark/monogram using the provided ivory PNGs. `dark` inverts for
+ *  light backgrounds via CSS (the source art is ivory + transparent). */
 export function Wordmark({
   className,
   dark = false,
+  priority = false,
 }: {
   className?: string;
   dark?: boolean;
   priority?: boolean;
 }) {
   return (
-    <span aria-label="Beaumont" className={cn("inline-flex items-center whitespace-nowrap font-display text-[2rem] uppercase leading-none tracking-[0.025em]", dark ? "text-oak" : "text-ivory", className)}>
-      Beaumont
-    </span>
+    <Image
+      src="/brand/wordmark-ivory.png"
+      alt="Beaumont"
+      width={1500}
+      height={500}
+      priority={priority}
+      quality={100}
+      className={cn("object-contain", dark && "invert", className)}
+    />
   );
 }
 
