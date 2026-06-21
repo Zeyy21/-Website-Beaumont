@@ -43,6 +43,7 @@ export function Hero() {
     <section
       ref={ref}
       id="top"
+      data-header-tone="dark"
       className="relative -mt-[84px] min-h-[100svh] overflow-hidden bg-soil text-ivory"
       aria-labelledby="hero-title"
     >

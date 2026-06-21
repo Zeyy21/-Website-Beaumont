@@ -12,8 +12,34 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [activeHash, setActiveHash] = useState("");
+  const [logoOnDark, setLogoOnDark] = useState(pathname === "/");
 
   useEffect(() => setOpen(false), [pathname]);
+
+  useEffect(() => {
+    let frame = 0;
+    const updateLogoTone = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        const marker = 42;
+        const darkSurface = Array.from(
+          document.querySelectorAll<HTMLElement>('[data-header-tone="dark"]'),
+        ).some((surface) => {
+          const rect = surface.getBoundingClientRect();
+          return rect.top <= marker && rect.bottom > marker;
+        });
+        setLogoOnDark(darkSurface);
+      });
+    };
+    updateLogoTone();
+    window.addEventListener("scroll", updateLogoTone, { passive: true });
+    window.addEventListener("resize", updateLogoTone);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", updateLogoTone);
+      window.removeEventListener("resize", updateLogoTone);
+    };
+  }, [pathname]);
 
   useEffect(() => {
     if (pathname !== "/") return;
@@ -71,11 +97,19 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
       <Container className="flex h-[84px] items-center justify-between gap-3 md:grid md:grid-cols-[1fr_auto_1fr]">
         <Link
           href="/"
-          className="pointer-events-auto relative flex h-14 w-fit items-center overflow-hidden rounded-[0.7rem] border border-oak/10 bg-ivory/95 px-4 shadow-[0_16px_45px_-26px_rgba(29,23,15,.9)] backdrop-blur-xl transition-colors hover:bg-ivory focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ochre"
+          data-logo-tone={logoOnDark ? "light" : "dark"}
+          className="pointer-events-auto flex h-14 w-fit items-center px-2 transition-opacity duration-300 hover:opacity-75 focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ochre"
           aria-label={`${site.name} home`}
         >
-          <Wordmark dark priority className="h-[1.35rem] md:h-6" />
-          <span aria-hidden="true" className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-transparent via-ochre/70 to-transparent" />
+          <span className="relative block h-[1.35rem] aspect-[7.5/1] md:h-6" aria-hidden="true">
+            <span className={cn("absolute inset-0 transition-opacity duration-500 ease-out", logoOnDark ? "opacity-100" : "opacity-0")}>
+              <Wordmark className="h-full drop-shadow-[0_2px_6px_rgba(0,0,0,.45)]" />
+            </span>
+            <span className={cn("absolute inset-0 transition-opacity duration-500 ease-out", logoOnDark ? "opacity-0" : "opacity-100")}>
+              <Wordmark dark priority className="h-full drop-shadow-[0_1px_2px_rgba(249,248,231,.7)]" />
+            </span>
+          </span>
+          <span className="sr-only">{site.name}</span>
         </Link>
 
         <nav className="pointer-events-auto hidden items-center gap-0.5 rounded-full border border-oak/10 bg-ivory/95 p-1.5 shadow-[0_14px_40px_-24px_rgba(29,23,15,.8)] backdrop-blur-xl md:flex" aria-label="Primary navigation">

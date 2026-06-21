@@ -4,7 +4,7 @@ import { ButtonLink, Container, Wordmark } from "./ui";
 
 export function SiteFooter() {
   return (
-    <footer className="texture-soil overflow-hidden text-ivory">
+    <footer data-header-tone="dark" className="texture-soil overflow-hidden text-ivory">
       <Container className="py-16 md:py-20">
         <div className="grid gap-14 border-b border-ivory/10 pb-14 lg:grid-cols-[1.15fr_.85fr] lg:gap-24 lg:pb-20">
           <div>

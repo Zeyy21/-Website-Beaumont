@@ -29,7 +29,7 @@ export default async function HomePage() {
     <>
       <Hero />
 
-      <section className="relative z-10 border-y border-ivory/10 bg-soil text-ivory" aria-label="Beaumont service principles">
+      <section data-header-tone="dark" className="relative z-10 border-y border-ivory/10 bg-soil text-ivory" aria-label="Beaumont service principles">
         <Container className="grid divide-y divide-ivory/10 md:grid-cols-3 md:divide-x md:divide-y-0">
           {[
             ["01", "Material-aware", "A method selected for every surface."],
@@ -112,7 +112,7 @@ export default async function HomePage() {
 
       <ExperienceSequence />
 
-      <section className="texture-soil relative overflow-hidden py-24 text-ivory md:py-36" aria-label="Client testimonial">
+      <section data-header-tone="dark" className="texture-soil relative overflow-hidden py-24 text-ivory md:py-36" aria-label="Client testimonial">
         <div aria-hidden="true" className="pointer-events-none absolute -right-12 -top-24 font-display text-[24rem] leading-none text-ivory/[0.025]">“</div>
         <Container>
           <Reveal className="relative grid gap-10 rounded-[2.25rem] border border-ivory/10 bg-ivory/[0.035] p-8 backdrop-blur-sm md:rounded-[3.5rem] md:p-14 lg:grid-cols-[0.3fr_1.7fr] lg:p-20">
