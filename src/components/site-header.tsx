@@ -3,149 +3,57 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { nav, site } from "@/lib/config";
 import { cn } from "@/lib/cn";
 import { ButtonLink, Container, Wordmark } from "./ui";
 
 export function SiteHeader({ signedIn }: { signedIn: boolean }) {
   const pathname = usePathname();
-  const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-  const home = pathname === "/";
-
-  useEffect(() => {
-    const onScroll = () =>
-      setScrolled(window.scrollY > (home ? window.innerHeight * 1.92 : 12));
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [home]);
 
   useEffect(() => setOpen(false), [pathname]);
 
-  const onDark = home && !scrolled && !open;
-
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-50 transition-all duration-500",
-        onDark
-          ? "border-b border-transparent bg-transparent text-ivory"
-          : "border-b border-oak/10 bg-ivory/90 text-soil backdrop-blur-md",
-      )}
-    >
-      <Container className="flex h-[72px] items-center justify-between">
-        <Link
-          href="/"
-          className="group flex items-center"
-          aria-label={`${site.name} home`}
-        >
-          <Wordmark dark={!onDark} priority className="h-8 w-auto transition-opacity duration-300 group-hover:opacity-70 md:h-11 lg:h-12" />
+    <header className="sticky top-0 z-50 h-[72px] bg-transparent text-ivory">
+      <Container className="flex h-[72px] items-center justify-between gap-3">
+        <Link href="/" className="flex h-11 items-center rounded-full border border-ivory/15 bg-soil/88 px-4 shadow-soft backdrop-blur-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sand" aria-label={`${site.name} home`}>
+          <Wordmark priority className="text-[1.45rem] md:text-[1.65rem]" />
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden items-center gap-0.5 rounded-full border border-ivory/15 bg-soil/88 p-1 shadow-soft backdrop-blur-md md:flex" aria-label="Primary navigation">
           {nav.map((item) => {
             const active = pathname === item.href;
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "relative whitespace-nowrap rounded-full px-4 py-2 text-sm transition-colors",
-                  onDark
-                    ? active
-                      ? "text-ivory"
-                      : "text-ivory/70 hover:text-ivory"
-                    : active
-                      ? "text-oak"
-                      : "text-soil/70 hover:text-oak",
-                )}
-              >
-                {item.label}
-                {active && (
-                  <motion.span
-                    layoutId="nav-active"
-                    className={cn(
-                      "absolute inset-0 -z-10 rounded-full",
-                      onDark ? "bg-ivory/10" : "bg-oak/8",
-                    )}
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                  />
-                )}
-              </Link>
+              <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined} className={cn("whitespace-nowrap rounded-full px-3.5 py-2 text-[13px] font-medium text-ivory/72 hover:text-ivory focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sand", active && "bg-ivory/14 text-ivory")}>{item.label}</Link>
             );
           })}
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
-          <ButtonLink
-            href={signedIn ? "/dashboard" : "/login"}
-            variant="ghost"
-            size="sm"
-            className={onDark ? "text-ivory hover:bg-ivory/10" : undefined}
-          >
-            {signedIn ? "Dashboard" : "Sign in"}
-          </ButtonLink>
-          <ButtonLink href="/quote" size="sm" variant={onDark ? "light" : "primary"}>
-            Instant Quote
-          </ButtonLink>
+          <ButtonLink href={signedIn ? "/dashboard" : "/login"} size="sm" className="border border-ivory/15 bg-soil/88 text-ivory shadow-soft backdrop-blur-md hover:bg-soil">{signedIn ? "Dashboard" : "Sign in"}</ButtonLink>
+          <ButtonLink href="/quote" size="sm" variant="light" className="shadow-soft">Instant Quote</ButtonLink>
         </div>
 
-        <button
-          className={cn(
-            "flex h-10 w-10 items-center justify-center rounded-full md:hidden",
-            onDark ? "text-ivory" : "text-oak",
-          )}
-          onClick={() => setOpen((v) => !v)}
-          aria-label="Toggle menu"
-          aria-expanded={open}
-        >
-          <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8">
-            {open ? (
-              <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
-            ) : (
-              <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />
-            )}
+        <button className="flex h-11 w-11 items-center justify-center rounded-full border border-ivory/15 bg-soil/88 text-ivory shadow-soft backdrop-blur-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sand md:hidden" onClick={() => setOpen((value) => !value)} aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open}>
+          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
+            {open ? <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" /> : <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />}
           </svg>
         </button>
       </Container>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.25 }}
-            className="overflow-hidden border-t border-oak/10 bg-ivory md:hidden"
-          >
-            <Container className="flex flex-col gap-1 py-4">
-              {nav.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="rounded-xl px-4 py-3 text-base text-soil hover:bg-oak/5"
-                >
-                  {item.label}
-                </Link>
-              ))}
-              <div className="mt-2 flex gap-2 px-1">
-                <ButtonLink
-                  href={signedIn ? "/dashboard" : "/login"}
-                  variant="outline"
-                  className="flex-1"
-                >
-                  {signedIn ? "Dashboard" : "Sign in"}
-                </ButtonLink>
-                <ButtonLink href="/quote" className="flex-1">
-                  Quote
-                </ButtonLink>
-              </div>
-            </Container>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {open && (
+        <div className="absolute inset-x-4 top-[64px] overflow-hidden rounded-2xl border border-ivory/15 bg-soil/96 p-3 shadow-lift backdrop-blur-xl md:hidden">
+          <nav className="flex flex-col" aria-label="Mobile navigation">
+            {nav.map((item) => (
+              <Link key={item.href} href={item.href} aria-current={pathname === item.href ? "page" : undefined} className={cn("rounded-xl px-4 py-3 text-base font-medium text-ivory/75 hover:bg-ivory/10 hover:text-ivory", pathname === item.href && "bg-ivory/10 text-ivory")}>{item.label}</Link>
+            ))}
+          </nav>
+          <div className="mt-2 grid grid-cols-2 gap-2 border-t border-ivory/10 pt-3">
+            <ButtonLink href={signedIn ? "/dashboard" : "/login"} className="border border-ivory/20 bg-transparent text-ivory">{signedIn ? "Dashboard" : "Sign in"}</ButtonLink>
+            <ButtonLink href="/quote" variant="light">Quote</ButtonLink>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
