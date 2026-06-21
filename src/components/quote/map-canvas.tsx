@@ -64,8 +64,10 @@ export function MapCanvas({
     if (!elRef.current || mapRef.current) return;
 
     const map = L.map(elRef.current, {
-      center: [43.6532, -79.3832],
-      zoom: 17,
+      center: [45.5019, -73.5674],
+      zoom: 18,
+      minZoom: 14,
+      maxZoom: 22,
       zoomControl: false,
       attributionControl: false,
     });
@@ -76,14 +78,16 @@ export function MapCanvas({
     L.tileLayer(
       "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
       {
-        maxZoom: 21,
+        maxNativeZoom: 18,
+        maxZoom: 22,
+        keepBuffer: 4,
         attribution: "&copy; Esri",
       },
     ).addTo(map);
     // Street labels overlaid so addresses stay legible on the imagery.
     L.tileLayer(
       "https://{s}.basemaps.cartocdn.com/rastertiles/light_only_labels/{z}/{x}/{y}{r}.png",
-      { maxZoom: 21, opacity: 0.9 },
+      { maxNativeZoom: 20, maxZoom: 22, opacity: 0.9, keepBuffer: 4 },
     ).addTo(map);
 
     map.pm.setGlobalOptions({ snappable: true, snapDistance: 20 });
@@ -116,7 +120,7 @@ export function MapCanvas({
   // fly to searched address
   useEffect(() => {
     if (center && mapRef.current) {
-      mapRef.current.flyTo([center.lat, center.lon], 20, { duration: 1.2 });
+      mapRef.current.flyTo([center.lat, center.lon], 19, { duration: 1.2 });
     }
   }, [center]);
 
@@ -142,12 +146,17 @@ export function MapCanvas({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clearNonce]);
 
-  // zoom: positive nonce zooms in, negative zooms out (magnitude = trigger)
+  // Zoom the vector map even when imagery tiles are still loading. Imagery is
+  // intentionally upscaled above native zoom 18 so Esri never substitutes its
+  // opaque "Map data not available yet" high-zoom tiles.
   useEffect(() => {
     const map = mapRef.current;
     if (!map || zoomNonce === 0) return;
-    if (zoomNonce > 0) map.zoomIn();
-    else map.zoomOut();
+    map.stop();
+    const direction = zoomNonce > 0 ? 1 : -1;
+    const nextZoom = Math.max(map.getMinZoom(), Math.min(map.getMaxZoom(), map.getZoom() + direction));
+    map.setZoom(nextZoom, { animate: true });
+    requestAnimationFrame(() => map.invalidateSize({ pan: false }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [zoomNonce]);
 

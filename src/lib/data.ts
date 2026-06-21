@@ -2,7 +2,6 @@ import { createClient } from "@/lib/supabase/server";
 import { fallbackServices } from "@/lib/config";
 import type { Database } from "@/lib/supabase/types";
 
-type ServiceRow = Database["public"]["Tables"]["services"]["Row"];
 type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 
 export interface ServiceCard {
@@ -14,22 +13,15 @@ export interface ServiceCard {
   multiplier: number;
 }
 
-/** Services from Supabase if configured, else the bundled fallback catalogue. */
+/**
+ * Public services are code-owned. Legacy Supabase rows previously replaced the
+ * exterior-care catalogue with unrelated cleaning products in production.
+ */
 export async function getServices(): Promise<ServiceCard[]> {
-  const supabase = createClient();
-  if (!supabase) return fallbackServices.map(toCard);
-
-  const { data, error } = await supabase
-    .from("services")
-    .select("*")
-    .eq("active", true)
-    .order("sort", { ascending: true });
-
-  if (error || !data?.length) return fallbackServices.map(toCard);
-  return data.map(toCard);
+  return fallbackServices.map(toCard);
 }
 
-function toCard(s: ServiceRow | (typeof fallbackServices)[number]): ServiceCard {
+function toCard(s: (typeof fallbackServices)[number]): ServiceCard {
   return {
     id: s.id,
     name: s.name,

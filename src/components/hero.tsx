@@ -79,7 +79,7 @@ export function Hero() {
           style={{ y: contentY }}
         >
           <motion.p variants={line} className="text-[10px] font-semibold uppercase tracking-[0.34em] text-sand md:text-[11px] md:tracking-[0.4em]">
-            Luxury home care <span aria-hidden="true">·</span> Quietly delivered
+            Concierge home care <span aria-hidden="true">·</span> Quietly delivered
           </motion.p>
           <motion.h1
             variants={line}
@@ -90,8 +90,8 @@ export function Hero() {
             <span className="mt-2 block italic text-sand">nothing left to do.</span>
           </motion.h1>
           <motion.p variants={line} className="mt-8 max-w-xl text-base font-medium leading-relaxed text-ivory/80 md:text-lg">
-            Not simply a cleaner driveway. A brighter arrival, restored curb appeal,
-            and one less thing asking for your time.
+            Driveways, decks, home exteriors, and windows—considered together,
+            meticulously cared for, and one less thing asking for your time.
           </motion.p>
           <motion.div variants={line} className="mt-10 flex flex-wrap gap-3">
             <ButtonLink href="#quote" variant="light" size="lg">

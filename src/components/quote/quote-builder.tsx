@@ -3,7 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import dynamic from "next/dynamic";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { addOns, frequencies, type FrequencyId } from "@/lib/config";
+import { addOns, frequencies, quoteRatePerM2, type FrequencyId } from "@/lib/config";
 import { computeQuote, formatCurrency, m2ToFt2 } from "@/lib/pricing";
 import type { ServiceCard } from "@/lib/data";
 import { Button, ButtonLink } from "@/components/ui";
@@ -236,7 +236,7 @@ export function QuoteBuilder({
                         }`}
                       >
                         <span className="block font-display text-2xl leading-tight text-oak">{item.name}</span>
-                        <span className="mt-3 block text-xs font-semibold uppercase tracking-[0.16em] text-cinnamon">From {formatCurrency(item.base_price)}</span>
+                        <span className="mt-3 block text-xs font-semibold uppercase tracking-[0.16em] text-cinnamon">${quoteRatePerM2}/m²</span>
                       </button>
                     ))}
                   </div>
@@ -334,7 +334,7 @@ export function QuoteBuilder({
               {quote && areaM2 > 0 ? (
                 <motion.div key={quote.total} initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease }}>
                   <AnimatedPrice value={quote.total} />
-                  <p className="mt-2 text-sm text-ivory/65">Typically {formatCurrency(quote.low)} – {formatCurrency(quote.high)}</p>
+                  <p className="mt-2 text-sm text-ivory/65">Calculated at ${quoteRatePerM2} per m²</p>
                 </motion.div>
               ) : (
                 <div>

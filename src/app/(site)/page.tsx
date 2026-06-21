@@ -6,21 +6,20 @@ import { PartnerFeature } from "@/components/partner-feature";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion";
 import { Container, Eyebrow } from "@/components/ui";
 import { getServices } from "@/lib/data";
-import { formatCurrency } from "@/lib/pricing";
 import { site } from "@/lib/config";
 
 const serviceImages = [
-  "/images/pressure-washed-driveway-placeholder.png",
-  "/images/pressure-washed-patio-placeholder.png",
-  "/images/pressure-washed-entry-placeholder.png",
+  "/images/montreal-driveway-pressure-washing.webp",
+  "/images/montreal-deck-pressure-washing.webp",
   "/images/montreal-home-hero.png",
+  "/images/atlantic-window-care-montreal.webp",
 ];
 
 const serviceDetails = [
-  "Arrival surfaces",
-  "Outdoor living",
-  "Façade care",
-  "Complete property",
+  "Driveways & stone",
+  "Decks & patios",
+  "House exteriors",
+  "Atlantic partner",
 ];
 
 export default async function HomePage() {
@@ -59,12 +58,12 @@ export default async function HomePage() {
                 <Eyebrow>Services</Eyebrow>
               </div>
               <p className="mt-6 max-w-sm text-base font-medium leading-relaxed text-soil/65">
-                Exterior care selected for the surface, the setting, and the result you want to come home to.
+                Pressure washing and specialist window care selected for each surface, setting, and Montréal home.
               </p>
             </div>
             <h2 id="services-title" className="max-w-4xl text-balance font-display text-[clamp(3.25rem,6.2vw,6.5rem)] leading-[0.9] text-oak">
-              Everything the exterior needs.
-              <span className="block italic text-ochre">Nothing it doesn’t.</span>
+              Every exterior surface.
+              <span className="block italic text-ochre">One considered standard.</span>
             </h2>
           </Reveal>
 
@@ -94,9 +93,10 @@ export default async function HomePage() {
                     {serviceDetails[index]}
                   </div>
                   <div className="absolute inset-x-0 bottom-0 p-8 md:p-11">
-                    <div className="flex items-center justify-between gap-4 text-[9px] font-semibold uppercase tracking-[0.28em] text-sand/90">
+                    <div className="flex items-center gap-4 text-[9px] font-semibold uppercase tracking-[0.28em] text-sand/90">
                       <span>Service 0{index + 1}</span>
-                      <span>From {formatCurrency(service.base_price)}</span>
+                      <span className="h-px w-8 bg-sand/40" />
+                      <span>{index === 3 ? "With Atlantic" : "Pressure washing"}</span>
                     </div>
                     <h3 className={`mt-5 max-w-2xl font-display leading-[0.95] ${index === 0 || index === 3 ? "text-4xl md:text-6xl" : "text-4xl md:text-[2.65rem]"}`}>{service.name}</h3>
                     <div className="mt-5 flex items-end justify-between gap-6">

@@ -2,9 +2,9 @@
 
 export const site = {
   name: "Beaumont",
-  tagline: "Exterior care, beautifully delivered.",
+  tagline: "Concierge home care, quietly delivered.",
   description:
-    "Beaumont restores driveways, walkways, patios, pool surrounds, and home exteriors with meticulous pressure washing and effortless service.",
+    "Beaumont provides meticulous pressure washing for driveways, decks, patios, and home exteriors, with specialist window washing delivered alongside Atlantic.",
   promise: "A brighter arrival, quietly delivered.",
   email: "beaumontgroup.net@gmail.com",
   instagram: "https://www.instagram.com/groupebeaumont/?hl=en",
@@ -23,17 +23,20 @@ export const nav = [
 /** Frequencies offered for recurring service. modifier multiplies the line total. */
 export const frequencies = [
   { id: "one_time", label: "One-time", modifier: 1.0, note: "A single visit" },
-  { id: "monthly", label: "Quarterly", modifier: 0.85, note: "Four seasonal visits" },
+  { id: "monthly", label: "Quarterly", modifier: 1.0, note: "Four seasonal visits" },
   {
     id: "biweekly",
     label: "Twice yearly",
-    modifier: 0.9,
+    modifier: 1.0,
     note: "Spring and fall, most popular",
   },
-  { id: "weekly", label: "Annual", modifier: 0.95, note: "A yearly restoration" },
+  { id: "weekly", label: "Annual", modifier: 1.0, note: "A yearly restoration" },
 ] as const;
 
 export type FrequencyId = (typeof frequencies)[number]["id"];
+
+/** Public instant-estimate rate. Every measured service uses this exact rate. */
+export const quoteRatePerM2 = 3;
 
 /** Optional add-ons surfaced in the quote builder. price is a flat add. */
 export const addOns = [
@@ -53,45 +56,44 @@ export const rewards = {
 };
 
 /**
- * Fallback service catalogue used when Supabase is not configured, so the
- * marketing site and quote tool render fully with zero keys. When Supabase is
- * connected these are seeded into the `services` table (see migration).
+ * Canonical public service catalogue. This intentionally remains code-owned so
+ * legacy database rows can never replace the services shown on the website.
  */
 export const fallbackServices = [
   {
     id: "driveway",
-    name: "Driveway & Walkway Restoration",
+    name: "Driveway & Hardscape Washing",
     description:
-      "Concrete, stone, and pavers restored to a brighter, more welcoming arrival.",
-    base_price: 80,
-    rate_per_m2: 2.2,
+      "Interlock, concrete, stone, and front walks pressure washed for a cleaner, brighter arrival.",
+    base_price: 0,
+    rate_per_m2: quoteRatePerM2,
     multiplier: 1.0,
   },
   {
-    id: "patio",
-    name: "Patio & Pool Surround",
+    id: "deck",
+    name: "Deck & Patio Washing",
     description:
-      "Outdoor living surfaces refreshed with careful pressure and material-aware treatment.",
-    base_price: 140,
-    rate_per_m2: 2.8,
+      "Wood and composite decks, terraces, and patios refreshed with material-aware pressure and careful preparation.",
+    base_price: 0,
+    rate_per_m2: quoteRatePerM2,
     multiplier: 1.0,
   },
   {
     id: "house-wash",
-    name: "Gentle House Wash",
+    name: "House Exterior Washing",
     description:
-      "A considered low-pressure exterior wash for siding, stucco, brick, and delicate finishes.",
-    base_price: 160,
-    rate_per_m2: 2.4,
+      "A considered exterior wash for brick, stone, stucco, siding, entrances, and other residential surfaces.",
+    base_price: 0,
+    rate_per_m2: quoteRatePerM2,
     multiplier: 1.0,
   },
   {
-    id: "estate",
-    name: "Complete Estate Exterior",
+    id: "windows-atlantic",
+    name: "Window Washing with Atlantic",
     description:
-      "A tailored restoration of the driveway, paths, terraces, walls, and outdoor living areas.",
-    base_price: 240,
-    rate_per_m2: 3.2,
+      "Purified-water window care for glass, frames, and sills, delivered with our specialist partner Atlantic.",
+    base_price: 0,
+    rate_per_m2: quoteRatePerM2,
     multiplier: 1.0,
   },
 ] as const;
