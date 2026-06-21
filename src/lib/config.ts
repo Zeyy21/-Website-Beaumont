@@ -4,7 +4,7 @@ export const site = {
   name: "Beaumont",
   tagline: "Concierge home care, quietly delivered.",
   description:
-    "Beaumont provides meticulous pressure washing for driveways, decks, patios, and home exteriors, with specialist window washing delivered alongside Atlantic.",
+    "Beaumont provides meticulous pressure washing for driveways, decks, patios, and home exteriors, with specialist exterior window care.",
   promise: "A brighter arrival, quietly delivered.",
   email: "beaumontgroup.net@gmail.com",
   instagram: "https://www.instagram.com/groupebeaumont/?hl=en",
@@ -38,12 +38,10 @@ export type FrequencyId = (typeof frequencies)[number]["id"];
 /** Public instant-estimate rate. Every measured service uses this exact rate. */
 export const quoteRatePerM2 = 3;
 
-/** Optional add-ons surfaced in the quote builder. price is a flat add. */
+/** Conditional services reviewed and priced after the request is submitted. */
 export const addOns = [
-  { id: "windows", label: "Exterior window rinse", price: 60 },
-  { id: "deep", label: "Protective surface seal", price: 120 },
-  { id: "fridge", label: "Oil and rust treatment", price: 45 },
-  { id: "laundry", label: "Gutter-face brightening", price: 35 },
+  { id: "windows", label: "Exterior Window Cleaning" },
+  { id: "gutters", label: "Gutter Cleaning" },
 ] as const;
 
 /** Reward points economy. */
@@ -89,9 +87,9 @@ export const fallbackServices = [
   },
   {
     id: "windows-atlantic",
-    name: "Window Washing with Atlantic",
+    name: "Exterior Window Washing",
     description:
-      "Purified-water window care for glass, frames, and sills, delivered with our specialist partner Atlantic.",
+      "In partnership with Atlantic Group, we clean exterior glass, frames, and sills with a purified-water system for a clear, streak-free finish.",
     base_price: 0,
     rate_per_m2: quoteRatePerM2,
     multiplier: 1.0,

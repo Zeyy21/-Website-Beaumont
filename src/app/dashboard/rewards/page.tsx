@@ -56,7 +56,7 @@ export default async function RewardsPage() {
             <EmptyState
               title="No activity yet"
               body="Earn your first points by creating an account and booking a clean."
-              ctaHref="/quote"
+              ctaHref="/dashboard/quotes/new"
               ctaLabel="Start a quote"
             />
           ) : (

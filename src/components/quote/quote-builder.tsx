@@ -6,7 +6,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { addOns, frequencies, quoteRatePerM2, type FrequencyId } from "@/lib/config";
 import { computeQuote, formatCurrency, m2ToFt2 } from "@/lib/pricing";
 import type { ServiceCard } from "@/lib/data";
-import { Button, ButtonLink } from "@/components/ui";
+import { Button } from "@/components/ui";
 import { AddressSearch } from "./address-search";
 import { saveQuote } from "@/app/(site)/quote/actions";
 import { AnimatedPrice } from "./animated-price";
@@ -48,7 +48,10 @@ export function QuoteBuilder({
   const [serviceId, setServiceId] = useState(services[0]?.id ?? "");
   const [frequency, setFrequency] = useState<FrequencyId>("biweekly");
   const [selectedAddOns, setSelectedAddOns] = useState<string[]>([]);
-  const [result, setResult] = useState<null | { message: string; persisted: boolean }>(null);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [result, setResult] = useState<null | { ok: boolean; message: string }>(null);
   const [pending, startTransition] = useTransition();
 
   const service = services.find((item) => item.id === serviceId) ?? services[0];
@@ -60,8 +63,10 @@ export function QuoteBuilder({
     [service, areaM2, frequency, selectedAddOns],
   );
   const canAdvance = step === 0 ? Boolean(place) && areaM2 > 0 : true;
+  const contactIsValid =
+    fullName.trim().length > 1 && /^\S+@\S+\.\S+$/.test(email.trim()) && phone.trim().length > 6;
 
-  const submit = (intent: "save" | "request") => {
+  const submit = () => {
     if (!service || !place) return;
     startTransition(async () => {
       const response = await saveQuote({
@@ -71,25 +76,17 @@ export function QuoteBuilder({
         frequency,
         addOnIds: selectedAddOns,
         sourceZone: initialZone ?? null,
-        intent,
+        fullName,
+        email,
+        phone,
       });
-      if (response.needsAuth) {
-        const params = new URLSearchParams({ next: "/#quote", intent });
-        window.location.href = `/login?${params.toString()}`;
-        return;
-      }
       if (response.ok) {
         setResult({
-          persisted: !response.error,
-          message:
-            intent === "request"
-              ? "Your request is in. We’ll confirm a final quote by email shortly."
-              : response.error === "preview"
-                ? "This is a live preview. Connect accounts to save quotes to your profile."
-                : "Saved to your profile.",
+          ok: true,
+          message: "We will get back to you within 24h",
         });
       } else {
-        setResult({ persisted: false, message: response.error ?? "Something went wrong. Please try again." });
+        setResult({ ok: false, message: response.error ?? "Something went wrong. Please try again." });
       }
     });
   };
@@ -272,7 +269,7 @@ export function QuoteBuilder({
                             className={`flex items-center justify-between rounded-xl border px-4 py-3.5 text-sm transition-colors ${selected ? "border-cinnamon bg-cinnamon/5" : "border-oak/10 bg-white/70 hover:border-cinnamon/30"}`}
                           >
                             <span className="font-medium text-oak">{item.label}</span>
-                            <span className="text-soil/55">+{formatCurrency(item.price)}</span>
+                            <span className="text-xs font-semibold uppercase tracking-[0.14em] text-soil/45">Condition assessed</span>
                           </button>
                         );
                       })}
@@ -293,22 +290,45 @@ export function QuoteBuilder({
                         </li>
                       ))}
                     </ul>
+                    {selectedAddOns.length > 0 && (
+                      <div className="mt-5 border-t border-oak/10 pt-5">
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-soil/45">Priced after condition review</p>
+                        <p className="mt-2 text-sm font-medium text-soil/65">
+                          {selectedAddOns
+                            .map((id) => addOns.find((item) => item.id === id)?.label)
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </p>
+                      </div>
+                    )}
                   </div>
 
-                  {result ? (
-                    <motion.div initial={reduce ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mt-6 rounded-2xl border border-ochre/25 bg-sand/25 p-7 text-center">
-                      <p className="font-display text-3xl text-oak">{result.persisted ? "All set" : "Estimate ready"}</p>
-                      <p className="mt-3 text-sm font-medium leading-relaxed text-soil/65">{result.message}</p>
-                      <div className="mt-6 flex flex-wrap justify-center gap-3">
-                        <Button variant="outline" onClick={() => { setResult(null); setStep(0); }}>New quote</Button>
-                        <ButtonLink href="/dashboard">Dashboard</ButtonLink>
+                  {!result && (
+                    <div className="mt-6 rounded-2xl border border-oak/10 bg-white/55 p-6 md:p-7">
+                      <div className="mb-5">
+                        <p className="font-display text-2xl text-oak">Where should we reach you?</p>
+                        <p className="mt-1 text-sm font-medium text-soil/55">We use these details only to review and respond to this request.</p>
                       </div>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <QuoteField label="Full name" value={fullName} onChange={setFullName} autoComplete="name" />
+                        <QuoteField label="Email" value={email} onChange={setEmail} type="email" autoComplete="email" />
+                        <div className="sm:col-span-2">
+                          <QuoteField label="Phone" value={phone} onChange={setPhone} type="tel" autoComplete="tel" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {result ? (
+                    <motion.div initial={reduce ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className={`mt-6 rounded-2xl border p-7 text-center ${result.ok ? "border-ochre/25 bg-sand/25" : "border-red-900/15 bg-red-50/60"}`}>
+                      <p className="font-display text-3xl text-oak">
+                        {result.ok ? "Quote Requested - We will get back to you within 24h" : "Request not sent"}
+                      </p>
+                      {!result.ok && <p className="mt-3 text-sm font-medium leading-relaxed text-soil/65">{result.message}</p>}
+                      <Button className="mt-6" variant="outline" onClick={() => { setResult(null); if (result.ok) setStep(0); }}>{result.ok ? "New quote" : "Try again"}</Button>
                     </motion.div>
                   ) : (
-                    <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                      <Button size="lg" disabled={pending} onClick={() => submit("request")}>{pending ? "Sending…" : "Request formal quote"}</Button>
-                      <Button size="lg" variant="outline" disabled={pending} onClick={() => submit("save")}>Save to my account</Button>
-                    </div>
+                    <Button className="mt-6 w-full" size="lg" disabled={pending || !contactIsValid} onClick={submit}>{pending ? "Sending…" : "Request formal quote"}</Button>
                   )}
                 </div>
               )}
@@ -348,7 +368,7 @@ export function QuoteBuilder({
               <SummaryRow label="Service" value={service?.name ?? "Not selected"} />
               <SummaryRow label="Area" value={areaM2 > 0 ? `${areaM2.toLocaleString()} m²` : "Not measured"} />
               <SummaryRow label="Frequency" value={frequencies.find((item) => item.id === frequency)?.label ?? "Not selected"} />
-              <SummaryRow label="Add-ons" value={selectedAddOns.length ? `${selectedAddOns.length} selected` : "None"} />
+              <SummaryRow label="Conditional" value={selectedAddOns.length ? `${selectedAddOns.length} selected` : "None"} />
             </dl>
             <p className="mt-8 border-t border-ivory/15 pt-6 text-xs leading-relaxed text-ivory/50">No charge to request. Final pricing is confirmed after a quick review of access and surface condition.</p>
           </div>
@@ -374,6 +394,34 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
       <dt className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ivory/45">{label}</dt>
       <dd className="mt-1 truncate font-medium text-ivory/85">{value}</dd>
     </div>
+  );
+}
+
+function QuoteField({
+  label,
+  value,
+  onChange,
+  type = "text",
+  autoComplete,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  type?: "text" | "email" | "tel";
+  autoComplete: string;
+}) {
+  return (
+    <label className="block text-sm font-semibold text-oak">
+      {label}
+      <input
+        type={type}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        autoComplete={autoComplete}
+        required
+        className="mt-2 h-12 w-full rounded-xl border border-oak/15 bg-ivory/70 px-4 font-medium text-oak outline-none transition focus:border-cinnamon focus:ring-2 focus:ring-cinnamon/10"
+      />
+    </label>
   );
 }
 

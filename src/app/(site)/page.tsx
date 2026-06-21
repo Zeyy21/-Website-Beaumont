@@ -2,7 +2,6 @@ import Image from "next/image";
 import { Hero } from "@/components/hero";
 import { ExperienceSequence } from "@/components/home-experience";
 import { LazyQuoteBuilder } from "@/components/quote/lazy-quote-builder";
-import { PartnerFeature } from "@/components/partner-feature";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion";
 import { Container, Eyebrow } from "@/components/ui";
 import { getServices } from "@/lib/data";
@@ -19,7 +18,7 @@ const serviceDetails = [
   "Driveways & stone",
   "Decks & patios",
   "House exteriors",
-  "Atlantic partner",
+  "Specialist window care",
 ];
 
 export default async function HomePage() {
@@ -96,7 +95,7 @@ export default async function HomePage() {
                     <div className="flex items-center gap-4 text-[9px] font-semibold uppercase tracking-[0.28em] text-sand/90">
                       <span>Service 0{index + 1}</span>
                       <span className="h-px w-8 bg-sand/40" />
-                      <span>{index === 3 ? "With Atlantic" : "Pressure washing"}</span>
+                      <span>{index === 3 ? "Exterior window cleaning" : "Pressure washing"}</span>
                     </div>
                     <h3 className={`mt-5 max-w-2xl font-display leading-[0.95] ${index === 0 || index === 3 ? "text-4xl md:text-6xl" : "text-4xl md:text-[2.65rem]"}`}>{service.name}</h3>
                     <div className="mt-5 flex items-end justify-between gap-6">
@@ -155,8 +154,6 @@ export default async function HomePage() {
           <LazyQuoteBuilder services={services} />
         </Container>
       </section>
-
-      <PartnerFeature />
 
       <section id="contact" className="relative scroll-mt-24 overflow-hidden bg-ivory py-24 md:py-40" aria-labelledby="contact-title">
         <div aria-hidden="true" className="pointer-events-none absolute -left-16 bottom-0 font-display text-[22rem] leading-none text-oak/[0.025]">04</div>

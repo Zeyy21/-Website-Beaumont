@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { fallbackServices } from "@/lib/config";
+import { fallbackServices, rewards } from "@/lib/config";
 import type { Database } from "@/lib/supabase/types";
 
 type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
@@ -63,6 +63,28 @@ export async function getCurrentUser(): Promise<{
       .select("*")
       .single();
     profile = created ?? null;
+  }
+
+  if (profile) {
+    const { data: ledger } = await supabase
+      .from("rewards_ledger")
+      .select("delta")
+      .eq("user_id", user.id);
+    const ledgerBalance = (ledger ?? []).reduce(
+      (total, entry) => total + Number(entry.delta),
+      0,
+    );
+    const syncedBalance = ledger?.length
+      ? ledgerBalance
+      : Math.max(profile.points_balance, rewards.signup);
+
+    if (profile.points_balance !== syncedBalance) {
+      await supabase
+        .from("profiles")
+        .update({ points_balance: syncedBalance })
+        .eq("id", user.id);
+      profile = { ...profile, points_balance: syncedBalance };
+    }
   }
 
   return { id: user.id, email: user.email ?? null, profile: profile ?? null };

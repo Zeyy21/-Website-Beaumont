@@ -17,7 +17,7 @@ export default async function QuotesPage() {
       <EmptyState
         title="No quotes yet"
         body="Your saved and requested quotes will appear here. Start by drawing your space."
-        ctaHref="/quote"
+        ctaHref="/dashboard/quotes/new"
         ctaLabel="Get an instant quote"
       />
     );

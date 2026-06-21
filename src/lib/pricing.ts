@@ -1,4 +1,4 @@
-import { addOns, frequencies, quoteRatePerM2, type FrequencyId } from "./config";
+import { frequencies, quoteRatePerM2, type FrequencyId } from "./config";
 import type { LineItem } from "./supabase/types";
 
 export interface PricingService {
@@ -30,11 +30,12 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
 
 /**
  * Transparent public pricing model:
- * measured area × $3/m² + optional add-ons − points discount.
+ * measured area × $3/m² − points discount.
+ * Conditional services are intentionally excluded until the property is reviewed.
  * Service and visit frequency never alter the advertised square-metre rate.
  */
 export function computeQuote(input: QuoteInput): QuoteResult {
-  const { service, areaM2, frequency, addOnIds } = input;
+  const { service, areaM2, frequency } = input;
   const freq = frequencies.find((item) => item.id === frequency) ?? frequencies[0];
   const area = Math.max(0, areaM2);
   const areaCost = area * quoteRatePerM2;
@@ -45,11 +46,6 @@ export function computeQuote(input: QuoteInput): QuoteResult {
       amount: round2(areaCost),
     },
   ];
-
-  for (const id of addOnIds) {
-    const addOn = addOns.find((item) => item.id === id);
-    if (addOn) lineItems.push({ label: addOn.label, amount: addOn.price });
-  }
 
   const subtotal = round2(lineItems.reduce((sum, item) => sum + item.amount, 0));
   const pointsDiscount = Math.min(input.pointsDiscount ?? 0, subtotal);

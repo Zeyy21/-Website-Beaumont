@@ -5,6 +5,18 @@ import { formatCurrency } from "@/lib/pricing";
 export type EmailTemplate =
   | { kind: "welcome"; name: string }
   | { kind: "quote_requested"; name: string; total: number; address: string }
+  | {
+      kind: "quote_lead";
+      name: string;
+      email: string;
+      phone: string;
+      address: string;
+      service: string;
+      areaM2: number;
+      frequency: string;
+      conditionalServices: string[];
+      estimate: number;
+    }
   | { kind: "quote_sent"; name: string; total: number; quoteUrl: string }
   | { kind: "payment_receipt"; name: string; amount: number; method: string }
   | { kind: "referral_credited"; name: string; points: number };
@@ -38,6 +50,15 @@ const p = (t: string) =>
 const button = (label: string, href: string) =>
   `<a href="${href}" style="display:inline-block;background:#7A4327;color:#F9F8E7;text-decoration:none;padding:12px 24px;border-radius:999px;font-family:Arial,sans-serif;font-size:14px;">${label}</a>`;
 
+const escapeHtml = (value: string) =>
+  value.replace(
+    /[&<>"']/g,
+    (character) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[
+        character
+      ] ?? character,
+  );
+
 export function renderEmail(t: EmailTemplate): Rendered {
   switch (t.kind) {
     case "welcome":
@@ -69,6 +90,42 @@ export function renderEmail(t: EmailTemplate): Rendered {
             p("Our team will review and confirm a final quote shortly."),
         ),
       };
+    case "quote_lead": {
+      const name = escapeHtml(t.name);
+      const email = escapeHtml(t.email);
+      const phone = escapeHtml(t.phone);
+      const address = escapeHtml(t.address);
+      const service = escapeHtml(t.service);
+      const frequency = escapeHtml(t.frequency);
+      const conditionalServices = t.conditionalServices.length
+        ? t.conditionalServices.map(escapeHtml).join(", ")
+        : "None selected";
+      const text = [
+        `New formal quote request from ${t.name}`,
+        `Email: ${t.email}`,
+        `Phone: ${t.phone}`,
+        `Address: ${t.address}`,
+        `Service: ${t.service}`,
+        `Measured area: ${Math.round(t.areaM2)} m²`,
+        `Visit rhythm: ${t.frequency}`,
+        `Conditional services: ${t.conditionalServices.join(", ") || "None selected"}`,
+        `Instant estimate: ${formatCurrency(t.estimate)}`,
+      ].join("\n");
+
+      return {
+        subject: `New quote request — ${t.name}`,
+        text,
+        html: shell(
+          "New formal quote request",
+          p(`<strong>${name}</strong> has requested a quote.`) +
+            p(`<strong>Email:</strong> ${email}<br><strong>Phone:</strong> ${phone}`) +
+            p(`<strong>Property:</strong> ${address}`) +
+            p(`<strong>Service:</strong> ${service}<br><strong>Measured area:</strong> ${Math.round(t.areaM2)} m²<br><strong>Visit rhythm:</strong> ${frequency}`) +
+            p(`<strong>Conditional services:</strong> ${conditionalServices}`) +
+            p(`<strong>Instant estimate:</strong> ${formatCurrency(t.estimate)}`),
+        ),
+      };
+    }
     case "quote_sent":
       return {
         subject: `Your Beaumont quote is ready`,

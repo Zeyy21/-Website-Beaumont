@@ -60,7 +60,7 @@ export default async function DashboardOverview() {
           <EmptyState
             title="No quotes yet"
             body="Draw your space and get an instant estimate, it takes less than a minute."
-            ctaHref="/quote"
+            ctaHref="/dashboard/quotes/new"
             ctaLabel="Start a quote"
           />
         ) : (
@@ -106,7 +106,7 @@ export default async function DashboardOverview() {
             Build a new quote in a minute and redeem points at checkout.
           </p>
           <Link
-            href="/quote"
+            href="/dashboard/quotes/new"
             className="mt-4 inline-block text-sm text-cinnamon hover:underline"
           >
             New instant quote →
