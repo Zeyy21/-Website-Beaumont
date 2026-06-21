@@ -68,15 +68,16 @@ export async function getCurrentUser(): Promise<{
   if (profile) {
     const { data: ledger } = await supabase
       .from("rewards_ledger")
-      .select("delta")
+      .select("delta, reason")
       .eq("user_id", user.id);
     const ledgerBalance = (ledger ?? []).reduce(
       (total, entry) => total + Number(entry.delta),
       0,
     );
-    const syncedBalance = ledger?.length
-      ? ledgerBalance
-      : Math.max(profile.points_balance, rewards.signup);
+    const hasSignupReward = (ledger ?? []).some(
+      (entry) => entry.reason === "signup_bonus",
+    );
+    const syncedBalance = ledgerBalance + (hasSignupReward ? 0 : rewards.signup);
 
     if (profile.points_balance !== syncedBalance) {
       await supabase
