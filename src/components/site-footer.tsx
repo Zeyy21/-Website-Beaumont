@@ -10,7 +10,7 @@ export function SiteFooter() {
           <div>
             <Wordmark className="h-9 md:h-11" />
             <p className="mt-7 max-w-lg text-base font-medium leading-relaxed text-ivory/60 md:text-lg">{site.description}</p>
-            <ButtonLink href="#quote" variant="light" size="lg" className="mt-9">
+            <ButtonLink href="/#quote" variant="light" size="lg" className="mt-9">
               Begin your estimate <span aria-hidden="true">↗</span>
             </ButtonLink>
           </div>
@@ -21,7 +21,7 @@ export function SiteFooter() {
               <ol className="mt-6 space-y-4">
                 {nav.map((item) => (
                   <li key={item.href}>
-                    <Link href={item.href} className="group flex items-center gap-3 text-sm font-medium text-ivory/65 transition-colors hover:text-ivory">
+                    <Link href={`/${item.href}`} className="group flex items-center gap-3 text-sm font-medium text-ivory/65 transition-colors hover:text-ivory">
                       <span className="h-px w-5 bg-ochre/60 transition-all group-hover:w-8" />
                       {item.label}
                     </Link>
@@ -51,7 +51,7 @@ export function SiteFooter() {
           <p>© {new Date().getFullYear()} {site.name}. {site.promise}</p>
           <div className="flex flex-wrap gap-6">
             <span>Greater Montréal</span>
-            <Link href="#terms" className="transition-colors hover:text-ivory">Terms & Conditions</Link>
+            <Link href="/#terms" className="transition-colors hover:text-ivory">Terms & Conditions</Link>
           </div>
         </div>
       </Container>

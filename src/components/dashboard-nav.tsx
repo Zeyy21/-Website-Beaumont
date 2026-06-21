@@ -39,7 +39,7 @@ export function DashboardNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex gap-1 overflow-x-auto lg:flex-col lg:overflow-visible">
+    <nav className="flex items-center gap-1 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" aria-label="Account navigation">
       {items.map((item) => {
         const active =
           item.href === "/dashboard"
@@ -50,14 +50,14 @@ export function DashboardNav() {
             key={item.href}
             href={item.href}
             className={cn(
-              "relative flex shrink-0 items-center gap-3 rounded-xl px-4 py-2.5 text-sm transition-colors lg:shrink",
+              "relative isolate flex shrink-0 items-center gap-2.5 rounded-full px-4 py-2.5 text-sm font-medium transition-colors",
               active ? "text-ivory" : "text-ivory/60 hover:text-ivory",
             )}
           >
             {active && (
               <motion.span
                 layoutId="dash-active"
-                className="absolute inset-0 -z-10 rounded-xl bg-cinnamon"
+                className="absolute inset-0 -z-10 rounded-full border border-ivory/10 bg-cinnamon shadow-[inset_0_1px_0_rgba(255,255,255,.12)]"
                 transition={{ type: "spring", stiffness: 380, damping: 30 }}
               />
             )}
@@ -67,10 +67,10 @@ export function DashboardNav() {
         );
       })}
 
-      <form action={signOut} className="mt-2 hidden lg:block">
+      <form action={signOut} className="ml-auto shrink-0 pl-2">
         <button
           type="submit"
-          className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm text-ivory/50 transition-colors hover:text-ivory cursor-pointer"
+          className="flex cursor-pointer items-center gap-2.5 rounded-full border border-ivory/10 px-4 py-2.5 text-sm text-ivory/50 transition-colors hover:border-ivory/20 hover:text-ivory"
         >
           <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
             <path d="M9 21H5V3h4M16 17l5-5-5-5M21 12H9" />
