@@ -16,7 +16,7 @@ export default async function LoginPage({
 }) {
   // Already signed in? Skip the form.
   const user = await getCurrentUser();
-  if (user) redirect(searchParams.next ?? "/dashboard");
+  if (user) redirect(searchParams.next ?? "/");
 
   const fallbackErrors: Record<string, string> = {
     disabled: "Supabase is not configured in this local build.",
@@ -28,7 +28,7 @@ export default async function LoginPage({
   return (
     <AuthForm
       enabled={supabaseConfigured}
-      next={searchParams.next ?? "/dashboard"}
+      next={searchParams.next ?? "/"}
       initialError={searchParams.message ?? (searchParams.error ? fallbackErrors[searchParams.error] : undefined)}
     />
   );

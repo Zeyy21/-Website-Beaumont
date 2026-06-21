@@ -11,7 +11,7 @@ export interface AuthState {
   message?: string;
 }
 
-function safeNext(value: FormDataEntryValue | string | null, fallback = "/dashboard") {
+function safeNext(value: FormDataEntryValue | string | null, fallback = "/") {
   const next = String(value ?? fallback);
   return next.startsWith("/") && !next.startsWith("//") ? next : fallback;
 }
