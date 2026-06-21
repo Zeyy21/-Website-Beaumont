@@ -2,6 +2,7 @@ import Image from "next/image";
 import { Hero } from "@/components/hero";
 import { ExperienceSequence } from "@/components/home-experience";
 import { LazyQuoteBuilder } from "@/components/quote/lazy-quote-builder";
+import { PartnerFeature } from "@/components/partner-feature";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion";
 import { Container, Eyebrow } from "@/components/ui";
 import { getServices } from "@/lib/data";
@@ -154,6 +155,8 @@ export default async function HomePage() {
           <LazyQuoteBuilder services={services} />
         </Container>
       </section>
+
+      <PartnerFeature />
 
       <section id="contact" className="relative scroll-mt-24 overflow-hidden bg-ivory py-24 md:py-40" aria-labelledby="contact-title">
         <div aria-hidden="true" className="pointer-events-none absolute -left-16 bottom-0 font-display text-[22rem] leading-none text-oak/[0.025]">04</div>
