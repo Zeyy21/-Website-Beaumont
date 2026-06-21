@@ -96,6 +96,15 @@ p {
     radial-gradient(at 10% 85%, rgba(64, 38, 26, 0.45) 0px, transparent 50%);
 }
 
+/* Soft layered light used behind high-attention editorial sections. */
+.luxe-wash {
+  background-color: var(--ivory);
+  background-image:
+    radial-gradient(circle at 12% 8%, rgba(215, 190, 150, 0.32), transparent 32rem),
+    radial-gradient(circle at 88% 72%, rgba(161, 121, 79, 0.13), transparent 30rem),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.34), transparent 58%);
+}
+
 /* Reusable shimmer skeleton */
 .skeleton {
   position: relative;

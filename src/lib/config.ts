@@ -6,15 +6,17 @@ export const site = {
   description:
     "Beaumont restores driveways, walkways, patios, pool surrounds, and home exteriors with meticulous pressure washing and effortless service.",
   promise: "A brighter arrival, quietly delivered.",
-  email: "concierge@beaumont.example",
+  email: "beaumontgroup.net@gmail.com",
+  instagram: "https://www.instagram.com/groupebeaumont/?hl=en",
+  instagramHandle: "@groupebeaumont",
   phone: "+1 (555) 014-7788",
   url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
 };
 
 export const nav = [
   { href: "#services", label: "Services" },
-  { href: "#quote", label: "Instant Quote" },
   { href: "#about", label: "Who We Are" },
+  { href: "#quote", label: "Instant Quote" },
   { href: "#terms", label: "Terms" },
 ];
 

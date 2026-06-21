@@ -43,7 +43,7 @@ export function Hero() {
     <section
       ref={ref}
       id="top"
-      className="relative -mt-[72px] min-h-[100svh] overflow-hidden bg-soil text-ivory"
+      className="relative -mt-[84px] min-h-[100svh] overflow-hidden bg-soil text-ivory"
       aria-labelledby="hero-title"
     >
       <motion.div
@@ -66,8 +66,9 @@ export function Hero() {
 
       <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(17,12,8,.93)_0%,rgba(17,12,8,.76)_42%,rgba(17,12,8,.2)_78%)]" />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(17,12,8,.5)_0%,transparent_34%,transparent_68%,rgba(17,12,8,.68)_100%)]" />
+      <div className="pointer-events-none absolute inset-4 rounded-[1.75rem] border border-ivory/15 md:inset-6 md:rounded-[2.5rem]" />
 
-      <Container className="relative flex min-h-[100svh] items-end pb-16 pt-36 md:items-center md:pb-24 md:pt-32">
+      <Container className="relative flex min-h-[100svh] items-end pb-20 pt-40 md:items-center md:pb-24 md:pt-36">
         <motion.div
           className="max-w-[58rem] will-change-transform"
           variants={copy}
@@ -108,7 +109,7 @@ export function Hero() {
       </Container>
 
       <motion.div
-        className="absolute bottom-7 right-8 hidden items-center gap-4 text-[9px] font-semibold uppercase tracking-[0.28em] text-ivory/60 md:flex"
+        className="absolute bottom-10 right-12 hidden items-center gap-4 text-[9px] font-semibold uppercase tracking-[0.28em] text-ivory/60 md:flex"
         initial={reduce ? false : { opacity: 0, x: 18 }}
         whileInView={{ opacity: 1, x: 0 }}
         viewport={{ once: false, amount: 0.2 }}
@@ -116,6 +117,16 @@ export function Hero() {
       >
         <span className="h-px w-12 bg-sand/60" />
         Greater Montréal
+      </motion.div>
+      <motion.div
+        className="absolute bottom-10 left-12 hidden items-center gap-3 text-[9px] font-semibold uppercase tracking-[0.25em] text-ivory/45 lg:flex"
+        initial={reduce ? false : { opacity: 0, y: 12 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: false, amount: 0.2 }}
+        transition={{ duration: 0.9, ease, delay: 1 }}
+      >
+        <span className="flex h-7 w-7 items-center justify-center rounded-full border border-ivory/20">↓</span>
+        A considered approach to exterior care
       </motion.div>
     </section>
   );

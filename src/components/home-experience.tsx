@@ -31,9 +31,10 @@ export function ExperienceSequence() {
   const reduce = useReducedMotion();
 
   return (
-    <section id="about" className="scroll-mt-20 overflow-hidden bg-sand/20 py-24 md:py-36" aria-labelledby="approach-title">
+    <section id="about" className="relative scroll-mt-24 overflow-hidden bg-sand/20 py-24 md:py-40" aria-labelledby="approach-title">
+      <div aria-hidden="true" className="pointer-events-none absolute -left-12 top-10 font-display text-[20rem] leading-none text-oak/[0.025] md:text-[30rem]">02</div>
       <Container>
-        <div className="grid gap-14 lg:grid-cols-[0.92fr_1.08fr] lg:gap-20">
+        <div className="relative grid gap-14 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
           <div className="lg:sticky lg:top-28 lg:self-start">
             <motion.div
               initial={reduce ? false : { opacity: 0, y: 24 }}
@@ -41,7 +42,11 @@ export function ExperienceSequence() {
               viewport={{ once: false, amount: 0.35 }}
               transition={{ duration: 0.9, ease }}
             >
-              <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-cinnamon">Who we are</p>
+              <div className="flex items-center gap-4">
+                <span className="font-display text-2xl text-ochre">02</span>
+                <span className="h-px w-12 bg-ochre/40" />
+                <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-cinnamon">Who we are</p>
+              </div>
               <h2 id="approach-title" className="mt-6 text-balance font-display text-[clamp(3.2rem,5.7vw,5.9rem)] leading-[0.9] text-oak">
                 Quiet service.
                 <span className="block italic text-ochre">Exacting care.</span>
@@ -66,24 +71,26 @@ export function ExperienceSequence() {
                 className="object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-soil/60 via-transparent to-transparent" />
-              <p className="absolute bottom-7 left-7 text-[9px] font-semibold uppercase tracking-[0.28em] text-ivory/80 md:bottom-9 md:left-9">
-                Material-aware exterior care
-              </p>
+              <div className="pointer-events-none absolute inset-3 rounded-[1.45rem] border border-ivory/15 md:inset-4 md:rounded-[2.3rem]" />
+              <div className="absolute bottom-7 left-7 right-7 flex items-center justify-between gap-4 md:bottom-9 md:left-9 md:right-9">
+                <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-ivory/80">Material-aware exterior care</p>
+                <span className="font-display text-2xl text-sand">B.</span>
+              </div>
             </motion.div>
           </div>
 
-          <ol className="border-t border-oak/15">
+          <ol className="space-y-4">
             {chapters.map((chapter, index) => (
               <motion.li
                 key={chapter.number}
-                className="grid gap-6 border-b border-oak/15 py-10 md:grid-cols-[5rem_1fr] md:py-14"
+                className="group grid gap-6 rounded-[2rem] border border-oak/10 bg-ivory/55 p-7 shadow-[0_20px_60px_-46px_rgba(29,23,15,.7)] transition-colors duration-500 hover:bg-ivory/85 md:grid-cols-[5rem_1fr] md:rounded-[2.5rem] md:p-10"
                 initial={reduce ? false : { opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: false, amount: 0.4 }}
                 transition={{ duration: 0.85, ease, delay: index * 0.08 }}
               >
                 <div>
-                  <span className="font-display text-2xl text-ochre">{chapter.number}</span>
+                  <span className="flex h-12 w-12 items-center justify-center rounded-full border border-oak/10 font-display text-xl text-ochre transition-colors duration-500 group-hover:bg-oak group-hover:text-ivory">{chapter.number}</span>
                   <p className="mt-2 text-[9px] font-semibold uppercase tracking-[0.26em] text-soil/45">{chapter.eyebrow}</p>
                 </div>
                 <div>

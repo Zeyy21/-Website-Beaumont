@@ -83,15 +83,17 @@ export function Wordmark({
   priority?: boolean;
 }) {
   return (
-    <Image
-      src="/brand/wordmark-ivory.png"
-      alt="Beaumont"
-      width={1500}
-      height={500}
-      priority={priority}
-      quality={100}
-      className={cn("object-contain", dark && "invert", className)}
-    />
+    <span className={cn("relative inline-block aspect-[7.5/1] shrink-0 overflow-hidden", className)}>
+      <Image
+        src="/brand/wordmark-ivory.png"
+        alt="Beaumont"
+        width={1500}
+        height={500}
+        priority={priority}
+        quality={100}
+        className={cn("absolute left-0 top-1/2 h-[250%] w-full -translate-y-1/2 object-fill", dark && "invert")}
+      />
+    </span>
   );
 }
 

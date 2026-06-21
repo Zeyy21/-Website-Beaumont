@@ -15,6 +15,13 @@ const serviceImages = [
   "/images/montreal-home-hero.png",
 ];
 
+const serviceDetails = [
+  "Arrival surfaces",
+  "Outdoor living",
+  "Façade care",
+  "Complete property",
+];
+
 export default async function HomePage() {
   const services = await getServices();
 
@@ -22,12 +29,35 @@ export default async function HomePage() {
     <>
       <Hero />
 
-      <section id="services" className="scroll-mt-20 overflow-hidden bg-ivory py-24 md:py-36" aria-labelledby="services-title">
+      <section className="relative z-10 border-y border-ivory/10 bg-soil text-ivory" aria-label="Beaumont service principles">
+        <Container className="grid divide-y divide-ivory/10 md:grid-cols-3 md:divide-x md:divide-y-0">
+          {[
+            ["01", "Material-aware", "A method selected for every surface."],
+            ["02", "Quietly managed", "Clear timing, careful preparation, no theatre."],
+            ["03", "Effortless to arrange", "Measure and request your visit in one place."],
+          ].map(([number, title, copy]) => (
+            <div key={number} className="group flex gap-5 py-7 md:px-8 md:py-9 first:md:pl-0 last:md:pr-0">
+              <span className="font-display text-2xl text-ochre transition-colors group-hover:text-sand">{number}</span>
+              <div>
+                <p className="text-sm font-semibold text-ivory">{title}</p>
+                <p className="mt-1 text-xs font-medium leading-relaxed text-ivory/50">{copy}</p>
+              </div>
+            </div>
+          ))}
+        </Container>
+      </section>
+
+      <section id="services" className="relative scroll-mt-24 overflow-hidden bg-ivory py-24 md:py-40" aria-labelledby="services-title">
+        <div aria-hidden="true" className="pointer-events-none absolute -right-10 top-10 font-display text-[18rem] leading-none text-oak/[0.025] md:text-[28rem]">01</div>
         <Container>
-          <Reveal className="grid gap-8 lg:grid-cols-[0.7fr_1.3fr] lg:items-end">
+          <Reveal className="relative grid gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:items-end">
             <div>
-              <Eyebrow>Services</Eyebrow>
-              <p className="mt-5 max-w-sm text-base font-medium leading-relaxed text-soil/70">
+              <div className="flex items-center gap-4">
+                <span className="font-display text-2xl text-ochre">01</span>
+                <span className="h-px w-12 bg-ochre/40" />
+                <Eyebrow>Services</Eyebrow>
+              </div>
+              <p className="mt-6 max-w-sm text-base font-medium leading-relaxed text-soil/65">
                 Exterior care selected for the surface, the setting, and the result you want to come home to.
               </p>
             </div>
@@ -37,25 +67,41 @@ export default async function HomePage() {
             </h2>
           </Reveal>
 
-          <Stagger className="mt-16 grid gap-px overflow-hidden rounded-[2rem] border border-oak/10 bg-oak/10 md:grid-cols-2 md:rounded-[3rem]">
+          <Stagger className="relative mt-16 grid gap-4 lg:grid-cols-12">
             {services.map((service, index) => (
-              <StaggerItem key={service.id}>
-                <article className="group relative min-h-[30rem] overflow-hidden bg-soil text-ivory md:min-h-[36rem]">
+              <StaggerItem
+                key={service.id}
+                className={
+                  index === 0
+                    ? "lg:col-span-7 lg:row-span-2"
+                    : index === 3
+                      ? "lg:col-span-12"
+                      : "lg:col-span-5"
+                }
+              >
+                <article className={`group relative h-full min-h-[30rem] overflow-hidden rounded-[2rem] bg-soil text-ivory shadow-[0_28px_80px_-40px_rgba(29,23,15,.75)] md:rounded-[2.75rem] ${index === 0 ? "lg:min-h-[46rem]" : index === 3 ? "lg:min-h-[28rem]" : "lg:min-h-[22.5rem]"}`}>
                   <Image
                     src={serviceImages[index % serviceImages.length]}
                     alt=""
                     fill
                     sizes="(min-width: 768px) 50vw, 100vw"
-                    className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.025]"
+                    className="object-cover transition-transform duration-[1400ms] ease-out group-hover:scale-[1.035]"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-soil/95 via-soil/30 to-soil/5" />
-                  <div className="absolute inset-x-0 bottom-0 p-7 md:p-10">
-                    <div className="flex items-center justify-between gap-4 text-[9px] font-semibold uppercase tracking-[0.28em] text-sand">
-                      <span>0{index + 1}</span>
+                  <div className="absolute inset-0 bg-gradient-to-t from-soil/95 via-soil/30 to-soil/5 transition-colors duration-700 group-hover:via-soil/20" />
+                  <div className="pointer-events-none absolute inset-3 rounded-[1.45rem] border border-ivory/15 md:inset-4 md:rounded-[2.15rem]" />
+                  <div className="absolute left-7 top-7 rounded-full border border-ivory/20 bg-soil/25 px-4 py-2 text-[9px] font-semibold uppercase tracking-[0.24em] text-ivory/75 backdrop-blur-md md:left-10 md:top-10">
+                    {serviceDetails[index]}
+                  </div>
+                  <div className="absolute inset-x-0 bottom-0 p-8 md:p-11">
+                    <div className="flex items-center justify-between gap-4 text-[9px] font-semibold uppercase tracking-[0.28em] text-sand/90">
+                      <span>Service 0{index + 1}</span>
                       <span>From {formatCurrency(service.base_price)}</span>
                     </div>
-                    <h3 className="mt-5 max-w-lg font-display text-4xl leading-[0.98] md:text-5xl">{service.name}</h3>
-                    <p className="mt-4 max-w-md text-sm font-medium leading-relaxed text-ivory/75 md:text-base">{service.description}</p>
+                    <h3 className={`mt-5 max-w-2xl font-display leading-[0.95] ${index === 0 || index === 3 ? "text-4xl md:text-6xl" : "text-4xl md:text-[2.65rem]"}`}>{service.name}</h3>
+                    <div className="mt-5 flex items-end justify-between gap-6">
+                      <p className="max-w-lg text-sm font-medium leading-relaxed text-ivory/70 md:text-base">{service.description}</p>
+                      <span className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-full border border-ivory/25 text-xl transition-all duration-500 group-hover:-rotate-45 group-hover:bg-ivory group-hover:text-soil sm:flex">↗</span>
+                    </div>
                   </div>
                 </article>
               </StaggerItem>
@@ -66,22 +112,37 @@ export default async function HomePage() {
 
       <ExperienceSequence />
 
-      <section className="bg-ivory py-24 md:py-32" aria-label="Client testimonial">
+      <section className="texture-soil relative overflow-hidden py-24 text-ivory md:py-36" aria-label="Client testimonial">
+        <div aria-hidden="true" className="pointer-events-none absolute -right-12 -top-24 font-display text-[24rem] leading-none text-ivory/[0.025]">“</div>
         <Container>
-          <Reveal className="mx-auto max-w-5xl border-y border-oak/15 py-16 text-center md:py-24">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-cinnamon">Felt, not announced</p>
-            <blockquote className="mt-7 text-balance font-display text-[clamp(2.8rem,5.7vw,5.7rem)] leading-[0.96] text-oak">
+          <Reveal className="relative grid gap-10 rounded-[2.25rem] border border-ivory/10 bg-ivory/[0.035] p-8 backdrop-blur-sm md:rounded-[3.5rem] md:p-14 lg:grid-cols-[0.3fr_1.7fr] lg:p-20">
+            <div>
+              <p className="font-display text-5xl text-ochre">01</p>
+              <p className="mt-4 text-[10px] font-semibold uppercase tracking-[0.34em] text-sand">Client note</p>
+            </div>
+            <div>
+            <blockquote className="text-balance font-display text-[clamp(2.7rem,5.2vw,5.4rem)] leading-[0.96] text-ivory">
               “It made the whole house look newer. The property simply felt cared for again.”
             </blockquote>
-            <p className="mt-7 text-xs font-semibold uppercase tracking-[0.22em] text-soil/60">Eleanor V. · Beaumont client</p>
+              <div className="mt-10 flex flex-wrap items-center gap-5 border-t border-ivory/10 pt-7">
+                <span className="h-px w-12 bg-ochre" />
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-ivory/55">Eleanor V. · Beaumont client</p>
+              </div>
+            </div>
           </Reveal>
         </Container>
       </section>
 
-      <section id="quote" className="scroll-mt-16 bg-sand/20 py-20 md:py-28" aria-labelledby="quote-title">
+      <section id="quote" className="luxe-wash relative scroll-mt-24 overflow-hidden py-24 md:py-36" aria-labelledby="quote-title">
+        <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-oak/15 to-transparent" />
         <Container>
           <Reveal className="mx-auto mb-12 max-w-4xl text-center md:mb-14">
-            <Eyebrow>Instant quote</Eyebrow>
+            <div className="flex items-center justify-center gap-4">
+              <span className="h-px w-10 bg-ochre/40" />
+              <span className="font-display text-2xl text-ochre">03</span>
+              <Eyebrow>Instant quote</Eyebrow>
+              <span className="h-px w-10 bg-ochre/40" />
+            </div>
             <h2 id="quote-title" className="mt-5 text-balance font-display text-[clamp(3.15rem,5.4vw,5.6rem)] leading-[0.92] text-oak">
               Your property. Your care.
               <span className="block italic text-ochre">One clear estimate.</span>
@@ -94,19 +155,53 @@ export default async function HomePage() {
         </Container>
       </section>
 
-      <section id="contact" className="scroll-mt-20 bg-ivory py-24 md:py-32" aria-labelledby="contact-title">
-        <Container className="grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
-          <Reveal>
-            <Eyebrow>Contact</Eyebrow>
+      <section id="contact" className="relative scroll-mt-24 overflow-hidden bg-ivory py-24 md:py-40" aria-labelledby="contact-title">
+        <div aria-hidden="true" className="pointer-events-none absolute -left-16 bottom-0 font-display text-[22rem] leading-none text-oak/[0.025]">04</div>
+        <Container>
+          <Reveal className="grid gap-10 lg:grid-cols-[1.25fr_.75fr] lg:items-end">
+            <div>
+            <div className="flex items-center gap-4">
+              <span className="font-display text-2xl text-ochre">04</span>
+              <span className="h-px w-12 bg-ochre/40" />
+              <Eyebrow>Contact</Eyebrow>
+            </div>
             <h2 id="contact-title" className="mt-6 max-w-3xl text-balance font-display text-[clamp(3.2rem,6vw,6.1rem)] leading-[0.9] text-oak">
               Prefer a conversation?
               <span className="block italic text-ochre">We’re here.</span>
             </h2>
+            </div>
+            <p className="max-w-md text-base font-medium leading-relaxed text-soil/60 lg:justify-self-end">
+              For questions, property details, or a more tailored scope, reach us directly. We reply with clarity and without pressure.
+            </p>
           </Reveal>
-          <Reveal delay={0.08} className="border-t border-oak/15 pt-7">
-            <a href={`mailto:${site.email}`} className="block font-display text-3xl text-oak transition-colors hover:text-cinnamon md:text-4xl">{site.email}</a>
-            <a href={`tel:${site.phone.replace(/[^\d+]/g, "")}`} className="mt-3 block text-lg font-medium text-soil/65 transition-colors hover:text-oak">{site.phone}</a>
-            <p className="mt-6 max-w-md text-sm font-medium leading-relaxed text-soil/60">Monday to Saturday · Quotes available online at any time.</p>
+
+          <div className="relative mt-14 grid gap-4 lg:grid-cols-12">
+            <Reveal className="min-w-0 lg:col-span-7">
+              <a href={`mailto:${site.email}`} className="group flex min-h-[21rem] w-full min-w-0 flex-col justify-between overflow-hidden rounded-[2.25rem] bg-soil p-8 text-ivory shadow-lift md:rounded-[3rem] md:p-12">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-sand">Email Beaumont</span>
+                  <span className="flex h-12 w-12 items-center justify-center rounded-full border border-ivory/15 text-xl transition-all duration-500 group-hover:-rotate-45 group-hover:bg-ivory group-hover:text-soil">↗</span>
+                </div>
+                <span className="break-all font-display text-[clamp(2rem,4vw,4.5rem)] leading-[0.98] transition-colors group-hover:text-sand">{site.email}</span>
+              </a>
+            </Reveal>
+            <Reveal delay={0.08} className="min-w-0 lg:col-span-5">
+              <a href={site.instagram} target="_blank" rel="noreferrer" className="group flex min-h-[21rem] w-full min-w-0 flex-col justify-between overflow-hidden rounded-[2.25rem] border border-oak/10 bg-sand/35 p-8 text-oak shadow-[0_24px_70px_-42px_rgba(29,23,15,.6)] md:rounded-[3rem] md:p-10">
+                <div className="flex items-center justify-between">
+                  <InstagramMark />
+                  <span className="flex h-12 w-12 items-center justify-center rounded-full border border-oak/15 text-xl transition-all duration-500 group-hover:-rotate-45 group-hover:bg-oak group-hover:text-ivory">↗</span>
+                </div>
+                <div>
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-cinnamon">Follow our work</span>
+                  <span className="mt-3 block break-all font-display text-[clamp(2rem,3vw,2.75rem)] leading-none tracking-[-0.02em]">{site.instagramHandle}</span>
+                </div>
+              </a>
+            </Reveal>
+          </div>
+
+          <Reveal className="mt-5 flex flex-col justify-between gap-3 border-t border-oak/10 pt-5 text-xs font-semibold uppercase tracking-[0.18em] text-soil/45 sm:flex-row">
+            <span>Greater Montréal</span>
+            <span>Monday–Saturday · Online estimates anytime</span>
           </Reveal>
         </Container>
       </section>
@@ -120,5 +215,15 @@ export default async function HomePage() {
         </Container>
       </section>
     </>
+  );
+}
+
+function InstagramMark() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+    </svg>
   );
 }
