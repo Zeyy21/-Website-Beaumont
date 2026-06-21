@@ -78,19 +78,17 @@ export default async function HomePage() {
         </Container>
       </section>
 
-      <section id="quote" className="scroll-mt-16 bg-sand/20 py-24 md:py-36" aria-labelledby="quote-title">
+      <section id="quote" className="scroll-mt-16 bg-sand/20 py-20 md:py-28" aria-labelledby="quote-title">
         <Container>
-          <Reveal className="mb-14 grid gap-8 lg:grid-cols-[0.7fr_1.3fr] lg:items-end">
-            <div>
-              <Eyebrow>Instant quote</Eyebrow>
-              <p className="mt-5 max-w-sm text-base font-medium leading-relaxed text-soil/70">
-                Trace the space, choose the care, and see a transparent estimate without leaving this page.
-              </p>
-            </div>
-            <h2 id="quote-title" className="max-w-4xl text-balance font-display text-[clamp(3.2rem,6vw,6.2rem)] leading-[0.9] text-oak">
-              A clear price,
-              <span className="block italic text-ochre">in three simple steps.</span>
+          <Reveal className="mx-auto mb-12 max-w-4xl text-center md:mb-14">
+            <Eyebrow>Instant quote</Eyebrow>
+            <h2 id="quote-title" className="mt-5 text-balance font-display text-[clamp(3.15rem,5.4vw,5.6rem)] leading-[0.92] text-oak">
+              Your property. Your care.
+              <span className="block italic text-ochre">One clear estimate.</span>
             </h2>
+            <p className="mx-auto mt-5 max-w-2xl text-base font-medium leading-relaxed text-soil/65 md:text-lg">
+              Select the address, trace the service area, and tailor the visit without leaving this page.
+            </p>
           </Reveal>
           <LazyQuoteBuilder services={services} />
         </Container>

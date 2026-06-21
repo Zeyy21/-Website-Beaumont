@@ -154,7 +154,7 @@ export function MapCanvas({
   return (
     <div
       ref={elRef}
-      className="h-[440px] w-full overflow-hidden rounded-3xl border border-oak/15 md:h-[540px]"
+      className="h-[320px] w-full overflow-hidden rounded-[1.5rem] border border-oak/15 md:h-[400px]"
       role="application"
       aria-label="Map. Draw your property to estimate its area."
     />

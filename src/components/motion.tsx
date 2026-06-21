@@ -23,7 +23,7 @@ export function Reveal({
       className={className}
       initial={reduce ? false : { opacity: 0, y, scale: 0.995 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: true, amount: 0.2 }}
+      viewport={{ once: false, amount: 0.2 }}
       transition={{ duration: 0.85, ease, delay }}
       style={{ willChange: "transform, opacity" }}
     >
@@ -51,7 +51,7 @@ export function Stagger({
       variants={container}
       initial="hidden"
       whileInView="show"
-      viewport={{ once: true, amount: 0.16 }}
+      viewport={{ once: false, amount: 0.16 }}
     >
       {children}
     </motion.div>

@@ -38,7 +38,7 @@ export function ExperienceSequence() {
             <motion.div
               initial={reduce ? false : { opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.35 }}
+              viewport={{ once: false, amount: 0.35 }}
               transition={{ duration: 0.9, ease }}
             >
               <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-cinnamon">Who we are</p>
@@ -55,7 +55,7 @@ export function ExperienceSequence() {
               className="relative mt-10 aspect-[4/3] overflow-hidden rounded-[2rem] bg-oak shadow-lift md:rounded-[3rem]"
               initial={reduce ? false : { opacity: 0, scale: 0.975 }}
               whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, amount: 0.25 }}
+              viewport={{ once: false, amount: 0.25 }}
               transition={{ duration: 1.05, ease, delay: 0.08 }}
             >
               <Image
@@ -79,7 +79,7 @@ export function ExperienceSequence() {
                 className="grid gap-6 border-b border-oak/15 py-10 md:grid-cols-[5rem_1fr] md:py-14"
                 initial={reduce ? false : { opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.4 }}
+                viewport={{ once: false, amount: 0.4 }}
                 transition={{ duration: 0.85, ease, delay: index * 0.08 }}
               >
                 <div>

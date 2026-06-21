@@ -49,7 +49,8 @@ export function Hero() {
       <motion.div
         className="absolute -inset-y-10 inset-x-0 will-change-transform"
         initial={reduce ? false : { scale: 1.055, opacity: 0.72 }}
-        animate={{ scale: 1, opacity: 1 }}
+        whileInView={{ scale: 1, opacity: 1 }}
+        viewport={{ once: false, amount: 0.15 }}
         transition={{ duration: 1.8, ease }}
         style={{ y: imageY }}
       >
@@ -71,7 +72,8 @@ export function Hero() {
           className="max-w-[58rem] will-change-transform"
           variants={copy}
           initial={reduce ? false : "hidden"}
-          animate="visible"
+          whileInView="visible"
+          viewport={{ once: false, amount: 0.28 }}
           style={{ y: contentY }}
         >
           <motion.p variants={line} className="text-[10px] font-semibold uppercase tracking-[0.34em] text-sand md:text-[11px] md:tracking-[0.4em]">
@@ -108,7 +110,8 @@ export function Hero() {
       <motion.div
         className="absolute bottom-7 right-8 hidden items-center gap-4 text-[9px] font-semibold uppercase tracking-[0.28em] text-ivory/60 md:flex"
         initial={reduce ? false : { opacity: 0, x: 18 }}
-        animate={{ opacity: 1, x: 0 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        viewport={{ once: false, amount: 0.2 }}
         transition={{ duration: 0.9, ease, delay: 0.9 }}
       >
         <span className="h-px w-12 bg-sand/60" />

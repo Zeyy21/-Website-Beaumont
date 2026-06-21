@@ -31,7 +31,7 @@ export function AnimatedPrice({ value }: { value: number }) {
   }, [value, reduce]);
 
   return (
-    <p className="mt-3 font-display text-6xl tabular-nums text-ivory">
+    <p className="mt-3 font-display text-5xl tabular-nums text-ivory md:text-6xl">
       {formatCurrency(display)}
     </p>
   );

@@ -22,7 +22,7 @@ type ButtonVariant = "primary" | "outline" | "ghost" | "light";
 type ButtonSize = "sm" | "md" | "lg";
 
 const base =
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium tracking-wide transition-all duration-200 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 hover:scale-[1.02] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ochre focus-visible:ring-offset-2 focus-visible:ring-offset-ivory";
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium tracking-wide transition-[background-color,border-color,color,box-shadow,transform] duration-300 ease-out cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 hover:-translate-y-px active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ochre focus-visible:ring-offset-2 focus-visible:ring-offset-ivory";
 
 const variants: Record<ButtonVariant, string> = {
   primary: "bg-cinnamon text-ivory hover:bg-oak shadow-soft",

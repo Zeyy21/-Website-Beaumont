@@ -10,19 +10,26 @@ import { ButtonLink, Container, Wordmark } from "./ui";
 
 export function SiteHeader({ signedIn }: { signedIn: boolean }) {
   const pathname = usePathname();
-  const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-  const home = pathname === "/";
-
-  useEffect(() => {
-    const onScroll = () =>
-      setScrolled(window.scrollY > (home ? window.innerHeight - 72 : 12));
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [home]);
+  const [activeHash, setActiveHash] = useState("");
 
   useEffect(() => setOpen(false), [pathname]);
+
+  useEffect(() => {
+    if (pathname !== "/") return;
+    const sections = nav
+      .map((item) => document.getElementById(item.href.slice(1)))
+      .filter((section): section is HTMLElement => Boolean(section));
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.find((entry) => entry.isIntersecting);
+        if (visible) setActiveHash(`#${visible.target.id}`);
+      },
+      { rootMargin: "-18% 0px -68% 0px", threshold: 0 },
+    );
+    sections.forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
+  }, [pathname]);
 
   useEffect(() => {
     if (pathname !== "/" || !window.location.hash) return;
@@ -39,58 +46,41 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
     if (!target) return;
     event.preventDefault();
     setOpen(false);
+    setActiveHash(href);
     window.history.pushState(null, "", href);
     target.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const onDark = home && !scrolled;
-
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-50 border-b border-transparent bg-transparent transition-all duration-500",
-        onDark
-          ? "text-ivory"
-          : "text-soil",
-      )}
-    >
-      <Container className="flex h-[72px] items-center justify-between">
+    <header className="pointer-events-none sticky top-0 z-50 h-[72px] bg-transparent">
+      <Container className="flex h-[72px] items-center justify-between gap-3">
         <Link
           href="/"
-          className="group flex items-center"
+          className="pointer-events-auto flex h-11 items-center rounded-full border border-oak/10 bg-ivory/90 px-4 shadow-soft backdrop-blur-xl transition-colors hover:bg-ivory focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ochre"
           aria-label={`${site.name} home`}
         >
-          <Wordmark dark={!onDark} priority className="h-8 w-auto transition-opacity duration-300 group-hover:opacity-70 md:h-11 lg:h-12" />
+          <Wordmark dark priority className="h-7 w-auto md:h-8" />
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="pointer-events-auto hidden items-center gap-0.5 rounded-full border border-oak/10 bg-ivory/90 p-1 shadow-soft backdrop-blur-xl md:flex" aria-label="Primary navigation">
           {nav.map((item) => {
-            const active = pathname === item.href;
+            const active = activeHash === item.href;
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={(event) => scrollToSection(event, item.href)}
                 className={cn(
-                  "relative whitespace-nowrap rounded-full px-4 py-2 text-sm transition-colors",
-                  onDark
-                    ? active
-                      ? "text-ivory"
-                      : "text-ivory/70 hover:text-ivory"
-                    : active
-                      ? "text-oak"
-                      : "text-soil/70 hover:text-oak",
+                  "relative rounded-full px-4 py-2 text-sm font-medium text-soil/65 transition-colors hover:text-oak",
+                  active && "text-oak",
                 )}
               >
                 {item.label}
                 {active && (
                   <motion.span
                     layoutId="nav-active"
-                    className={cn(
-                      "absolute inset-0 -z-10 rounded-full",
-                      onDark ? "bg-ivory/10" : "bg-oak/8",
-                    )}
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    className="absolute inset-0 -z-10 rounded-full bg-sand/40"
+                    transition={{ type: "spring", stiffness: 360, damping: 32 }}
                   />
                 )}
               </Link>
@@ -98,30 +88,22 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
           })}
         </nav>
 
-        <div className="hidden items-center gap-2 md:flex">
-          <ButtonLink
-            href={signedIn ? "/dashboard" : "/login"}
-            variant="ghost"
-            size="sm"
-            className={onDark ? "text-ivory hover:bg-ivory/10" : undefined}
-          >
+        <div className="pointer-events-auto hidden items-center gap-1 rounded-full border border-oak/10 bg-ivory/90 p-1 shadow-soft backdrop-blur-xl md:flex">
+          <ButtonLink href={signedIn ? "/dashboard" : "/login"} variant="ghost" size="sm">
             {signedIn ? "Dashboard" : "Sign in"}
           </ButtonLink>
-          <ButtonLink href="#quote" onClick={(event) => scrollToSection(event, "#quote")} size="sm" variant={onDark ? "light" : "primary"}>
+          <ButtonLink href="#quote" onClick={(event) => scrollToSection(event, "#quote")} size="sm">
             Instant Quote
           </ButtonLink>
         </div>
 
         <button
-          className={cn(
-            "flex h-10 w-10 items-center justify-center rounded-full md:hidden",
-            onDark ? "text-ivory" : "text-oak",
-          )}
-          onClick={() => setOpen((v) => !v)}
+          className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full border border-oak/10 bg-ivory/90 text-oak shadow-soft backdrop-blur-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ochre md:hidden"
+          onClick={() => setOpen((value) => !value)}
           aria-label="Toggle menu"
           aria-expanded={open}
         >
-          <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8">
+          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
             {open ? (
               <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
             ) : (
@@ -134,36 +116,35 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.25 }}
-            className="overflow-hidden border-t border-oak/10 bg-ivory md:hidden"
+            initial={{ opacity: 0, y: -8, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.98 }}
+            transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+            className="pointer-events-auto absolute inset-x-4 top-[64px] overflow-hidden rounded-2xl border border-oak/10 bg-ivory/95 p-3 shadow-lift backdrop-blur-xl md:hidden"
           >
-            <Container className="flex flex-col gap-1 py-4">
+            <nav className="flex flex-col" aria-label="Mobile navigation">
               {nav.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={(event) => scrollToSection(event, item.href)}
-                  className="rounded-xl px-4 py-3 text-base text-soil hover:bg-oak/5"
+                  className={cn(
+                    "rounded-xl px-4 py-3 text-base font-medium text-soil/70 hover:bg-sand/30 hover:text-oak",
+                    activeHash === item.href && "bg-sand/30 text-oak",
+                  )}
                 >
                   {item.label}
                 </Link>
               ))}
-              <div className="mt-2 flex gap-2 px-1">
-                <ButtonLink
-                  href={signedIn ? "/dashboard" : "/login"}
-                  variant="outline"
-                  className="flex-1"
-                >
-                  {signedIn ? "Dashboard" : "Sign in"}
-                </ButtonLink>
-                <ButtonLink href="#quote" onClick={(event) => scrollToSection(event, "#quote")} className="flex-1">
-                  Quote
-                </ButtonLink>
-              </div>
-            </Container>
+            </nav>
+            <div className="mt-2 grid grid-cols-2 gap-2 border-t border-oak/10 pt-3">
+              <ButtonLink href={signedIn ? "/dashboard" : "/login"} variant="outline">
+                {signedIn ? "Dashboard" : "Sign in"}
+              </ButtonLink>
+              <ButtonLink href="#quote" onClick={(event) => scrollToSection(event, "#quote")}>
+                Quote
+              </ButtonLink>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
