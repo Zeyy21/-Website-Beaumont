@@ -20,7 +20,8 @@ export type EmailTemplate =
     }
   | { kind: "quote_sent"; name: string; total: number; quoteUrl: string }
   | { kind: "payment_receipt"; name: string; amount: number; method: string }
-  | { kind: "referral_credited"; name: string; points: number };
+  | { kind: "referral_credited"; name: string; points: number }
+  | { kind: "quote_cancelled"; name: string; address: string; total: number };
 
 interface Rendered {
   subject: string;
@@ -143,6 +144,19 @@ export function renderEmail(t: EmailTemplate): Rendered {
               "View your quote",
               t.quoteUrl,
             )}</div>`,
+        ),
+      };
+    case "quote_cancelled":
+      return {
+        subject: `Quote cancelled for ${t.address}`,
+        text: `${t.name}, your quote request for ${t.address} (${formatCurrency(t.total)}) has been successfully cancelled.`,
+        html: shell(
+          "Quote Cancelled",
+          p(`${t.name},`) +
+            p(
+              `We have successfully cancelled your quote request for <strong>${t.address}</strong>.`,
+            ) +
+            p("If you need anything else, just draw a new quote!"),
         ),
       };
     case "payment_receipt":

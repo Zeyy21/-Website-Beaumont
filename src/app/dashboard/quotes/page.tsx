@@ -2,6 +2,7 @@ import { getCurrentUser } from "@/lib/data";
 import { getDashboardData } from "@/lib/dashboard";
 import { formatCurrency } from "@/lib/pricing";
 import { Card, EmptyState, StatusBadge } from "@/components/dashboard-ui";
+import { CancelQuoteButton } from "@/components/quote/cancel-quote-button";
 import type { LineItem } from "@/lib/supabase/types";
 
 export const metadata = { title: "Quotes" };
@@ -40,7 +41,12 @@ export default async function QuotesPage() {
                   {new Date(q.created_at).toLocaleDateString()}
                 </p>
               </div>
-              <StatusBadge status={q.status} />
+              <div className="flex flex-col items-end gap-2">
+                <StatusBadge status={q.status} />
+                {(q.status === "requested" || q.status === "draft") && (
+                  <CancelQuoteButton quoteId={q.id} />
+                )}
+              </div>
             </div>
 
             {items.length > 0 && (
