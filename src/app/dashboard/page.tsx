@@ -10,6 +10,7 @@ import {
   StatCard,
   StatusBadge,
 } from "@/components/dashboard-ui";
+import { CancelQuoteButton } from "@/components/quote/cancel-quote-button";
 
 export default async function DashboardOverview() {
   const user = await getCurrentUser();
@@ -75,9 +76,14 @@ export default async function DashboardOverview() {
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="font-display text-xl text-oak">
-                    {formatCurrency(Number(q.total))}
-                  </span>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="font-display text-xl text-oak">
+                      {formatCurrency(Number(q.total))}
+                    </span>
+                    {(q.status === "requested" || q.status === "draft") && (
+                      <CancelQuoteButton quoteId={q.id} />
+                    )}
+                  </div>
                   <StatusBadge status={q.status} />
                 </div>
               </li>

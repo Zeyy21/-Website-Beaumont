@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email";
+import { revalidatePath } from "next/cache";
 
 export async function cancelQuote(quoteId: string) {
   const supabase = createClient();
@@ -54,6 +55,9 @@ export async function cancelQuote(quoteId: string) {
       },
     });
   }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/quotes");
 
   return { ok: true };
 }
