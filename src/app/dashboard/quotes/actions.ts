@@ -5,6 +5,8 @@ import { sendEmail } from "@/lib/email";
 
 export async function cancelQuote(quoteId: string) {
   const supabase = createClient();
+  if (!supabase) return { error: "Service unavailable." };
+
   const { data: userResponse } = await supabase.auth.getUser();
   const user = userResponse?.user;
 
