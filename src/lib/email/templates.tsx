@@ -106,7 +106,6 @@ export function renderEmail(t: EmailTemplate): Rendered {
       const text = [
         `New formal quote request from ${t.name}`,
         `Email: ${t.email}`,
-        `Signed-in account: ${t.accountEmail}`,
         `Phone: ${t.phone}`,
         `Address: ${t.address}`,
         `Service: ${t.service}`,
@@ -122,7 +121,7 @@ export function renderEmail(t: EmailTemplate): Rendered {
         html: shell(
           "New formal quote request",
           p(`<strong>${name}</strong> has requested a quote.`) +
-            p(`<strong>Contact email:</strong> ${email}<br><strong>Signed-in account:</strong> ${accountEmail}<br><strong>Phone:</strong> ${phone}`) +
+            p(`<strong>Contact email:</strong> ${email}<br><strong>Phone:</strong> ${phone}`) +
             p(`<strong>Property:</strong> ${address}`) +
             p(`<strong>Service:</strong> ${service}<br><strong>Measured area:</strong> ${Math.round(t.areaM2)} m²<br><strong>Visit rhythm:</strong> ${frequency}`) +
             p(`<strong>Conditional services:</strong> ${conditionalServices}`) +
