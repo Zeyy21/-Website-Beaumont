@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: { next?: string; error?: string; message?: string };
+  searchParams: { next?: string; error?: string; message?: string; mode?: string };
 }) {
   // Already signed in? Skip the form.
   const user = await getCurrentUser();
@@ -29,6 +29,7 @@ export default async function LoginPage({
     <AuthForm
       enabled={supabaseConfigured}
       next={searchParams.next ?? "/"}
+      initialMode={searchParams.mode === "signup" ? "signup" : "signin"}
       initialError={searchParams.message ?? (searchParams.error ? fallbackErrors[searchParams.error] : undefined)}
     />
   );

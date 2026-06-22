@@ -23,6 +23,7 @@ export interface SaveQuotePayload {
 
 export interface SaveQuoteResult {
   ok: boolean;
+  needsAuth?: boolean;
   quoteId?: string;
   total?: number;
   lineItems?: LineItem[];
@@ -30,8 +31,8 @@ export interface SaveQuoteResult {
 }
 
 /**
- * Recomputes the estimate server-side, emails the complete lead to Beaumont,
- * and associates the request with the user when one is already signed in.
+ * Requires an authenticated account, recomputes the estimate server-side,
+ * emails the complete lead to Beaumont, and saves it to the signed-in user.
  */
 export async function saveQuote(
   payload: SaveQuotePayload,
@@ -43,7 +44,15 @@ export async function saveQuote(
   const fullName = payload.fullName.trim();
   const email = payload.email.trim().toLowerCase();
   const phone = payload.phone.trim();
-  if (!fullName || !phone || !/^\S+@\S+\.\S+$/.test(email)) {
+  const address = payload.address.trim();
+  if (
+    !fullName ||
+    !phone ||
+    !address ||
+    !/^\S+@\S+\.\S+$/.test(email) ||
+    !Number.isFinite(payload.areaM2) ||
+    payload.areaM2 <= 0
+  ) {
     return { ok: false, error: "Please provide a valid name, email, and phone number." };
   }
 
@@ -55,7 +64,11 @@ export async function saveQuote(
   });
 
   const supabase = createClient();
-  const user = supabase ? (await supabase.auth.getUser()).data.user : null;
+  if (!supabase) return { ok: false, needsAuth: true };
+
+  const user = (await supabase.auth.getUser()).data.user;
+  if (!user) return { ok: false, needsAuth: true };
+
   const frequencyLabel =
     frequencies.find((item) => item.id === payload.frequency)?.label ?? payload.frequency;
   const conditionalServices: string[] = payload.addOnIds.flatMap((id) => {
@@ -63,14 +76,24 @@ export async function saveQuote(
     return addOn ? [addOn.label] : [];
   });
 
+  const emailProvider = process.env.EMAIL_PROVIDER?.toLowerCase();
+  if (
+    process.env.NODE_ENV === "production" &&
+    (!emailProvider || emailProvider === "console")
+  ) {
+    console.error("[quote] EMAIL_PROVIDER is not configured for production delivery.");
+    return { ok: false, error: "Email delivery is temporarily unavailable. Please try again later." };
+  }
+
   const delivery = await sendEmail({
     to: site.email,
     template: {
       kind: "quote_lead",
       name: fullName,
       email,
+      accountEmail: user.email ?? email,
       phone,
-      address: payload.address,
+      address,
       service: service.name,
       areaM2: payload.areaM2,
       frequency: frequencyLabel,
@@ -79,7 +102,10 @@ export async function saveQuote(
     },
   });
 
-  if (!delivery.ok) {
+  if (
+    !delivery.ok ||
+    (delivery.provider === "console" && process.env.NODE_ENV === "production")
+  ) {
     return { ok: false, error: "We could not send your request. Please try again." };
   }
 
@@ -89,12 +115,12 @@ export async function saveQuote(
       service.id,
     );
 
-  const { data, error } = supabase ? await supabase
+  const { data, error } = await supabase
     .from("quotes")
     .insert({
-      user_id: user?.id ?? null,
+      user_id: user.id,
       service_id: isUuid ? service.id : null,
-      address: payload.address,
+      address,
       area_m2: payload.areaM2,
       frequency: payload.frequency,
       line_items: quote.lineItems,
@@ -103,10 +129,10 @@ export async function saveQuote(
       source_zone: payload.sourceZone ?? null,
     })
     .select("id")
-    .single() : { data: null, error: null };
+    .single();
 
-  // Email delivery is the source of truth for a lead. Persistence is best-effort
-  // because anonymous visitors may not have permission to insert database rows.
+  // Email delivery is the source of truth for the lead; database persistence
+  // remains best-effort so a temporary storage issue never loses the request.
   if (error) console.error("[quote] request persistence failed:", error.message);
 
   revalidatePath("/dashboard");

@@ -49,7 +49,7 @@ Everything below is off by default and documented in [`.env.example`](./.env.exa
 
 | Capability | Add to `.env.local` | Notes |
 | --- | --- | --- |
-| Live email | `EMAIL_PROVIDER` + `EMAIL_API_KEY` + `EMAIL_FROM` | MailerSend/Brevo/Resend (no card) or `smtp` (`npm i nodemailer`) |
+| Formal quote email | `EMAIL_PROVIDER` + `EMAIL_API_KEY` + `EMAIL_FROM` | Required in production; MailerSend/Brevo/Resend or `smtp` (`npm i nodemailer`) |
 | Card payments | `STRIPE_SECRET_KEY` + `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | also `npm i stripe`; transfer/cash work without it |
 | Premium geocoder | `GEOCODER` + `GEOCODER_KEY` | free Photon/Nominatim used otherwise |
 

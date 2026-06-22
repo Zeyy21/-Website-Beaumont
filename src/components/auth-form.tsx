@@ -17,8 +17,8 @@ type Mode = "signin" | "signup" | "magic";
 const inputClass =
   "w-full rounded-xl border border-oak/30 bg-white px-4 py-3 text-soil outline-none transition focus:border-cinnamon focus:ring-2 focus:ring-cinnamon/15";
 
-export function AuthForm({ enabled, next, initialError }: { enabled: boolean; next: string; initialError?: string }) {
-  const [mode, setMode] = useState<Mode>("signin");
+export function AuthForm({ enabled, next, initialError, initialMode = "signin" }: { enabled: boolean; next: string; initialError?: string; initialMode?: Mode }) {
+  const [mode, setMode] = useState<Mode>(initialMode);
 
   if (!enabled) {
     return (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import dynamic from "next/dynamic";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { addOns, frequencies, quoteRatePerM2, type FrequencyId } from "@/lib/config";
@@ -8,7 +8,7 @@ import { computeQuote, formatCurrency, m2ToFt2 } from "@/lib/pricing";
 import type { ServiceCard } from "@/lib/data";
 import { Button } from "@/components/ui";
 import { AddressSearch } from "./address-search";
-import { saveQuote } from "@/app/(site)/quote/actions";
+import { saveQuote, type SaveQuotePayload } from "@/app/(site)/quote/actions";
 import { AnimatedPrice } from "./animated-price";
 
 const MapCanvas = dynamic(() => import("./map-canvas").then((module) => module.MapCanvas), {
@@ -21,6 +21,14 @@ interface Place {
   lat: number;
   lon: number;
 }
+
+interface StoredQuoteRequest extends SaveQuotePayload {
+  place: Place;
+  expiresAt: number;
+}
+
+const pendingQuoteKey = "beaumont:pending-quote";
+const quoteReturnPath = "/?completeQuote=1#quote";
 
 const steps = [
   { label: "Location", note: "Map the space" },
@@ -53,6 +61,7 @@ export function QuoteBuilder({
   const [phone, setPhone] = useState("");
   const [result, setResult] = useState<null | { ok: boolean; message: string }>(null);
   const [pending, startTransition] = useTransition();
+  const resumedRequest = useRef(false);
 
   const service = services.find((item) => item.id === serviceId) ?? services[0];
   const quote = useMemo(
@@ -66,21 +75,33 @@ export function QuoteBuilder({
   const contactIsValid =
     fullName.trim().length > 1 && /^\S+@\S+\.\S+$/.test(email.trim()) && phone.trim().length > 6;
 
-  const submit = () => {
-    if (!service || !place) return;
+  const sendRequest = useCallback((request: StoredQuoteRequest) => {
     startTransition(async () => {
-      const response = await saveQuote({
-        serviceId: service.id,
-        address: place.label,
-        areaM2,
-        frequency,
-        addOnIds: selectedAddOns,
-        sourceZone: initialZone ?? null,
-        fullName,
-        email,
-        phone,
-      });
+      const payload: SaveQuotePayload = {
+        serviceId: request.serviceId,
+        address: request.address,
+        areaM2: request.areaM2,
+        frequency: request.frequency,
+        addOnIds: request.addOnIds,
+        sourceZone: request.sourceZone,
+        fullName: request.fullName,
+        email: request.email,
+        phone: request.phone,
+      };
+      const response = await saveQuote(payload);
+      if (response.needsAuth) {
+        window.localStorage.setItem(
+          pendingQuoteKey,
+          JSON.stringify({ ...request, expiresAt: Date.now() + 60 * 60 * 1000 }),
+        );
+        window.location.assign(
+          `/login?mode=signup&next=${encodeURIComponent(quoteReturnPath)}`,
+        );
+        return;
+      }
       if (response.ok) {
+        window.localStorage.removeItem(pendingQuoteKey);
+        window.history.replaceState({}, "", "/#quote");
         setResult({
           ok: true,
           message: "We will get back to you within 24h",
@@ -88,6 +109,61 @@ export function QuoteBuilder({
       } else {
         setResult({ ok: false, message: response.error ?? "Something went wrong. Please try again." });
       }
+    });
+  }, []);
+
+  useEffect(() => {
+    if (resumedRequest.current) return;
+    if (new URLSearchParams(window.location.search).get("completeQuote") !== "1") return;
+    resumedRequest.current = true;
+
+    const raw = window.localStorage.getItem(pendingQuoteKey);
+    if (!raw) {
+      setStep(2);
+      setResult({ ok: false, message: "Your saved quote details expired. Please complete the estimate again." });
+      return;
+    }
+
+    try {
+      const stored = JSON.parse(raw) as StoredQuoteRequest;
+      if (!stored.expiresAt || stored.expiresAt < Date.now()) {
+        window.localStorage.removeItem(pendingQuoteKey);
+        setStep(2);
+        setResult({ ok: false, message: "Your saved quote details expired. Please complete the estimate again." });
+        return;
+      }
+
+      setPlace(stored.place);
+      setAreaM2(stored.areaM2);
+      setServiceId(stored.serviceId);
+      setFrequency(stored.frequency);
+      setSelectedAddOns(stored.addOnIds);
+      setFullName(stored.fullName);
+      setEmail(stored.email);
+      setPhone(stored.phone);
+      setStep(2);
+      sendRequest(stored);
+    } catch {
+      window.localStorage.removeItem(pendingQuoteKey);
+      setStep(2);
+      setResult({ ok: false, message: "We could not restore your quote. Please complete the estimate again." });
+    }
+  }, [sendRequest]);
+
+  const submit = () => {
+    if (!service || !place) return;
+    sendRequest({
+      serviceId: service.id,
+      address: place.label,
+      areaM2,
+      frequency,
+      addOnIds: selectedAddOns,
+      sourceZone: initialZone ?? null,
+      fullName,
+      email,
+      phone,
+      place,
+      expiresAt: Date.now() + 60 * 60 * 1000,
     });
   };
 
