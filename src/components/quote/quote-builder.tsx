@@ -59,9 +59,10 @@ export function QuoteBuilder({
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [result, setResult] = useState<null | { ok: boolean; message: string }>(null);
+  const [result, setResult] = useState<null | { ok: boolean; title: string; message?: string }>(null);
   const [pending, startTransition] = useTransition();
   const resumedRequest = useRef(false);
+  const requestId = useRef("");
 
   const service = services.find((item) => item.id === serviceId) ?? services[0];
   const quote = useMemo(
@@ -78,6 +79,7 @@ export function QuoteBuilder({
   const sendRequest = useCallback((request: StoredQuoteRequest) => {
     startTransition(async () => {
       const payload: SaveQuotePayload = {
+        requestId: request.requestId,
         serviceId: request.serviceId,
         address: request.address,
         areaM2: request.areaM2,
@@ -102,12 +104,18 @@ export function QuoteBuilder({
       if (response.ok) {
         window.localStorage.removeItem(pendingQuoteKey);
         window.history.replaceState({}, "", "/#quote");
+        const delivered = response.notificationStatus === "sent";
         setResult({
           ok: true,
-          message: "We will get back to you within 24h",
+          title: delivered
+            ? "Quote Requested — We will get back to you within 24h"
+            : "Quote Received — We will get back to you within 24h",
+          message: delivered
+            ? undefined
+            : "Your request is safely saved. Beaumont can see every detail in the client system while the notification is retried.",
         });
       } else {
-        setResult({ ok: false, message: response.error ?? "Something went wrong. Please try again." });
+        setResult({ ok: false, title: "Request not completed", message: response.error ?? "Something went wrong. Please try again." });
       }
     });
   }, []);
@@ -120,16 +128,17 @@ export function QuoteBuilder({
     const raw = window.localStorage.getItem(pendingQuoteKey);
     if (!raw) {
       setStep(2);
-      setResult({ ok: false, message: "Your saved quote details expired. Please complete the estimate again." });
+      setResult({ ok: false, title: "Quote details expired", message: "Please complete the estimate again." });
       return;
     }
 
     try {
       const stored = JSON.parse(raw) as StoredQuoteRequest;
+      if (!stored.requestId) stored.requestId = window.crypto.randomUUID();
       if (!stored.expiresAt || stored.expiresAt < Date.now()) {
         window.localStorage.removeItem(pendingQuoteKey);
         setStep(2);
-        setResult({ ok: false, message: "Your saved quote details expired. Please complete the estimate again." });
+        setResult({ ok: false, title: "Quote details expired", message: "Please complete the estimate again." });
         return;
       }
 
@@ -141,18 +150,21 @@ export function QuoteBuilder({
       setFullName(stored.fullName);
       setEmail(stored.email);
       setPhone(stored.phone);
+      requestId.current = stored.requestId;
       setStep(2);
       sendRequest(stored);
     } catch {
       window.localStorage.removeItem(pendingQuoteKey);
       setStep(2);
-      setResult({ ok: false, message: "We could not restore your quote. Please complete the estimate again." });
+      setResult({ ok: false, title: "Quote could not be restored", message: "Please complete the estimate again." });
     }
   }, [sendRequest]);
 
   const submit = () => {
     if (!service || !place) return;
+    if (!requestId.current) requestId.current = window.crypto.randomUUID();
     sendRequest({
+      requestId: requestId.current,
       serviceId: service.id,
       address: place.label,
       areaM2,
@@ -397,11 +409,9 @@ export function QuoteBuilder({
 
                   {result ? (
                     <motion.div initial={reduce ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className={`mt-6 rounded-2xl border p-7 text-center ${result.ok ? "border-ochre/25 bg-sand/25" : "border-red-900/15 bg-red-50/60"}`}>
-                      <p className="font-display text-3xl text-oak">
-                        {result.ok ? "Quote Requested - We will get back to you within 24h" : "Request not sent"}
-                      </p>
-                      {!result.ok && <p className="mt-3 text-sm font-medium leading-relaxed text-soil/65">{result.message}</p>}
-                      <Button className="mt-6" variant="outline" onClick={() => { setResult(null); if (result.ok) setStep(0); }}>{result.ok ? "New quote" : "Try again"}</Button>
+                      <p className="font-display text-3xl text-oak">{result.title}</p>
+                      {result.message && <p className="mt-3 text-sm font-medium leading-relaxed text-soil/65">{result.message}</p>}
+                      <Button className="mt-6" variant="outline" onClick={() => { setResult(null); if (result.ok) { requestId.current = ""; setStep(0); } }}>{result.ok ? "New quote" : "Try again"}</Button>
                     </motion.div>
                   ) : (
                     <Button className="mt-6 w-full" size="lg" disabled={pending || !contactIsValid} onClick={submit}>{pending ? "Sending…" : "Request formal quote"}</Button>

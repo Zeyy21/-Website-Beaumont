@@ -15,6 +15,8 @@ export type QuoteStatus =
   | "scheduled"
   | "completed";
 
+export type QuoteNotificationStatus = "pending" | "sent" | "failed";
+
 export type PaymentMethod = "card" | "transfer" | "cash";
 export type PaymentStatus = "awaiting" | "paid" | "refunded";
 export type ContractStatus = "draft" | "sent" | "signed";
@@ -74,6 +76,16 @@ export type QuoteRow = {
   total: number;
   status: QuoteStatus;
   source_zone: string | null;
+  requester_name: string | null;
+  requester_email: string | null;
+  account_email: string | null;
+  requester_phone: string | null;
+  service_name: string | null;
+  conditional_services: Json;
+  request_key: string | null;
+  notification_status: QuoteNotificationStatus;
+  notification_error: string | null;
+  notification_sent_at: string | null;
   created_at: string;
 };
 
