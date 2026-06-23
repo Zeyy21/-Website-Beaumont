@@ -143,7 +143,7 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
             {signedIn ? "Account" : "Sign in"}
           </ButtonLink>
           <ButtonLink href={quoteHref} onClick={(event) => pathname === "/" && scrollToSection(event, "#quote")} size="sm">
-            Instant Quote
+            Free Estimate
           </ButtonLink>
         </div>
 

@@ -92,7 +92,7 @@ export function AddressSearch({
     setQ(suggestion.label);
     setResults([]);
     setOpen(false);
-    setMessage("Location selected. The map has moved to your property.");
+    setMessage("Location selected. Beaumont will review this property.");
     onSelect(suggestion);
   };
 

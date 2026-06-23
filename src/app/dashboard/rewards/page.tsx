@@ -18,12 +18,12 @@ export default async function RewardsPage() {
         <StatCard
           label="Points balance"
           value={balance.toLocaleString()}
-          sub={`≈ ${formatCurrency(balance / rewards.pointsPerDollar)} toward your next clean`}
+          sub={`${formatCurrency(balance / rewards.pointsPerDollar)} toward your next visit`}
         />
         <StatCard
           label="Redemption rate"
-          value={`${rewards.pointsPerDollar} pts`}
-          sub="= $1 discount"
+          value="100 pts"
+          sub="= $10 discount"
         />
       </div>
 
@@ -57,7 +57,7 @@ export default async function RewardsPage() {
               title="No activity yet"
               body="Earn your first points by creating an account and booking a clean."
               ctaHref="/dashboard/quotes/new"
-              ctaLabel="Start a quote"
+              ctaLabel="Request a quote"
             />
           ) : (
             <ul className="divide-y divide-oak/10">

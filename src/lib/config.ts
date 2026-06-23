@@ -4,7 +4,7 @@ export const site = {
   name: "Beaumont",
   tagline: "Concierge home care, quietly delivered.",
   description:
-    "Beaumont provides meticulous pressure washing for driveways, decks, patios, and home exteriors, with specialist exterior window care.",
+    "Beaumont provides professional exterior cleaning for pressure washing, soft washing, and window care across Greater Montreal.",
   promise: "A brighter arrival, quietly delivered.",
   email: "beaumontgroup.net@gmail.com",
   instagram: "https://www.instagram.com/groupebeaumont/?hl=en",
@@ -16,14 +16,14 @@ export const site = {
 export const nav = [
   { href: "#services", label: "Services" },
   { href: "#about", label: "Who We Are" },
-  { href: "#quote", label: "Instant Quote" },
+  { href: "#quote", label: "Free Estimate" },
   { href: "#terms", label: "Terms" },
 ];
 
-/** Frequencies offered for recurring service. modifier multiplies the line total. */
+/** Frequencies offered for recurring service. */
 export const frequencies = [
   { id: "one_time", label: "One-time", modifier: 1.0, note: "A single visit" },
-  { id: "monthly", label: "Quarterly", modifier: 1.0, note: "Four seasonal visits" },
+  { id: "monthly", label: "Seasonal", modifier: 1.0, note: "A planned seasonal refresh" },
   {
     id: "biweekly",
     label: "Twice yearly",
@@ -35,13 +35,13 @@ export const frequencies = [
 
 export type FrequencyId = (typeof frequencies)[number]["id"];
 
-/** Public instant-estimate rate. Every measured service uses this exact rate. */
-export const quoteRatePerM2 = 3;
+/** Legacy DB field default. Public quotes are reviewed, not area-priced. */
+export const quoteRatePerM2 = 0;
 
 /** Conditional services reviewed and priced after the request is submitted. */
 export const addOns = [
-  { id: "windows", label: "Exterior Window Cleaning" },
   { id: "gutters", label: "Gutter Cleaning" },
+  { id: "stain-review", label: "Oil, rust, or algae spot review" },
 ] as const;
 
 /** Reward points economy. */
@@ -50,7 +50,7 @@ export const rewards = {
   quoteAccepted: 250,
   jobCompleted: 500,
   referralSuccess: 1000,
-  pointsPerDollar: 100, // 100 pts = $1 discount
+  pointsPerDollar: 10, // 100 pts = $10 discount
 };
 
 /**
@@ -62,7 +62,7 @@ export const fallbackServices = [
     id: "driveway",
     name: "Driveway & Hardscape Washing",
     description:
-      "Interlock, concrete, stone, and front walks pressure washed for a cleaner, brighter arrival.",
+      "Concrete, interlock, asphalt, steps, and front walks cleaned for a brighter arrival.",
     base_price: 0,
     rate_per_m2: quoteRatePerM2,
     multiplier: 1.0,
@@ -71,16 +71,16 @@ export const fallbackServices = [
     id: "deck",
     name: "Deck & Patio Washing",
     description:
-      "Wood and composite decks, terraces, and patios refreshed with material-aware pressure and careful preparation.",
+      "Wood, composite, concrete, and outdoor living surfaces refreshed with material-aware pressure.",
     base_price: 0,
     rate_per_m2: quoteRatePerM2,
     multiplier: 1.0,
   },
   {
     id: "house-wash",
-    name: "House Exterior Washing",
+    name: "Soft House Washing",
     description:
-      "A considered exterior wash for brick, stone, stucco, siding, entrances, and other residential surfaces.",
+      "Low-pressure exterior washing for siding, brick, stucco, painted details, and delicate finishes.",
     base_price: 0,
     rate_per_m2: quoteRatePerM2,
     multiplier: 1.0,
@@ -89,7 +89,7 @@ export const fallbackServices = [
     id: "windows-atlantic",
     name: "Exterior Window Washing",
     description:
-      "In partnership with Atlantic Group, we clean exterior glass, frames, and sills with a purified-water system for a clear, streak-free finish.",
+      "Exterior glass, frames, and sills cleaned with purified water for a clear, streak-free finish.",
     base_price: 0,
     rate_per_m2: quoteRatePerM2,
     multiplier: 1.0,

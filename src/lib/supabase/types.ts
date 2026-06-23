@@ -82,6 +82,7 @@ export type QuoteRow = {
   requester_phone: string | null;
   service_name: string | null;
   conditional_services: Json;
+  scope_details: string | null;
   request_key: string | null;
   notification_status: QuoteNotificationStatus;
   notification_error: string | null;

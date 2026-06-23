@@ -39,7 +39,7 @@ export default async function DashboardLayout({
                   <div className="min-w-[13rem] rounded-[1.5rem] border border-ivory/10 bg-ivory/[0.055] p-5 backdrop-blur-sm">
                     <p className="text-[9px] font-semibold uppercase tracking-[0.25em] text-ivory/45">Reward balance</p>
                     <p className="mt-2 font-display text-4xl text-sand">{points.toLocaleString()}</p>
-                    <p className="mt-1 text-xs text-ivory/45">≈ ${(points / rewards.pointsPerDollar).toFixed(0)} toward your next visit</p>
+                    <p className="mt-1 text-xs text-ivory/45">${(points / rewards.pointsPerDollar).toFixed(0)} toward your next visit</p>
                   </div>
                 )}
               </div>

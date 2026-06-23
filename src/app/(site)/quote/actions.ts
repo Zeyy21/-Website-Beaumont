@@ -16,10 +16,14 @@ import type { LineItem } from "@/lib/supabase/types";
 export interface SaveQuotePayload {
   requestId: string;
   serviceId: string;
+  selectedServiceIds?: string[];
   address: string;
-  areaM2: number;
+  areaM2?: number;
   frequency: FrequencyId;
   addOnIds: string[];
+  propertySize?: string;
+  condition?: string;
+  scopeDetails?: string;
   sourceZone?: string | null;
   fullName: string;
   email: string;
@@ -49,7 +53,11 @@ export async function saveQuote(
   }
 
   const services = await getServices();
-  const service = services.find((s) => s.id === payload.serviceId);
+  const selectedServiceIds = payload.selectedServiceIds?.length
+    ? payload.selectedServiceIds
+    : [payload.serviceId];
+  const selectedServices = services.filter((s) => selectedServiceIds.includes(s.id));
+  const service = selectedServices[0] ?? services.find((s) => s.id === payload.serviceId);
   if (!service) return { ok: false, error: "Unknown service." };
 
   const fullName = payload.fullName.trim();
@@ -61,15 +69,14 @@ export async function saveQuote(
     !phone ||
     !address ||
     !/^\S+@\S+\.\S+$/.test(email) ||
-    !Number.isFinite(payload.areaM2) ||
-    payload.areaM2 <= 0
+    selectedServices.length === 0
   ) {
     return { ok: false, error: "Please provide a valid name, email, and phone number." };
   }
 
   const quote = computeQuote({
     service,
-    areaM2: payload.areaM2,
+    areaM2: 0,
     frequency: payload.frequency,
     addOnIds: payload.addOnIds,
   });
@@ -86,6 +93,27 @@ export async function saveQuote(
     const addOn = addOns.find((item) => item.id === id);
     return addOn ? [addOn.label] : [];
   });
+  const selectedServiceNames = selectedServices.map((item) => item.name);
+  const propertySize = formatScopeValue(payload.propertySize, {
+    entry: "Entry or front walk",
+    single: "Single surface",
+    multi: "Multiple surfaces",
+    full: "Full exterior package",
+  });
+  const condition = formatScopeValue(payload.condition, {
+    refresh: "Routine refresh",
+    organic: "Algae or grime",
+    stains: "Oil or rust stains",
+    delicate: "Delicate surface",
+  });
+  const scopeDetails = [
+    `Services requested: ${selectedServiceNames.join(", ")}`,
+    `Scope size: ${propertySize}`,
+    `Surface condition: ${condition}`,
+    payload.scopeDetails?.trim() ? `Customer notes: ${payload.scopeDetails.trim()}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   const { data: existing, error: existingError } = await supabase
     .from("quotes")
@@ -119,7 +147,7 @@ export async function saveQuote(
       user_id: user.id,
       service_id: isUuid ? service.id : null,
       address,
-      area_m2: payload.areaM2,
+      area_m2: null,
       frequency: payload.frequency,
       line_items: quote.lineItems,
       total: quote.total,
@@ -129,8 +157,9 @@ export async function saveQuote(
       requester_email: email,
       account_email: user.email ?? email,
       requester_phone: phone,
-      service_name: service.name,
+      service_name: selectedServiceNames.join(", "),
       conditional_services: conditionalServices,
+      scope_details: scopeDetails,
       notification_status: "pending",
       notification_error: null,
       notification_sent_at: null,
@@ -165,10 +194,12 @@ export async function saveQuote(
     accountEmail: user.email ?? email,
     phone,
     address,
-    service: service.name,
-    areaM2: payload.areaM2,
+    service: selectedServiceNames.join(", "),
     frequency: frequencyLabel,
     conditionalServices,
+    propertySize,
+    condition,
+    scopeDetails,
     estimate: quote.total,
   });
 
@@ -198,4 +229,8 @@ export async function saveQuote(
     lineItems: quote.lineItems,
     notificationStatus,
   };
+}
+
+function formatScopeValue(value: string | undefined, labels: Record<string, string>) {
+  return value && labels[value] ? labels[value] : "Not selected";
 }

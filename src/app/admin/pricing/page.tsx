@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CardTitle, EmptyState } from "@/components/dashboard-ui";
 import { PricingEditor } from "@/components/pricing-editor";
 
-export const metadata = { title: "Admin · Pricing" };
+export const metadata = { title: "Admin - Pricing" };
 
 export default async function AdminPricing() {
   const supabase = createClient();
@@ -18,8 +18,7 @@ export default async function AdminPricing() {
       <div>
         <CardTitle>Pricing</CardTitle>
         <p className="mt-1 text-sm text-soil/60">
-          Edit the base price, per-m² rate, and multiplier for each service.
-          Changes apply instantly to new quotes, no deploy needed.
+          Edit internal pricing fields for each service. Customer requests stay review-based until a final quote is confirmed.
         </p>
       </div>
 

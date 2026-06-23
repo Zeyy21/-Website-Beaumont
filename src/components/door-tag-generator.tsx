@@ -143,7 +143,7 @@ function Hanger({ tag }: { tag: Tag }) {
           <img src={tag.qrDataUrl} alt={`QR for ${tag.zone}`} className="h-32 w-32" />
         </div>
         <p className="mt-3 font-display text-base text-oak">
-          Scan for an instant quote on <em>this</em> home
+          Scan for a free estimate on <em>this</em> home
         </p>
         <p className="mt-1 text-xs text-soil/50">{site.url.replace(/^https?:\/\//, "")}/quote</p>
         <p className="mt-2 text-[10px] uppercase tracking-widest text-ochre">

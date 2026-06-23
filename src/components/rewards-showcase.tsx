@@ -50,8 +50,8 @@ export function RewardsShowcase({ referralPoints }: { referralPoints: number }) 
               <Eyebrow>Beaumont Rewards</Eyebrow>
               <h2 className="mt-4 text-4xl md:text-5xl">Every clean earns you more</h2>
               <p className="mt-5 max-w-md text-ivory/70">
-                Collect points on signup, completed jobs, and referrals, then
-                redeem them as a discount on future visits. Refer a friend and
+                Collect points on signup, completed jobs, and referrals. Every
+                100 points is worth $10 toward future visits. Refer a friend and
                 you both earn {referralPoints.toLocaleString()} points.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">

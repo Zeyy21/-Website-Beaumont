@@ -277,7 +277,7 @@ select * from (values
 where not exists (select 1 from public.services);
 
 insert into public.pricing_rates (key, value, note) values
-  ('points_per_dollar', 100, '100 points = $1 discount'),
+  ('points_per_dollar', 10, '100 points = $10 discount'),
   ('signup_bonus', 100, 'points granted on signup'),
   ('referral_bonus', 1000, 'points per successful referral')
 on conflict (key) do nothing;

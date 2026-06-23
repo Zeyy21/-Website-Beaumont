@@ -1,5 +1,4 @@
 @import url("https://fonts.googleapis.com/css2?family=Cormorant:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap");
-@import "leaflet/dist/leaflet.css";
 
 @tailwind base;
 @tailwind components;
@@ -142,16 +141,3 @@ p {
   }
 }
 
-/* Leaflet controls themed to brand */
-.leaflet-container {
-  font-family: var(--font-body);
-  background: var(--sand);
-}
-.leaflet-bar a {
-  color: var(--soil) !important;
-}
-
-/* Hide Geoman default toolbar so our custom programmatic UI takes over */
-.leaflet-pm-toolbar {
-  display: none !important;
-}

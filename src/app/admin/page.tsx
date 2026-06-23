@@ -75,11 +75,11 @@ export default async function AdminHome() {
                   <AdminDetail label="Contact email" value={q.requester_email ?? "Not provided"} href={q.requester_email ? `mailto:${q.requester_email}` : undefined} />
                   <AdminDetail label="Account email" value={q.account_email ?? "Not available"} />
                   <AdminDetail label="Phone" value={q.requester_phone ?? "Not provided"} href={q.requester_phone ? `tel:${q.requester_phone}` : undefined} />
-                  <AdminDetail label="Estimate" value={formatCurrency(Number(q.total))} />
+                  <AdminDetail label="Quote status" value={Number(q.total) > 0 ? formatCurrency(Number(q.total)) : "Review needed"} />
                   <AdminDetail label="Service" value={q.service_name ?? "Legacy quote"} />
-                  <AdminDetail label="Measured area" value={q.area_m2 ? `${q.area_m2} m²` : "Not measured"} />
+                  <AdminDetail label="Scope details" value={q.scope_details ?? "Not provided"} />
                   <AdminDetail label="Visit rhythm" value={q.frequency ?? "Not selected"} />
-                  <AdminDetail label="Conditional services" value={conditionalServices.join(", ") || "None selected"} />
+                  <AdminDetail label="Review items" value={conditionalServices.join(", ") || "None selected"} />
                 </dl>
 
                 {q.notification_error && (

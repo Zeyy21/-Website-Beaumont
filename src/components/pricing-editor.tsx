@@ -13,7 +13,7 @@ interface Service {
   multiplier: number;
 }
 
-/** Inline editor for a service's pricing knobs. */
+/** Inline editor for service pricing fields kept for staff-side quote work. */
 export function PricingEditor({ service }: { service: Service }) {
   const [base, setBase] = useState(service.base_price);
   const [rate, setRate] = useState(service.rate_per_m2);
@@ -41,7 +41,7 @@ export function PricingEditor({ service }: { service: Service }) {
       <h3 className="text-lg text-oak">{service.name}</h3>
       <div className="mt-4 grid gap-4 sm:grid-cols-3">
         <NumField label="Base price ($)" value={base} onChange={setBase} step={5} />
-        <NumField label="Rate / m² ($)" value={rate} onChange={setRate} step={0.1} />
+        <NumField label="Legacy area field ($)" value={rate} onChange={setRate} step={0.1} />
         <NumField label="Multiplier" value={mult} onChange={setMult} step={0.05} />
       </div>
       <div className="mt-4 flex items-center gap-3">

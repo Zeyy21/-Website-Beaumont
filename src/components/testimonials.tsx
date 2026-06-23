@@ -6,13 +6,13 @@ import { Container, Eyebrow } from "@/components/ui";
 const quotes = [
   {
     quote:
-      "The most thorough clean we have ever had. The instant quote took a minute and the team was flawless.",
+      "The most thorough exterior clean we have ever had. The quote request took a minute and the team was flawless.",
     name: "Eleanor V.",
     detail: "Estate & Luxury Care",
   },
   {
     quote:
-      "Drawing my apartment on the map and getting a price on the spot felt like magic. Booking was effortless.",
+      "I selected the services I needed, sent the request, and had a clear quote without the back-and-forth.",
     name: "Marcus T.",
     detail: "Bi-weekly Residential",
   },

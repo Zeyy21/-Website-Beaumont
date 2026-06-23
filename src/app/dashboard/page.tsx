@@ -39,7 +39,7 @@ export default async function DashboardOverview() {
         <StatCard
           label="Reward points"
           value={points.toLocaleString()}
-          sub={`≈ ${formatCurrency(points / rewards.pointsPerDollar)} value`}
+          sub={`${formatCurrency(points / rewards.pointsPerDollar)} value`}
         />
         <StatCard label="Active quotes" value={String(activeQuotes)} />
         <StatCard
@@ -60,34 +60,37 @@ export default async function DashboardOverview() {
         {data.quotes.length === 0 ? (
           <EmptyState
             title="No quotes yet"
-            body="Draw your space and get an instant estimate, it takes less than a minute."
+            body="Send the services you need reviewed and Beaumont will confirm a written quote."
             ctaHref="/dashboard/quotes/new"
-            ctaLabel="Start a quote"
+            ctaLabel="Request a quote"
           />
         ) : (
           <ul className="divide-y divide-oak/10">
-            {data.quotes.slice(0, 4).map((q) => (
-              <li key={q.id} className="flex items-center justify-between py-4">
-                <div>
-                  <p className="text-oak">{q.address ?? "Quote"}</p>
-                  <p className="text-sm text-soil/50">
-                    {q.area_m2 ? `${q.area_m2} m² · ` : ""}
-                    {new Date(q.created_at).toLocaleDateString()}
-                  </p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="flex flex-col items-end gap-1">
-                    <span className="font-display text-xl text-oak">
-                      {formatCurrency(Number(q.total))}
-                    </span>
-                    {(q.status === "requested" || q.status === "draft") && (
-                      <CancelQuoteButton quoteId={q.id} />
-                    )}
+            {data.quotes.slice(0, 4).map((q) => {
+              const hasTotal = Number(q.total) > 0;
+
+              return (
+                <li key={q.id} className="flex items-center justify-between gap-4 py-4">
+                  <div>
+                    <p className="text-oak">{q.address ?? "Quote"}</p>
+                    <p className="text-sm text-soil/50">
+                      {new Date(q.created_at).toLocaleDateString()}
+                    </p>
                   </div>
-                  <StatusBadge status={q.status} />
-                </div>
-              </li>
-            ))}
+                  <div className="flex items-center gap-4">
+                    <div className="flex flex-col items-end gap-1">
+                      <span className="font-display text-xl text-oak">
+                        {hasTotal ? formatCurrency(Number(q.total)) : "Pending review"}
+                      </span>
+                      {(q.status === "requested" || q.status === "draft") && (
+                        <CancelQuoteButton quoteId={q.id} />
+                      )}
+                    </div>
+                    <StatusBadge status={q.status} />
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </Card>
@@ -103,19 +106,19 @@ export default async function DashboardOverview() {
             href="/dashboard/referrals"
             className="mt-4 inline-block text-sm text-cinnamon hover:underline"
           >
-            Get your referral link →
+            Get your referral link
           </Link>
         </Card>
         <Card>
-          <CardTitle>Need another clean?</CardTitle>
+          <CardTitle>Need another visit?</CardTitle>
           <p className="mt-2 text-sm text-soil/60">
-            Build a new quote in a minute and redeem points at checkout.
+            Send a new scope for review and redeem points once a quote is confirmed.
           </p>
           <Link
             href="/dashboard/quotes/new"
             className="mt-4 inline-block text-sm text-cinnamon hover:underline"
           >
-            New instant quote →
+            New quote request
           </Link>
         </Card>
       </div>

@@ -16,7 +16,7 @@ export default async function NewDashboardQuotePage() {
         <p className="mt-6 text-[10px] font-semibold uppercase tracking-[0.28em] text-cinnamon">New request</p>
         <h2 className="mt-3 font-display text-4xl leading-tight text-oak md:text-5xl">Request your next visit.</h2>
         <p className="mt-3 max-w-2xl text-sm font-medium leading-relaxed text-soil/60">
-          Measure the area, choose the care, and send the request directly from your client portal.
+          Choose the exterior services you need reviewed and send the request directly from your client portal.
         </p>
       </div>
       <QuoteBuilder services={services} />

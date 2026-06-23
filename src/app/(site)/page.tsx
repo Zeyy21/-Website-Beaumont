@@ -21,6 +21,13 @@ const serviceDetails = [
   "Specialist window care",
 ];
 
+const serviceTypes = [
+  "Pressure washing",
+  "Pressure washing",
+  "Soft washing",
+  "Exterior window cleaning",
+];
+
 export default async function HomePage() {
   const services = await getServices();
 
@@ -33,7 +40,7 @@ export default async function HomePage() {
           {[
             ["01", "Material-aware", "A method selected for every surface."],
             ["02", "Quietly managed", "Clear timing, careful preparation, no theatre."],
-            ["03", "Effortless to arrange", "Measure and request your visit in one place."],
+            ["03", "Effortless to arrange", "Request the right exterior care in one place."],
           ].map(([number, title, copy]) => (
             <div key={number} className="group flex gap-5 py-7 md:px-8 md:py-9 first:md:pl-0 last:md:pr-0">
               <span className="font-display text-2xl text-ochre transition-colors group-hover:text-sand">{number}</span>
@@ -57,7 +64,7 @@ export default async function HomePage() {
                 <Eyebrow>Services</Eyebrow>
               </div>
               <p className="mt-6 max-w-sm text-base font-medium leading-relaxed text-soil/65">
-                Pressure washing and specialist window care selected for each surface, setting, and Montréal home.
+                Pressure washing, soft washing, and specialist window care selected for each surface, setting, and Montreal home.
               </p>
             </div>
             <h2 id="services-title" className="max-w-4xl text-balance font-display text-[clamp(3.25rem,6.2vw,6.5rem)] leading-[0.9] text-oak">
@@ -95,7 +102,7 @@ export default async function HomePage() {
                     <div className="flex items-center gap-4 text-[9px] font-semibold uppercase tracking-[0.28em] text-sand/90">
                       <span>Service 0{index + 1}</span>
                       <span className="h-px w-8 bg-sand/40" />
-                      <span>{index === 3 ? "Exterior window cleaning" : "Pressure washing"}</span>
+                      <span>{serviceTypes[index]}</span>
                     </div>
                     <h3 className={`mt-5 max-w-2xl font-display leading-[0.95] ${index === 0 || index === 3 ? "text-4xl md:text-6xl" : "text-4xl md:text-[2.65rem]"}`}>{service.name}</h3>
                     <div className="mt-5 flex items-end justify-between gap-6">
@@ -140,15 +147,15 @@ export default async function HomePage() {
             <div className="flex items-center justify-center gap-4">
               <span className="h-px w-10 bg-ochre/40" />
               <span className="font-display text-2xl text-ochre">03</span>
-              <Eyebrow>Instant quote</Eyebrow>
+              <Eyebrow>Free estimate</Eyebrow>
               <span className="h-px w-10 bg-ochre/40" />
             </div>
             <h2 id="quote-title" className="mt-5 text-balance font-display text-[clamp(3.15rem,5.4vw,5.6rem)] leading-[0.92] text-oak">
               Your property. Your care.
-              <span className="block italic text-ochre">One clear estimate.</span>
+              <span className="block italic text-ochre">One reviewed quote.</span>
             </h2>
             <p className="mx-auto mt-5 max-w-2xl text-base font-medium leading-relaxed text-soil/65 md:text-lg">
-              Select the address, trace the service area, and tailor the visit without leaving this page.
+              Select the address, choose the exterior services needed, and send the scope for review without leaving this page.
             </p>
           </Reveal>
           <LazyQuoteBuilder services={services} />
@@ -210,7 +217,7 @@ export default async function HomePage() {
         <Container className="grid gap-5 md:grid-cols-[0.35fr_1.65fr]">
           <h2 id="terms-title" className="text-xs font-semibold uppercase tracking-[0.25em] text-cinnamon">Terms</h2>
           <p className="max-w-4xl text-sm font-medium leading-relaxed text-soil/60">
-            Estimates are based on the area and options selected and are confirmed after review. Work is scheduled subject to access, weather, and surface condition. No payment is taken when requesting an estimate.
+            Estimates are confirmed after Beaumont reviews the selected services, access, weather, and surface condition. No payment is taken when requesting an estimate.
           </p>
         </Container>
       </section>

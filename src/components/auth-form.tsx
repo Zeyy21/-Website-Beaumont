@@ -27,7 +27,7 @@ export function AuthForm({ enabled, next, initialError, initialMode = "signin" }
         <p className="mt-3 text-soil/80">
           This build cannot see a Supabase URL or public client key. Add them to <code className="font-semibold">.env.local</code> and restart the site to enable real accounts.
         </p>
-        <a href="/quote" className="mt-5 inline-block"><Button>Continue to instant quote</Button></a>
+        <a href="/quote" className="mt-5 inline-block"><Button>Continue to quote request</Button></a>
       </div>
     );
   }

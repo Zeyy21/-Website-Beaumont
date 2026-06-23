@@ -8,9 +8,12 @@ export interface QuoteNotificationDetails {
   phone: string;
   address: string;
   service: string;
-  areaM2: number;
+  areaM2?: number;
   frequency: string;
   conditionalServices: string[];
+  propertySize?: string;
+  condition?: string;
+  scopeDetails?: string;
   estimate: number;
 }
 

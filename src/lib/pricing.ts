@@ -1,4 +1,4 @@
-import { frequencies, quoteRatePerM2, type FrequencyId } from "./config";
+import { frequencies, type FrequencyId } from "./config";
 import type { LineItem } from "./supabase/types";
 
 export interface PricingService {
@@ -26,34 +26,25 @@ export interface QuoteResult {
   high: number;
 }
 
-const round2 = (n: number) => Math.round(n * 100) / 100;
-
 /**
- * Transparent public pricing model:
- * measured area × $3/m² − points discount.
- * Conditional services are intentionally excluded until the property is reviewed.
- * Service and visit frequency never alter the advertised square-metre rate.
+ * Review-based quote model.
+ *
+ * Public requests no longer expose per-area rates. Staff confirm pricing after
+ * reviewing service scope, access, and surface condition.
  */
 export function computeQuote(input: QuoteInput): QuoteResult {
-  const { service, areaM2, frequency } = input;
+  const { service, frequency } = input;
   const freq = frequencies.find((item) => item.id === frequency) ?? frequencies[0];
-  const area = Math.max(0, areaM2);
-  const areaCost = area * quoteRatePerM2;
 
   const lineItems: LineItem[] = [
     {
-      label: `${service.name} · ${Math.round(area)} m² at $${quoteRatePerM2}/m² · ${freq.label}`,
-      amount: round2(areaCost),
+      label: `${service.name} request - ${freq.label}`,
+      amount: 0,
     },
   ];
 
-  const subtotal = round2(lineItems.reduce((sum, item) => sum + item.amount, 0));
-  const pointsDiscount = Math.min(input.pointsDiscount ?? 0, subtotal);
-  if (pointsDiscount > 0) {
-    lineItems.push({ label: "Reward points", amount: -round2(pointsDiscount) });
-  }
-
-  const total = round2(subtotal - pointsDiscount);
+  const subtotal = 0;
+  const total = 0;
   return { lineItems, subtotal, total, low: total, high: total };
 }
 
@@ -64,5 +55,5 @@ export const formatCurrency = (n: number) =>
     maximumFractionDigits: 0,
   }).format(n);
 
-/** m² → ft² for display toggles. */
+/** m2 -> ft2 for legacy display toggles. */
 export const m2ToFt2 = (m2: number) => m2 * 10.7639;

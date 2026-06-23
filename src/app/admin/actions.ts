@@ -61,8 +61,7 @@ export async function retryQuoteNotification(quoteId: string) {
     !quote.requester_email ||
     !quote.requester_phone ||
     !quote.address ||
-    !quote.service_name ||
-    !quote.area_m2
+    !quote.service_name
   ) {
     return { ok: false, error: "This older quote does not contain every notification field." };
   }
@@ -81,9 +80,9 @@ export async function retryQuoteNotification(quoteId: string) {
     phone: quote.requester_phone,
     address: quote.address,
     service: quote.service_name,
-    areaM2: Number(quote.area_m2),
     frequency,
     conditionalServices,
+    scopeDetails: quote.scope_details ?? undefined,
     estimate: Number(quote.total),
   });
 

@@ -64,8 +64,8 @@ export function ExperienceSequence() {
               transition={{ duration: 1.05, ease, delay: 0.08 }}
             >
               <Image
-                src="/images/pressure-washed-patio-placeholder.png"
-                alt="A carefully restored stone patio and pool surround"
+                src="/images/montreal-deck-pressure-washing.webp"
+                alt="A Beaumont technician cleaning exterior decking beside a Montreal home"
                 fill
                 sizes="(min-width: 1024px) 44vw, 100vw"
                 className="object-cover"

@@ -13,9 +13,12 @@ export type EmailTemplate =
       phone: string;
       address: string;
       service: string;
-      areaM2: number;
+      areaM2?: number;
       frequency: string;
       conditionalServices: string[];
+      propertySize?: string;
+      condition?: string;
+      scopeDetails?: string;
       estimate: number;
     }
   | { kind: "quote_sent"; name: string; total: number; quoteUrl: string }
@@ -66,30 +69,26 @@ export function renderEmail(t: EmailTemplate): Rendered {
     case "welcome":
       return {
         subject: `Welcome to ${site.name}`,
-        text: `Welcome, ${t.name}. Your account is ready. Draw your space for an instant estimate any time.`,
+        text: `Welcome, ${t.name}. Your account is ready. Request exterior care, track quotes, and watch your reward points grow.`,
         html: shell(
           `Welcome, ${t.name}`,
           p("Your account is ready.") +
             p(
-              "Draw your space whenever you like for an instant estimate, track quotes, and watch your reward points grow.",
+              "Request exterior care whenever you like, track quotes, and watch your reward points grow.",
             ),
         ),
       };
     case "quote_requested":
       return {
         subject: `We received your quote request`,
-        text: `Thank you, ${t.name}. We received your request for ${t.address} (estimate ${formatCurrency(
-          t.total,
-        )}). Our team will confirm a final quote shortly.`,
+        text: `Thank you, ${t.name}. We received your request for ${t.address}. Our team will review the scope and confirm a quote shortly.`,
         html: shell(
           "Quote request received",
           p(`Thank you, ${t.name}.`) +
             p(
-              `We've received your request for <strong>${t.address}</strong> with an instant estimate of <strong>${formatCurrency(
-                t.total,
-              )}</strong>.`,
+              `We've received your request for <strong>${t.address}</strong>.`,
             ) +
-            p("Our team will review and confirm a final quote shortly."),
+            p("Our team will review the scope and confirm a quote shortly."),
         ),
       };
     case "quote_lead": {
@@ -100,6 +99,9 @@ export function renderEmail(t: EmailTemplate): Rendered {
       const address = escapeHtml(t.address);
       const service = escapeHtml(t.service);
       const frequency = escapeHtml(t.frequency);
+      const propertySize = escapeHtml(t.propertySize ?? "Not selected");
+      const condition = escapeHtml(t.condition ?? "Not selected");
+      const scopeDetails = escapeHtml(t.scopeDetails ?? "None provided").replace(/\n/g, "<br>");
       const conditionalServices = t.conditionalServices.length
         ? t.conditionalServices.map(escapeHtml).join(", ")
         : "None selected";
@@ -108,11 +110,12 @@ export function renderEmail(t: EmailTemplate): Rendered {
         `Email: ${t.email}`,
         `Phone: ${t.phone}`,
         `Address: ${t.address}`,
-        `Service: ${t.service}`,
-        `Measured area: ${Math.round(t.areaM2)} m²`,
+        `Services: ${t.service}`,
+        `Scope size: ${t.propertySize ?? "Not selected"}`,
+        `Surface condition: ${t.condition ?? "Not selected"}`,
         `Visit rhythm: ${t.frequency}`,
-        `Conditional services: ${t.conditionalServices.join(", ") || "None selected"}`,
-        `Instant estimate: ${formatCurrency(t.estimate)}`,
+        `Additional review items: ${t.conditionalServices.join(", ") || "None selected"}`,
+        `Scope details: ${t.scopeDetails ?? "None provided"}`,
       ].join("\n");
 
       return {
@@ -123,9 +126,9 @@ export function renderEmail(t: EmailTemplate): Rendered {
           p(`<strong>${name}</strong> has requested a quote.`) +
             p(`<strong>Contact email:</strong> ${email}<br><strong>Phone:</strong> ${phone}`) +
             p(`<strong>Property:</strong> ${address}`) +
-            p(`<strong>Service:</strong> ${service}<br><strong>Measured area:</strong> ${Math.round(t.areaM2)} m²<br><strong>Visit rhythm:</strong> ${frequency}`) +
-            p(`<strong>Conditional services:</strong> ${conditionalServices}`) +
-            p(`<strong>Instant estimate:</strong> ${formatCurrency(t.estimate)}`),
+            p(`<strong>Services:</strong> ${service}<br><strong>Scope size:</strong> ${propertySize}<br><strong>Surface condition:</strong> ${condition}<br><strong>Visit rhythm:</strong> ${frequency}`) +
+            p(`<strong>Additional review items:</strong> ${conditionalServices}`) +
+            p(`<strong>Scope details:</strong><br>${scopeDetails}`),
         ),
       };
     }
@@ -155,7 +158,7 @@ export function renderEmail(t: EmailTemplate): Rendered {
             p(
               `We have successfully cancelled your quote request for <strong>${t.address}</strong>.`,
             ) +
-            p("If you need anything else, just draw a new quote!"),
+            p("If you need anything else, start a new request any time."),
         ),
       };
     case "payment_receipt":

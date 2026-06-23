@@ -4,7 +4,7 @@ import { site } from "@/lib/config";
 
 /**
  * Generates per-zone door-tag QR codes. Each QR encodes a deep link into the
- * instant-quote tool pre-seeded with the zone + a unique tag id, so scans are
+ * quote request tool pre-seeded with the zone + a unique tag id, so scans are
  * attributable (logged into door_tag_scans) and the quote is pre-tuned.
  *
  * POST { zones: string[], perZone?: number }  →  { tags: [...] }
