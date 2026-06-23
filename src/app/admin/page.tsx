@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { formatCurrency } from "@/lib/pricing";
+import { quoteScopeDetails } from "@/lib/quote-scope";
 import {
   Card,
   CardTitle,
@@ -47,6 +48,7 @@ export default async function AdminHome() {
               const conditionalServices = Array.isArray(q.conditional_services)
                 ? q.conditional_services.filter((item): item is string => typeof item === "string")
                 : [];
+              const scopeDetails = quoteScopeDetails(q);
               return (
               <Card key={q.id} className="overflow-hidden">
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -77,7 +79,7 @@ export default async function AdminHome() {
                   <AdminDetail label="Phone" value={q.requester_phone ?? "Not provided"} href={q.requester_phone ? `tel:${q.requester_phone}` : undefined} />
                   <AdminDetail label="Quote status" value={Number(q.total) > 0 ? formatCurrency(Number(q.total)) : "Review needed"} />
                   <AdminDetail label="Service" value={q.service_name ?? "Legacy quote"} />
-                  <AdminDetail label="Scope details" value={q.scope_details ?? "Not provided"} />
+                  <AdminDetail label="Scope details" value={scopeDetails ?? "Not provided"} />
                   <AdminDetail label="Visit rhythm" value={q.frequency ?? "Not selected"} />
                   <AdminDetail label="Review items" value={conditionalServices.join(", ") || "None selected"} />
                 </dl>

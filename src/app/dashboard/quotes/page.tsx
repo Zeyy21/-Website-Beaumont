@@ -1,9 +1,9 @@
 import { getCurrentUser } from "@/lib/data";
 import { getDashboardData } from "@/lib/dashboard";
 import { formatCurrency } from "@/lib/pricing";
+import { visibleLineItems } from "@/lib/quote-scope";
 import { Card, EmptyState, StatusBadge } from "@/components/dashboard-ui";
 import { CancelQuoteButton } from "@/components/quote/cancel-quote-button";
-import type { LineItem } from "@/lib/supabase/types";
 
 export const metadata = { title: "Quotes" };
 
@@ -27,9 +27,7 @@ export default async function QuotesPage() {
   return (
     <div className="space-y-4">
       {data.quotes.map((q) => {
-        const items = Array.isArray(q.line_items)
-          ? (q.line_items as unknown as LineItem[])
-          : [];
+        const items = visibleLineItems(q.line_items);
         const hasTotal = Number(q.total) > 0;
 
         return (

@@ -6,11 +6,12 @@ import { getServices } from "@/lib/data";
 import { computeQuote } from "@/lib/pricing";
 import { addOns, frequencies } from "@/lib/config";
 import type { FrequencyId } from "@/lib/config";
+import { lineItemsWithScopeDetails } from "@/lib/quote-scope";
 import {
   notificationError,
   sendQuoteNotification,
 } from "@/lib/quote-notification";
-import type { QuoteNotificationStatus } from "@/lib/supabase/types";
+import type { Database, QuoteNotificationStatus } from "@/lib/supabase/types";
 import type { LineItem } from "@/lib/supabase/types";
 
 export interface SaveQuotePayload {
@@ -139,33 +140,47 @@ export async function saveQuote(
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
       service.id,
     );
+  const lineItems = lineItemsWithScopeDetails(quote.lineItems, scopeDetails);
+  const quoteInsert: Database["public"]["Tables"]["quotes"]["Insert"] = {
+    request_key: payload.requestId,
+    user_id: user.id,
+    service_id: isUuid ? service.id : null,
+    address,
+    area_m2: null,
+    frequency: payload.frequency,
+    line_items: lineItems,
+    total: quote.total,
+    status: "requested",
+    source_zone: payload.sourceZone ?? null,
+    requester_name: fullName,
+    requester_email: email,
+    account_email: user.email ?? email,
+    requester_phone: phone,
+    service_name: selectedServiceNames.join(", "),
+    conditional_services: conditionalServices,
+    scope_details: scopeDetails,
+    notification_status: "pending",
+    notification_error: null,
+    notification_sent_at: null,
+  };
 
-  const { data, error } = await supabase
+  let { data, error } = await supabase
     .from("quotes")
-    .insert({
-      request_key: payload.requestId,
-      user_id: user.id,
-      service_id: isUuid ? service.id : null,
-      address,
-      area_m2: null,
-      frequency: payload.frequency,
-      line_items: quote.lineItems,
-      total: quote.total,
-      status: "requested",
-      source_zone: payload.sourceZone ?? null,
-      requester_name: fullName,
-      requester_email: email,
-      account_email: user.email ?? email,
-      requester_phone: phone,
-      service_name: selectedServiceNames.join(", "),
-      conditional_services: conditionalServices,
-      scope_details: scopeDetails,
-      notification_status: "pending",
-      notification_error: null,
-      notification_sent_at: null,
-    })
+    .insert(quoteInsert)
     .select("*")
     .single();
+
+  if (isMissingColumnError(error, "scope_details")) {
+    const compatibleQuoteInsert = { ...quoteInsert };
+    delete compatibleQuoteInsert.scope_details;
+    const retry = await supabase
+      .from("quotes")
+      .insert(compatibleQuoteInsert)
+      .select("*")
+      .single();
+    data = retry.data;
+    error = retry.error;
+  }
 
   if (error || !data) {
     if (error?.code === "23505") {
@@ -233,4 +248,17 @@ export async function saveQuote(
 
 function formatScopeValue(value: string | undefined, labels: Record<string, string>) {
   return value && labels[value] ? labels[value] : "Not selected";
+}
+
+function isMissingColumnError(
+  error: { code?: string; message?: string } | null,
+  column: string,
+) {
+  if (!error) return false;
+  const message = error.message ?? "";
+  return (
+    error.code === "PGRST204" ||
+    message.includes(`'${column}' column`) ||
+    message.includes(`'${column}' in the schema cache`)
+  );
 }

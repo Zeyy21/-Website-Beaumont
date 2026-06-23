@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { adminGate } from "@/lib/admin";
 import { sendEmail } from "@/lib/email";
 import { frequencies, site } from "@/lib/config";
+import { quoteScopeDetails } from "@/lib/quote-scope";
 import {
   notificationError,
   sendQuoteNotification,
@@ -82,7 +83,7 @@ export async function retryQuoteNotification(quoteId: string) {
     service: quote.service_name,
     frequency,
     conditionalServices,
-    scopeDetails: quote.scope_details ?? undefined,
+    scopeDetails: quoteScopeDetails(quote),
     estimate: Number(quote.total),
   });
 
