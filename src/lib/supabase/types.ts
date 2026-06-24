@@ -48,6 +48,7 @@ export type ProfileRow = {
   email: string | null;
   full_name: string | null;
   phone: string | null;
+  internal_notes: string | null;
   role: UserRole;
   points_balance: number;
   referral_code: string;
@@ -88,6 +89,9 @@ export type QuoteRow = {
   notification_status: QuoteNotificationStatus;
   notification_error: string | null;
   notification_sent_at: string | null;
+  internal_notes: string | null;
+  scheduled_for: string | null;
+  completed_at: string | null;
   created_at: string;
 };
 

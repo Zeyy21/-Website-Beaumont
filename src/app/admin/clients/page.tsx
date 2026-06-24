@@ -35,7 +35,7 @@ export default async function AdminClientsPage({
           </p>
         </div>
         <ButtonLink href="/admin" variant="outline" size="sm">
-          Open requests
+          Open inbox
         </ButtonLink>
       </div>
 

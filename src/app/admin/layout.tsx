@@ -3,11 +3,11 @@ import { adminGate } from "@/lib/admin";
 import { Monogram } from "@/components/ui";
 
 const adminNav = [
-  { href: "/admin", label: "Requests" },
+  { href: "/admin", label: "Inbox" },
   { href: "/admin/clients", label: "Clients" },
-  { href: "/admin/pricing", label: "Pricing" },
-  { href: "/admin/gallery", label: "Gallery" },
-  { href: "/admin/door-tags", label: "Door Tags" },
+  { href: "/admin/jobs", label: "Jobs" },
+  { href: "/admin/payments", label: "Payments" },
+  { href: "/admin/settings", label: "Settings" },
 ];
 
 export default async function AdminLayout({
@@ -51,14 +51,14 @@ export default async function AdminLayout({
   return (
     <div className="min-h-screen bg-ivory">
       <header className="texture-soil text-ivory">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-4">
           <Link href="/admin" className="flex items-center gap-3">
             <Monogram size={28} />
             <span className="font-display tracking-[0.18em]">
               BEAUMONT <span className="text-sand">· Admin</span>
             </span>
           </Link>
-          <nav className="flex gap-1">
+          <nav className="flex flex-wrap gap-1">
             {adminNav.map((n) => (
               <Link
                 key={n.href}
@@ -71,7 +71,7 @@ export default async function AdminLayout({
           </nav>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-6 py-10">{children}</main>
+      <main className="mx-auto max-w-7xl px-6 py-10">{children}</main>
     </div>
   );
 }

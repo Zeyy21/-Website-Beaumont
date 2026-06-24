@@ -4,8 +4,10 @@ import type { ReactNode } from "react";
 import { Card, CardTitle, EmptyState, StatusBadge } from "@/components/dashboard-ui";
 import { ButtonLink } from "@/components/ui";
 import { getAdminClientDetails } from "@/lib/admin-clients";
+import { quoteHref } from "@/lib/admin-quotes";
 import { formatCurrency } from "@/lib/pricing";
 import { quoteScopeDetails, visibleLineItems } from "@/lib/quote-scope";
+import { saveClientNotesForm } from "@/app/admin/actions";
 import type {
   ContractRow,
   Json,
@@ -103,6 +105,9 @@ export default async function AdminClientDetailPage({
                   value={referenceQuote.frequency ?? "Not selected"}
                 />
               </dl>
+              <ButtonLink href={quoteHref(referenceQuote.id)} size="sm">
+                Open reference quote
+              </ButtonLink>
 
               {pricedQuotes.length > 1 && (
                 <div className="border-t border-oak/10 pt-5">
@@ -122,6 +127,32 @@ export default async function AdminClientDetailPage({
               title="No priced quote yet"
               body="Past requests exist, but none have a confirmed total. Review the scope before sending a price."
             />
+          )}
+        </Card>
+      </section>
+
+      <section>
+        <CardTitle>Staff notes</CardTitle>
+        <Card className="mt-4">
+          {profile ? (
+            <form action={saveClientNotesForm} className="space-y-4">
+              <input type="hidden" name="profile_id" value={profile.id} />
+              <textarea
+                name="internal_notes"
+                defaultValue={profile.internal_notes ?? ""}
+                rows={5}
+                className="w-full rounded-2xl border border-oak/20 bg-white px-4 py-3 text-sm text-oak outline-none transition-colors focus:border-cinnamon"
+                placeholder="Staff-only notes about preferences, access, parking, special pricing, or support context."
+              />
+              <button className="rounded-full bg-cinnamon px-5 py-2.5 text-sm font-medium text-ivory transition-colors hover:bg-oak">
+                Save client notes
+              </button>
+            </form>
+          ) : (
+            <p className="text-sm text-soil/60">
+              Client notes need a full account profile. Use quote notes for
+              quote-only records.
+            </p>
           )}
         </Card>
       </section>
@@ -245,6 +276,9 @@ function QuoteHistoryCard({ quote }: { quote: QuoteRow }) {
           <span className="font-display text-2xl text-oak">
             {total > 0 ? formatCurrency(total) : "Review needed"}
           </span>
+          <ButtonLink href={quoteHref(quote.id)} size="sm" variant="outline">
+            Open quote
+          </ButtonLink>
         </div>
       </div>
 
