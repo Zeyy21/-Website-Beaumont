@@ -4,6 +4,7 @@ import { Monogram } from "@/components/ui";
 
 const adminNav = [
   { href: "/admin", label: "Requests" },
+  { href: "/admin/clients", label: "Clients" },
   { href: "/admin/pricing", label: "Pricing" },
   { href: "/admin/gallery", label: "Gallery" },
   { href: "/admin/door-tags", label: "Door Tags" },

@@ -45,6 +45,7 @@ export type LineItem = {
 
 export type ProfileRow = {
   id: string;
+  email: string | null;
   full_name: string | null;
   phone: string | null;
   role: UserRole;

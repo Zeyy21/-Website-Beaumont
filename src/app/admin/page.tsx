@@ -1,4 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
+import Link from "next/link";
+import { clientHref, clientKeyFromQuote } from "@/lib/admin-clients";
 import { formatCurrency } from "@/lib/pricing";
 import { quoteScopeDetails } from "@/lib/quote-scope";
 import {
@@ -45,6 +47,7 @@ export default async function AdminHome() {
             />
           ) : (
             requests.map((q) => {
+              const clientKey = clientKeyFromQuote(q);
               const conditionalServices = Array.isArray(q.conditional_services)
                 ? q.conditional_services.filter((item): item is string => typeof item === "string")
                 : [];
@@ -91,6 +94,14 @@ export default async function AdminHome() {
                 )}
 
                 <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-oak/10 pt-5">
+                    {clientKey && (
+                      <Link
+                        href={clientHref(clientKey)}
+                        className="inline-flex h-9 items-center justify-center rounded-full border border-oak/30 px-4 text-sm font-medium text-oak transition-colors hover:bg-oak hover:text-ivory"
+                      >
+                        View client
+                      </Link>
+                    )}
                     {q.notification_status !== "sent" && (
                       <AdminActionButton
                         id={q.id}
