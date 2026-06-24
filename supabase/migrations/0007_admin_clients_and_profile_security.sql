@@ -70,22 +70,14 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.profiles (id, full_name, email, role)
+  insert into public.profiles (id, full_name, email)
   values (
     new.id,
     coalesce(new.raw_user_meta_data->>'full_name', ''),
-    lower(new.email),
-    case
-      when lower(new.email) = 'beaumontgroup.net@gmail.com' then 'staff'
-      else 'customer'
-    end
+    lower(new.email)
   )
   on conflict (id) do update
-  set email = coalesce(public.profiles.email, lower(new.email)),
-      role = case
-        when lower(new.email) = 'beaumontgroup.net@gmail.com' then 'staff'
-        else public.profiles.role
-      end;
+  set email = coalesce(public.profiles.email, lower(new.email));
 
   insert into public.rewards_ledger (user_id, delta, reason)
   values (new.id, 100, 'signup_bonus')

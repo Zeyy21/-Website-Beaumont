@@ -30,15 +30,6 @@ begin
 end;
 $$;
 
--- The business-owner account receives staff access whether it already exists
--- or is created after this migration runs.
-update public.profiles
-set role = 'staff'
-where id in (
-  select id from auth.users
-  where lower(email) = 'beaumontgroup.net@gmail.com'
-);
-
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
@@ -46,20 +37,12 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.profiles (id, full_name, role)
+  insert into public.profiles (id, full_name)
   values (
     new.id,
-    coalesce(new.raw_user_meta_data->>'full_name', ''),
-    case
-      when lower(new.email) = 'beaumontgroup.net@gmail.com' then 'staff'
-      else 'customer'
-    end
+    coalesce(new.raw_user_meta_data->>'full_name', '')
   )
-  on conflict (id) do update
-  set role = case
-    when lower(new.email) = 'beaumontgroup.net@gmail.com' then 'staff'
-    else public.profiles.role
-  end;
+  on conflict (id) do nothing;
 
   insert into public.rewards_ledger (user_id, delta, reason)
   values (new.id, 100, 'signup_bonus')
