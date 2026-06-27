@@ -28,6 +28,7 @@ interface StoredQuoteRequest extends SaveQuotePayload {
 }
 
 const pendingQuoteKey = "beaumont:pending-quote";
+const quoteContactKey = "beaumont:quote-contact";
 const quoteReturnPath = "/quote?completeQuote=1";
 
 const steps = [
@@ -98,8 +99,8 @@ export function QuoteBuilder({
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
   const [propertySize, setPropertySize] =
     useState<(typeof propertySizes)[number]["id"]>("single");
-  const [condition, setCondition] =
-    useState<(typeof conditionOptions)[number]["id"]>("refresh");
+  const [conditions, setConditions] =
+    useState<(typeof conditionOptions)[number]["id"][]>(["refresh"]);
   const [frequency, setFrequency] = useState<FrequencyId>("one_time");
   const [selectedAddOns, setSelectedAddOns] = useState<string[]>([]);
   const [scopeDetails, setScopeDetails] = useState("");
@@ -110,6 +111,7 @@ export function QuoteBuilder({
     ok: boolean;
     title: string;
     message?: string;
+    needsAccount?: boolean;
   }>(null);
   const [pending, startTransition] = useTransition();
   const resumedRequest = useRef(false);
@@ -132,8 +134,12 @@ export function QuoteBuilder({
   const primaryService = selectedServices[0] ?? services[0];
   const propertySizeLabel =
     propertySizes.find((item) => item.id === propertySize)?.label ?? "Not selected";
-  const conditionLabel =
-    conditionOptions.find((item) => item.id === condition)?.label ?? "Not selected";
+  const conditionLabel = conditions.length
+    ? conditionOptions
+        .filter((item) => conditions.includes(item.id))
+        .map((item) => item.label)
+        .join(", ")
+    : "Not selected";
   const frequencyLabel =
     frequencies.find((item) => item.id === frequency)?.label ?? "Not selected";
   const serviceSummary = selectedServices.length
@@ -143,6 +149,18 @@ export function QuoteBuilder({
     step === 0 ? Boolean(place) : step === 1 ? selectedServiceIds.length > 0 : true;
   const contactIsValid =
     fullName.trim().length > 1 && /^\S+@\S+\.\S+$/.test(email.trim()) && phone.trim().length > 6;
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(quoteContactKey);
+      if (!raw) return;
+      const cached = JSON.parse(raw) as { fullName?: string; email?: string };
+      if (cached.fullName) setFullName((current) => current || cached.fullName || "");
+      if (cached.email) setEmail((current) => current || cached.email || "");
+    } catch {
+      window.localStorage.removeItem(quoteContactKey);
+    }
+  }, []);
 
   useEffect(() => {
     if (!hasMounted.current) {
@@ -325,6 +343,7 @@ export function QuoteBuilder({
           addOnIds: request.addOnIds,
           propertySize: request.propertySize,
           condition: request.condition,
+          conditions: request.conditions,
           scopeDetails: request.scopeDetails,
           sourceZone: request.sourceZone,
           fullName: request.fullName,
@@ -337,9 +356,21 @@ export function QuoteBuilder({
             pendingQuoteKey,
             JSON.stringify({ ...request, expiresAt: Date.now() + 60 * 60 * 1000 }),
           );
-          window.location.assign(
-            `/login?mode=signup&next=${encodeURIComponent(quoteReturnPath)}`,
+          window.localStorage.setItem(
+            quoteContactKey,
+            JSON.stringify({
+              fullName: request.fullName.trim(),
+              email: request.email.trim().toLowerCase(),
+              updatedAt: Date.now(),
+            }),
           );
+          setResult({
+            ok: true,
+            needsAccount: true,
+            title: "Your quote request is created.",
+            message:
+              "Create your free account to save this request and receive Beaumont's written quote. Your name and email are already filled in.",
+          });
           return;
         }
         if (response.ok) {
@@ -408,7 +439,14 @@ export function QuoteBuilder({
       setPlace(stored.place);
       setSelectedServiceIds(restoredServiceIds);
       setPropertySize(isPropertySize(stored.propertySize) ? stored.propertySize : "single");
-      setCondition(isCondition(stored.condition) ? stored.condition : "refresh");
+      const restoredConditions = stored.conditions?.filter(isCondition) ?? [];
+      setConditions(
+        restoredConditions.length
+          ? restoredConditions
+          : isCondition(stored.condition)
+            ? [stored.condition]
+            : ["refresh"],
+      );
       setFrequency(stored.frequency ?? "one_time");
       setSelectedAddOns(stored.addOnIds ?? []);
       setScopeDetails(stored.scopeDetails ?? "");
@@ -437,9 +475,25 @@ export function QuoteBuilder({
     );
   };
 
+  const toggleCondition = (id: (typeof conditionOptions)[number]["id"]) => {
+    setConditions((current) =>
+      current.includes(id)
+        ? current.filter((item) => item !== id)
+        : [...current, id],
+    );
+  };
+
   const submit = () => {
     if (!primaryService || !place || selectedServiceIds.length === 0) return;
     if (!requestId.current) requestId.current = window.crypto.randomUUID();
+    window.localStorage.setItem(
+      quoteContactKey,
+      JSON.stringify({
+        fullName: fullName.trim(),
+        email: email.trim().toLowerCase(),
+        updatedAt: Date.now(),
+      }),
+    );
     sendRequest({
       requestId: requestId.current,
       serviceId: primaryService.id,
@@ -449,7 +503,8 @@ export function QuoteBuilder({
       frequency,
       addOnIds: selectedAddOns,
       propertySize,
-      condition,
+      condition: conditions[0],
+      conditions,
       scopeDetails,
       sourceZone: initialZone ?? null,
       fullName,
@@ -465,12 +520,10 @@ export function QuoteBuilder({
     setPlace(null);
     setSelectedServiceIds([]);
     setPropertySize("single");
-    setCondition("refresh");
+    setConditions(["refresh"]);
     setFrequency("one_time");
     setSelectedAddOns([]);
     setScopeDetails("");
-    setFullName("");
-    setEmail("");
     setPhone("");
     setResult(null);
     setStep(0);
@@ -773,15 +826,19 @@ export function QuoteBuilder({
                       </div>
                     </QuestionBlock>
 
-                    <QuestionBlock number="02" title="What stands out right now?">
+                    <QuestionBlock
+                      number="02"
+                      title="What stands out right now?"
+                      hint="Select all that apply"
+                    >
                       <div className="grid gap-2 sm:grid-cols-2">
                         {conditionOptions.map((item) => (
                           <ChoiceCard
                             key={item.id}
                             label={item.label}
                             note={item.note}
-                            selected={condition === item.id}
-                            onClick={() => setCondition(item.id)}
+                            selected={conditions.includes(item.id)}
+                            onClick={() => toggleCondition(item.id)}
                           />
                         ))}
                       </div>
@@ -871,9 +928,17 @@ export function QuoteBuilder({
                     <StepHeading
                       headingRef={headingRef}
                       overline="Your request is ready"
-                      title={result?.ok ? "Consider it received." : "Where should we send your quote?"}
+                      title={
+                        result?.needsAccount
+                          ? "Your request is ready to save."
+                          : result?.ok
+                            ? "Consider it received."
+                            : "Where should we send your quote?"
+                      }
                       copy={
-                        result?.ok
+                        result?.needsAccount
+                          ? "One quick step keeps your quote connected to you."
+                          : result?.ok
                           ? "We’ll take it from here."
                           : "Share the best way to reach you. These details are used only for this request."
                       }
@@ -904,9 +969,36 @@ export function QuoteBuilder({
                             {result.message}
                           </p>
                         )}
-                        <Button className="mt-7" variant="outline" onClick={result.ok ? reset : () => setResult(null)}>
-                          {result.ok ? "Start another request" : "Try again"}
-                        </Button>
+                        {result.needsAccount ? (
+                          <div className="mt-7 flex flex-col items-center gap-3">
+                            <Button
+                              size="lg"
+                              onClick={() =>
+                                window.location.assign(
+                                  `/login?mode=signup&quote=ready&next=${encodeURIComponent(quoteReturnPath)}`,
+                                )
+                              }
+                            >
+                              Create account and save quote
+                              <Arrow />
+                            </Button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                window.location.assign(
+                                  `/login?quote=ready&next=${encodeURIComponent(quoteReturnPath)}`,
+                                )
+                              }
+                              className="text-sm font-semibold text-oak underline decoration-oak/25 underline-offset-4 hover:decoration-oak"
+                            >
+                              Already have an account? Sign in
+                            </button>
+                          </div>
+                        ) : (
+                          <Button className="mt-7" variant="outline" onClick={result.ok ? reset : () => setResult(null)}>
+                            {result.ok ? "Start another request" : "Try again"}
+                          </Button>
+                        )}
                       </motion.div>
                     ) : (
                       <>
@@ -1115,10 +1207,12 @@ const StepHeading = ({
 function QuestionBlock({
   number,
   title,
+  hint,
   children,
 }: {
   number: string;
   title: string;
+  hint?: string;
   children: ReactNode;
 }) {
   return (
@@ -1127,7 +1221,14 @@ function QuestionBlock({
         <span className="flex h-7 w-7 items-center justify-center rounded-full border border-oak/10 bg-sand/25 text-[9px] text-cinnamon">
           {number}
         </span>
-        {title}
+        <span className="flex flex-1 flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <span>{title}</span>
+          {hint && (
+            <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-soil/40">
+              {hint}
+            </span>
+          )}
+        </span>
       </legend>
       {children}
     </fieldset>

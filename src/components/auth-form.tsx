@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -14,11 +14,28 @@ import { Button } from "@/components/ui";
 
 type Mode = "signin" | "signup" | "magic";
 
+const quoteContactKey = "beaumont:quote-contact";
+
 const inputClass =
   "w-full rounded-xl border border-oak/30 bg-white px-4 py-3 text-soil outline-none transition focus:border-cinnamon focus:ring-2 focus:ring-cinnamon/15";
 
-export function AuthForm({ enabled, next, initialError, initialMode = "signin" }: { enabled: boolean; next: string; initialError?: string; initialMode?: Mode }) {
+export function AuthForm({ enabled, next, initialError, initialMode = "signin", quoteReady = false }: { enabled: boolean; next: string; initialError?: string; initialMode?: Mode; quoteReady?: boolean }) {
   const [mode, setMode] = useState<Mode>(initialMode);
+  const [cachedContact, setCachedContact] = useState({ fullName: "", email: "" });
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(quoteContactKey);
+      if (!raw) return;
+      const cached = JSON.parse(raw) as { fullName?: string; email?: string };
+      setCachedContact({
+        fullName: cached.fullName?.trim() ?? "",
+        email: cached.email?.trim() ?? "",
+      });
+    } catch {
+      window.localStorage.removeItem(quoteContactKey);
+    }
+  }, []);
 
   if (!enabled) {
     return (
@@ -40,6 +57,17 @@ export function AuthForm({ enabled, next, initialError, initialMode = "signin" }
 
   return (
     <div>
+      {quoteReady && (
+        <div className="mb-6 flex items-start gap-3 rounded-2xl border border-cinnamon/20 bg-sand/30 p-4 text-oak">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cinnamon text-sm text-ivory" aria-hidden="true">
+            ✓
+          </span>
+          <div>
+            <p className="text-sm font-semibold">Quote created</p>
+            <p className="mt-0.5 text-sm text-soil/70">Create an account to save it and track Beaumont’s response.</p>
+          </div>
+        </div>
+      )}
       <h2 className="font-display text-3xl text-oak">{mode === "signup" ? "Create your account" : "Welcome back"}</h2>
       <p className="mt-2 text-soil/80">
         {mode === "signup" ? "Save estimates and manage your exterior care." : "Sign in to manage quotes, visits, payments, and points."}
@@ -59,7 +87,14 @@ export function AuthForm({ enabled, next, initialError, initialMode = "signin" }
         ))}
       </div>
 
-      <AuthActionForm key={mode} mode={mode} next={next} initialError={initialError} />
+      <AuthActionForm
+        key={`${mode}:${cachedContact.fullName}:${cachedContact.email}`}
+        mode={mode}
+        next={next}
+        initialError={initialError}
+        defaultFullName={cachedContact.fullName}
+        defaultEmail={cachedContact.email}
+      />
 
       <div className="my-6 flex items-center gap-4 text-sm font-medium text-soil/65">
         <span className="h-px flex-1 bg-oak/20" />or<span className="h-px flex-1 bg-oak/20" />
@@ -76,15 +111,15 @@ export function AuthForm({ enabled, next, initialError, initialMode = "signin" }
   );
 }
 
-function AuthActionForm({ mode, next, initialError }: { mode: Mode; next: string; initialError?: string }) {
+function AuthActionForm({ mode, next, initialError, defaultFullName, defaultEmail }: { mode: Mode; next: string; initialError?: string; defaultFullName: string; defaultEmail: string }) {
   const action = mode === "signin" ? signIn : mode === "signup" ? signUp : signInWithMagicLink;
   const [state, formAction] = useFormState<AuthState, FormData>(action, initialError ? { error: initialError } : {});
 
   return (
     <form action={formAction} className="mt-6 space-y-4">
       <input type="hidden" name="next" value={next} />
-      {mode === "signup" && <Field label="Full name" name="full_name" type="text" autoComplete="name" required />}
-      <Field label="Email" name="email" type="email" autoComplete="email" required />
+      {mode === "signup" && <Field label="Full name" name="full_name" type="text" autoComplete="name" defaultValue={defaultFullName} required />}
+      <Field label="Email" name="email" type="email" autoComplete="email" defaultValue={defaultEmail} required />
       {mode !== "magic" && (
         <Field
           label="Password"
