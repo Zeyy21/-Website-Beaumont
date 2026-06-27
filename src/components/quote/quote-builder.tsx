@@ -169,7 +169,7 @@ export function QuoteBuilder({
       audio.pause();
       audio.currentTime = 0;
       audio.src = src;
-      audio.volume = phase === "signature" ? 0.68 : 0.9;
+      audio.volume = phase === "signature" ? 0.92 : 0.95;
       audioPhaseRef.current = phase;
       void audio.play()
         .then(() => {
