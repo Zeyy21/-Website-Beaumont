@@ -3,6 +3,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -120,7 +121,7 @@ export function QuoteBuilder({
   const hasMounted = useRef(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const audioTimerRef = useRef<number | null>(null);
-  const audioPhaseRef = useRef<"signature" | "narration" | null>(null);
+  const audioPhaseRef = useRef<"signature" | "narration" | null>("signature");
   const audioGuideEnabledRef = useRef(true);
   const hasPlayedSignature = useRef(false);
   const currentStepRef = useRef(step);
@@ -186,7 +187,8 @@ export function QuoteBuilder({
       clearAudioTimer();
       audio.pause();
       audio.currentTime = 0;
-      audio.src = src;
+      const targetSrc = new URL(src, window.location.origin).href;
+      if (audio.src !== targetSrc) audio.src = src;
       audio.volume = phase === "signature" ? 0.92 : 0.95;
       audioPhaseRef.current = phase;
       void audio.play()
@@ -286,40 +288,39 @@ export function QuoteBuilder({
     return clearAudioTimer;
   }, [clearAudioTimer, playStepNarration, step]);
 
-  // Autoplay signature on mount or first user interaction
-  useEffect(() => {
+  // Request playback during the initial commit. This preserves transient user
+  // activation when /quote was opened from an in-app link and also works for
+  // browsers where the visitor has already granted autoplay permission.
+  useLayoutEffect(() => {
     if (!audioGuideEnabledRef.current) return;
 
-    const startOnInteraction = () => {
+    const startSignature = () => {
       if (!hasPlayedSignature.current) {
         hasPlayedSignature.current = true;
         playAudio(quoteSignatureAudio, "signature");
       }
+    };
+
+    const startOnInteraction = () => {
+      startSignature();
       cleanup();
     };
 
     const cleanup = () => {
       window.removeEventListener("click", startOnInteraction);
       window.removeEventListener("pointerdown", startOnInteraction);
+      window.removeEventListener("touchstart", startOnInteraction);
       window.removeEventListener("keydown", startOnInteraction);
     };
 
     window.addEventListener("click", startOnInteraction);
     window.addEventListener("pointerdown", startOnInteraction);
+    window.addEventListener("touchstart", startOnInteraction, { passive: true });
     window.addEventListener("keydown", startOnInteraction);
 
-    // Try playing immediately (works if router navigated on user action)
-    const timeoutId = window.setTimeout(() => {
-      if (!hasPlayedSignature.current) {
-        hasPlayedSignature.current = true;
-        playAudio(quoteSignatureAudio, "signature");
-      }
-    }, 100);
+    startSignature();
 
-    return () => {
-      cleanup();
-      window.clearTimeout(timeoutId);
-    };
+    return cleanup;
   }, [playAudio]);
 
   useEffect(
@@ -536,8 +537,14 @@ export function QuoteBuilder({
     <div className="quote-experience min-w-0 overflow-hidden rounded-[1.75rem] border border-ivory/10 bg-soil shadow-[0_38px_110px_-42px_rgba(29,23,15,.75)] md:rounded-[2.75rem]">
       <audio
         ref={audioRef}
+        src={quoteSignatureAudio}
+        autoPlay
+        playsInline
         preload="auto"
-        onPlay={() => setAudioPlaying(true)}
+        onPlay={() => {
+          hasPlayedSignature.current = true;
+          setAudioPlaying(true);
+        }}
         onPause={() => setAudioPlaying(false)}
         onEnded={handleAudioEnded}
       />
