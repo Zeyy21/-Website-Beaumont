@@ -10,9 +10,10 @@ import { ButtonLink, Container, Wordmark } from "./ui";
 
 export function SiteHeader({ signedIn }: { signedIn: boolean }) {
   const pathname = usePathname();
+  const quoteOverlay = pathname === "/quote";
   const [open, setOpen] = useState(false);
   const [activeHash, setActiveHash] = useState("");
-  const [logoOnDark, setLogoOnDark] = useState(pathname === "/");
+  const [logoOnDark, setLogoOnDark] = useState(pathname === "/" || quoteOverlay);
 
   useEffect(() => setOpen(false), [pathname]);
 
@@ -93,7 +94,18 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
   const quoteHref = sectionHref("#quote");
 
   return (
-    <header className="pointer-events-none sticky top-0 z-50 h-[84px] bg-transparent">
+    <header
+      className={cn(
+        "pointer-events-none z-50 h-[84px] transition-[background-color,border-color,box-shadow] duration-500",
+        quoteOverlay
+          ? "absolute inset-x-0 top-0 bg-transparent"
+          : "sticky top-0 border-b backdrop-blur-xl",
+        !quoteOverlay &&
+          (logoOnDark
+            ? "border-ivory/[0.07] bg-soil/90 shadow-[0_12px_35px_-28px_rgba(0,0,0,.9)]"
+            : "border-oak/[0.07] bg-ivory/90 shadow-[0_12px_35px_-28px_rgba(29,23,15,.55)]"),
+      )}
+    >
       <Container className="flex h-[84px] items-center justify-between gap-3 md:grid md:grid-cols-[1fr_auto_1fr]">
         <Link
           href="/"

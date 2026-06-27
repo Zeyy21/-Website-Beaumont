@@ -17,9 +17,11 @@ interface GeocodeResponse {
 /** Address autocomplete, explicit search, and browser geolocation. */
 export function AddressSearch({
   onSelect,
+  onInputChange,
   initialValue = "",
 }: {
   onSelect: (s: Suggestion) => void;
+  onInputChange?: (value: string) => void;
   initialValue?: string;
 }) {
   const [q, setQ] = useState(initialValue);
@@ -92,7 +94,7 @@ export function AddressSearch({
     setQ(suggestion.label);
     setResults([]);
     setOpen(false);
-    setMessage("Location selected. Beaumont will review this property.");
+    setMessage(null);
     onSelect(suggestion);
   };
 
@@ -172,10 +174,10 @@ export function AddressSearch({
 
   return (
     <div ref={boxRef} className="relative">
-      <label htmlFor="address" className="mb-2 block text-sm font-semibold text-oak">
-        Property address
+      <label htmlFor="address" className="mb-2.5 block text-sm font-semibold text-oak">
+        Home address
       </label>
-      <div className="flex items-center gap-2 rounded-2xl border border-oak/30 bg-white p-2 shadow-sm transition focus-within:border-cinnamon focus-within:ring-2 focus-within:ring-cinnamon/15">
+      <div className="flex items-center gap-2 rounded-[1.15rem] border border-oak/20 bg-white/85 p-2 shadow-[0_12px_35px_-28px_rgba(29,23,15,.75)] transition focus-within:border-cinnamon focus-within:bg-white focus-within:ring-4 focus-within:ring-cinnamon/10">
         <svg viewBox="0 0 24 24" className="ml-2 h-5 w-5 shrink-0 text-cinnamon" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
           <path d="M12 21s-7-5.5-7-11a7 7 0 1114 0c0 5.5-7 11-7 11z" strokeLinejoin="round" />
           <circle cx="12" cy="10" r="2.5" />
@@ -186,6 +188,7 @@ export function AddressSearch({
           onChange={(event) => {
             setQ(event.target.value);
             setMessage(null);
+            onInputChange?.(event.target.value);
           }}
           onFocus={() => results.length > 0 && setOpen(true)}
           onKeyDown={(event) => {
@@ -204,20 +207,20 @@ export function AddressSearch({
             }
             if (event.key === "Escape") setOpen(false);
           }}
-          placeholder="Canadian address or postal code"
+          placeholder="Street address or postal code"
           autoComplete="street-address"
           role="combobox"
           aria-expanded={open}
           aria-controls="address-results"
-          className="min-w-0 flex-1 bg-transparent px-1 py-2 text-soil outline-none placeholder:text-soil/55"
+          className="min-w-0 flex-1 bg-transparent px-1 py-2.5 text-base font-medium text-soil outline-none placeholder:font-normal placeholder:text-soil/35"
         />
         <button
           type="button"
           onClick={() => void search(q)}
           disabled={loading || q.trim().length < 3}
-          className="inline-flex h-10 items-center justify-center rounded-xl bg-cinnamon px-4 text-sm font-semibold text-ivory transition hover:bg-oak disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex h-11 shrink-0 items-center justify-center rounded-[.85rem] bg-cinnamon px-4 text-sm font-semibold text-ivory shadow-[0_10px_25px_-15px_rgba(64,38,26,.9)] transition hover:bg-oak disabled:cursor-not-allowed disabled:opacity-40 sm:px-5"
         >
-          {loading ? "Searching…" : "Search"}
+          {loading ? "Searching…" : <><span className="sm:hidden">Find</span><span className="hidden sm:inline">Find address</span></>}
         </button>
       </div>
 
@@ -225,23 +228,23 @@ export function AddressSearch({
         type="button"
         onClick={locateMe}
         disabled={locating}
-        className="mt-3 inline-flex items-center gap-2 rounded-full border border-oak/25 bg-ivory px-4 py-2 text-sm font-semibold text-oak transition hover:border-cinnamon hover:bg-sand/40 disabled:opacity-60"
+        className="mt-3 inline-flex items-center gap-2 rounded-full px-1 py-2 text-xs font-semibold text-soil/60 transition hover:text-cinnamon disabled:opacity-60"
       >
         <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
           <circle cx="12" cy="12" r="3" />
           <path d="M12 2v3M12 19v3M2 12h3M19 12h3" strokeLinecap="round" />
         </svg>
-        {locating ? "Locating…" : "Use my rough location"}
+        {locating ? "Finding your area…" : "Use my current location"}
       </button>
 
       {message && (
-        <p className="mt-3 text-sm font-medium text-soil/80" role="status">
+        <p className="mt-3 text-sm font-medium text-soil/65" role="status">
           {message}
         </p>
       )}
 
       {open && results.length > 0 && (
-        <ul id="address-results" className="absolute z-[500] mt-2 max-h-72 w-full overflow-auto rounded-2xl border border-oak/20 bg-white p-2 shadow-lift" role="listbox">
+        <ul id="address-results" className="absolute z-[500] mt-2 max-h-72 w-full overflow-auto rounded-[1.15rem] border border-oak/15 bg-white p-2 shadow-lift" role="listbox">
           {results.map((result, index) => (
             <li key={`${result.lat}-${result.lon}-${index}`} role="option" aria-selected={active === index}>
               <button

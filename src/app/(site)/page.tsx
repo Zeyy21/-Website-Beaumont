@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Hero } from "@/components/hero";
 import { ExperienceSequence } from "@/components/home-experience";
-import { LazyQuoteBuilder } from "@/components/quote/lazy-quote-builder";
+import { QuoteCta } from "@/components/quote-cta";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion";
 import { Container, Eyebrow } from "@/components/ui";
 import { getServices } from "@/lib/data";
@@ -140,25 +140,10 @@ export default async function HomePage() {
         </Container>
       </section>
 
-      <section id="quote" className="luxe-wash relative scroll-mt-24 overflow-hidden py-24 md:py-36" aria-labelledby="quote-title">
+      <section id="quote" className="luxe-wash relative scroll-mt-24 overflow-hidden py-24 md:py-32" aria-labelledby="quote-title">
         <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-oak/15 to-transparent" />
         <Container>
-          <Reveal className="mx-auto mb-12 max-w-4xl text-center md:mb-14">
-            <div className="flex items-center justify-center gap-4">
-              <span className="h-px w-10 bg-ochre/40" />
-              <span className="font-display text-2xl text-ochre">03</span>
-              <Eyebrow>Free estimate</Eyebrow>
-              <span className="h-px w-10 bg-ochre/40" />
-            </div>
-            <h2 id="quote-title" className="mt-5 text-balance font-display text-[clamp(3.15rem,5.4vw,5.6rem)] leading-[0.92] text-oak">
-              Your property. Your care.
-              <span className="block italic text-ochre">One reviewed quote.</span>
-            </h2>
-            <p className="mx-auto mt-5 max-w-2xl text-base font-medium leading-relaxed text-soil/65 md:text-lg">
-              Select the address, choose the exterior services needed, and send the scope for review without leaving this page.
-            </p>
-          </Reveal>
-          <LazyQuoteBuilder services={services} />
+          <QuoteCta />
         </Container>
       </section>
 
