@@ -24,6 +24,7 @@ export interface SaveQuotePayload {
   addOnIds: string[];
   propertySize?: string;
   condition?: string;
+  conditions?: string[];
   scopeDetails?: string;
   sourceZone?: string | null;
   fullName: string;
@@ -101,12 +102,22 @@ export async function saveQuote(
     multi: "Multiple surfaces",
     full: "Full exterior package",
   });
-  const condition = formatScopeValue(payload.condition, {
+  const conditionLabels = {
     refresh: "Routine refresh",
     organic: "Algae or grime",
     stains: "Oil or rust stains",
     delicate: "Delicate surface",
-  });
+  };
+  const selectedConditions = payload.conditions?.length
+    ? payload.conditions
+    : payload.condition
+      ? [payload.condition]
+      : [];
+  const condition =
+    selectedConditions
+      .filter((value) => conditionLabels[value as keyof typeof conditionLabels])
+      .map((value) => conditionLabels[value as keyof typeof conditionLabels])
+      .join(", ") || "Not selected";
   const scopeDetails = [
     `Services requested: ${selectedServiceNames.join(", ")}`,
     `Scope size: ${propertySize}`,

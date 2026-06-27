@@ -31,20 +31,21 @@ export async function GET(request: NextRequest) {
   const biasLon = request.nextUrl.searchParams.get("biasLon");
   const bias = biasLat && biasLon ? `&lat=${encodeURIComponent(biasLat)}&lon=${encodeURIComponent(biasLon)}` : "";
 
-  try {
-    const photon = await fetch(
-      `https://photon.komoot.io/api/?q=${encodeURIComponent(`${q}, Canada`)}&limit=8&lang=en${bias}`,
-      { headers: requestHeaders, signal: AbortSignal.timeout(7000), cache: "no-store" },
-    );
-    if (photon.ok) {
-      const data = (await photon.json()) as PhotonResponse;
-      const results = dedupe((data.features ?? [])
-        .map(featureToSuggestion)
-        .filter((result): result is Suggestion => result !== null));
-      if (results.length) return NextResponse.json({ results, source: "photon" });
-    }
-  } catch {
-    // Continue to the second provider.
+  const [canadianAddress, photonResults] = await Promise.all([
+    looksLikeStreetAddress(q) ? geocodeCanadianAddress(q) : Promise.resolve(null),
+    searchPhoton(q, bias),
+  ]);
+  const primaryResults = dedupe([
+    ...(canadianAddress ? [canadianAddress] : []),
+    ...photonResults.filter(
+      (result) => !canadianAddress || !sameLocation(canadianAddress, result),
+    ),
+  ]);
+  if (primaryResults.length) {
+    return NextResponse.json({
+      results: primaryResults,
+      source: canadianAddress ? "geocoder.ca+photon" : "photon",
+    });
   }
 
   try {
@@ -71,6 +72,66 @@ export async function GET(request: NextRequest) {
     { results: [] as Suggestion[], error: "Address search is temporarily unavailable. Please try again." },
     { status: 502 },
   );
+}
+
+async function geocodeCanadianAddress(query: string): Promise<Suggestion | null> {
+  const params = new URLSearchParams({
+    locate: localizeGreaterMontrealAddress(query),
+    geoit: "XML",
+    standard: "1",
+    showpostal: "1",
+  });
+  const key = process.env.GEOCODER_KEY?.trim();
+  if (key) params.set("auth", key);
+
+  try {
+    const response = await fetch(`https://geocoder.ca/?${params.toString()}`, {
+      headers: requestHeaders,
+      signal: AbortSignal.timeout(7000),
+      cache: "no-store",
+    });
+    if (!response.ok) return null;
+
+    const xml = await response.text();
+    const lat = Number(xmlValue(xml, "latt"));
+    const lon = Number(xmlValue(xml, "longt"));
+    const confidence = Number(xmlValue(xml, "confidence"));
+    if (!Number.isFinite(lat) || !Number.isFinite(lon) || confidence < 0.8) return null;
+
+    const street = [xmlValue(xml, "stnumber"), xmlValue(xml, "staddress")]
+      .filter(Boolean)
+      .join(" ");
+    const postal = formatPostalCode(xmlValue(xml, "postal"));
+    const label = [
+      street,
+      xmlValue(xml, "city"),
+      xmlValue(xml, "prov"),
+      postal,
+      "Canada",
+    ]
+      .filter(Boolean)
+      .join(", ");
+
+    return label ? { label, lat, lon } : null;
+  } catch {
+    return null;
+  }
+}
+
+async function searchPhoton(query: string, bias: string): Promise<Suggestion[]> {
+  try {
+    const response = await fetch(
+      `https://photon.komoot.io/api/?q=${encodeURIComponent(`${query}, Canada`)}&limit=8&lang=en${bias}`,
+      { headers: requestHeaders, signal: AbortSignal.timeout(7000), cache: "no-store" },
+    );
+    if (!response.ok) return [];
+    const data = (await response.json()) as PhotonResponse;
+    return (data.features ?? [])
+      .map(featureToSuggestion)
+      .filter((result): result is Suggestion => result !== null);
+  } catch {
+    return [];
+  }
 }
 
 async function reverseGeocode(lat: number, lon: number) {
@@ -132,6 +193,40 @@ function normalizeCanadianQuery(value: string) {
     return `${compactPostal.slice(0, 3)} ${compactPostal.slice(3)}`;
   }
   return value.replace(/\s+/g, " ").trim();
+}
+
+function looksLikeStreetAddress(value: string) {
+  return /^\d+[a-z]?(?:-\d+[a-z]?)?\s+\S+\s+\S+/i.test(value.trim());
+}
+
+function localizeGreaterMontrealAddress(value: string) {
+  const hasMunicipality = /\b(?:montr[eé]al|verdun|laval|longueuil|brossard|westmount|lasalle|lachine|dorval|pointe-claire|kirkland|beaconsfield|saint-lambert|saint-laurent|outremont|anjou|qc|qu[eé]bec)\b/i.test(
+    value,
+  );
+  return hasMunicipality ? `${value}, QC, Canada` : `${value}, Montreal, QC, Canada`;
+}
+
+function xmlValue(xml: string, tag: string) {
+  const match = xml.match(new RegExp(`<${tag}>([\\s\\S]*?)<\/${tag}>`, "i"));
+  return decodeXml(match?.[1]?.trim() ?? "");
+}
+
+function decodeXml(value: string) {
+  return value
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
+}
+
+function formatPostalCode(value: string) {
+  const compact = value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  return compact.length === 6 ? `${compact.slice(0, 3)} ${compact.slice(3)}` : value;
+}
+
+function sameLocation(a: Suggestion, b: Suggestion) {
+  return Math.abs(a.lat - b.lat) < 0.00015 && Math.abs(a.lon - b.lon) < 0.0002;
 }
 
 function dedupe(results: Suggestion[]) {
