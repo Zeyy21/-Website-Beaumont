@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { site } from "@/lib/config";
 import { sendEmail } from "@/lib/email";
-import { getDict } from "@/lib/i18n/server";
+import { getDict, getLocale } from "@/lib/i18n/server";
 
 export interface AuthState {
   error?: string;
@@ -22,6 +22,18 @@ function requestOrigin() {
   const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
   const protocol = requestHeaders.get("x-forwarded-proto") ?? (host?.includes("localhost") || host?.startsWith("127.") ? "http" : "https");
   return host ? `${protocol}://${host}` : site.url;
+}
+
+/**
+ * Callback URL for OAuth / email links. Returns to the SAME origin the request
+ * came in on (so a French-domain login returns to the French domain) and
+ * carries the active locale so the callback can keep the language stable even
+ * when the host is ambiguous (localhost, previews) or Supabase bounces the
+ * round-trip through its fallback Site URL.
+ */
+function authCallback(next: string) {
+  const locale = getLocale();
+  return `${requestOrigin()}/auth/callback?next=${encodeURIComponent(next)}&locale=${locale}`;
 }
 
 export async function signIn(_prev: AuthState, formData: FormData): Promise<AuthState> {
@@ -53,7 +65,7 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
   if (!email) return { error: t.errEmail };
   if (password.length < 8) return { error: t.errPassword };
 
-  const callback = `${requestOrigin()}/auth/callback?next=${encodeURIComponent(next)}`;
+  const callback = authCallback(next);
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -91,7 +103,7 @@ export async function signInWithMagicLink(_prev: AuthState, formData: FormData):
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: `${requestOrigin()}/auth/callback?next=${encodeURIComponent(next)}`,
+      emailRedirectTo: authCallback(next),
       shouldCreateUser: true,
     },
   });
@@ -106,7 +118,7 @@ export async function signInWithGoogle(formData: FormData): Promise<void> {
   const next = safeNext(formData.get("next"));
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: `${requestOrigin()}/auth/callback?next=${encodeURIComponent(next)}` },
+    options: { redirectTo: authCallback(next) },
   });
   if (error) redirect(`/login?error=oauth&message=${encodeURIComponent(error.message)}`);
   if (data.url) redirect(data.url);
