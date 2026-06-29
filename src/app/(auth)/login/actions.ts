@@ -1,11 +1,12 @@
 "use server";
 
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { site } from "@/lib/config";
 import { sendEmail } from "@/lib/email";
 import { getDict, getLocale } from "@/lib/i18n/server";
+import { AUTH_LOCALE_COOKIE, AUTH_NEXT_COOKIE } from "@/lib/auth-handoff";
 
 export interface AuthState {
   error?: string;
@@ -25,15 +26,25 @@ function requestOrigin() {
 }
 
 /**
- * Callback URL for OAuth / email links. Returns to the SAME origin the request
- * came in on (so a French-domain login returns to the French domain) and
- * carries the active locale so the callback can keep the language stable even
- * when the host is ambiguous (localhost, previews) or Supabase bounces the
- * round-trip through its fallback Site URL.
- */
-function authCallback(next: string) {
-  const locale = getLocale();
-  return `${requestOrigin()}/auth/callback?next=${encodeURIComponent(next)}&locale=${locale}`;
+ * Callback URL for OAuth / email links. This MUST exactly match an entry in
+ * Supabase's "Redirect URLs" allow list — those entries are bare paths with no
+ * query string, and Supabase glob-matches the full URL. Appending `?next=…` here
+ * would fail the match and make Supabase fall back to the Site URL (dropping the
+ * user on the wrong domain). So we keep the callback bare and stash `next` +
+ * `locale` in short-lived cookies on the originating domain instead; because the
+ * exact match means OAuth returns to that same domain, the cookies come back. */
+function authCallback() {
+  return `${requestOrigin()}/auth/callback`;
+}
+
+/** Persist the post-login destination + chosen language across the OAuth/email
+ *  round-trip via same-domain cookies (see authCallback). Short max-age: this is
+ *  only needed for the seconds between leaving for the provider and returning. */
+function stashHandoff(next: string) {
+  const jar = cookies();
+  const options = { path: "/", maxAge: 60 * 15, sameSite: "lax" as const };
+  jar.set(AUTH_NEXT_COOKIE, next, options);
+  jar.set(AUTH_LOCALE_COOKIE, getLocale(), options);
 }
 
 export async function signIn(_prev: AuthState, formData: FormData): Promise<AuthState> {
@@ -65,12 +76,12 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
   if (!email) return { error: t.errEmail };
   if (password.length < 8) return { error: t.errPassword };
 
-  const callback = authCallback(next);
+  stashHandoff(next);
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      emailRedirectTo: callback,
+      emailRedirectTo: authCallback(),
       data: { full_name: fullName, referral_code: referral || null },
     },
   });
@@ -100,10 +111,11 @@ export async function signInWithMagicLink(_prev: AuthState, formData: FormData):
   const next = safeNext(formData.get("next"));
   if (!email) return { error: t.errEmail };
 
+  stashHandoff(next);
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: authCallback(next),
+      emailRedirectTo: authCallback(),
       shouldCreateUser: true,
     },
   });
@@ -116,9 +128,10 @@ export async function signInWithGoogle(formData: FormData): Promise<void> {
   if (!supabase) redirect("/login?error=disabled");
 
   const next = safeNext(formData.get("next"));
+  stashHandoff(next);
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: authCallback(next) },
+    options: { redirectTo: authCallback() },
   });
   if (error) redirect(`/login?error=oauth&message=${encodeURIComponent(error.message)}`);
   if (data.url) redirect(data.url);

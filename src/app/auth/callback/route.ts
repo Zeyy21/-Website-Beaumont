@@ -1,24 +1,23 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { LOCALE_COOKIE, isLocale, localeFromHost } from "@/lib/i18n/config";
+import { AUTH_LOCALE_COOKIE, AUTH_NEXT_COOKIE } from "@/lib/auth-handoff";
 
-function safeNext(value: string | null) {
+function safeNext(value: string | null | undefined) {
   return value?.startsWith("/") && !value.startsWith("//") ? value : "/dashboard";
 }
 
 /**
  * Exchange OAuth, email-confirmation, or magic-link codes for a cookie session.
  *
- * The auth session cookie is written on whichever origin finishes this exchange,
- * so we always redirect back to the same origin (never cross-domain — that would
- * drop the just-issued session). We do pin the language: the `locale` carried
- * from the login request is written to NEXT_LOCALE so the destination renders in
- * the user's language even when the host can't imply it (localhost/previews) or
- * when an OAuth round-trip returned via a different brand domain.
+ * The callback URL is intentionally bare (no query params) so it exactly matches
+ * Supabase's Redirect URLs allow list; the destination + chosen language are
+ * carried in same-domain handoff cookies set before leaving for the provider
+ * (see lib/auth-handoff). The auth session cookie is written on whichever origin
+ * finishes the exchange, so we always redirect within that same origin.
  */
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
-  const next = safeNext(request.nextUrl.searchParams.get("next"));
   const origin = request.nextUrl.origin;
 
   if (!code) return NextResponse.redirect(`${origin}/login?error=missing-code`);
@@ -32,13 +31,15 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  const next = safeNext(request.cookies.get(AUTH_NEXT_COOKIE)?.value);
   const response = NextResponse.redirect(`${origin}${next}`);
 
-  // Keep the chosen language stable. Prefer the real host's language (a brand
-  // domain is authoritative); otherwise fall back to the locale we carried.
+  // Pin the language. The real brand host is authoritative; otherwise fall back
+  // to the locale we stashed at login (covers the Vercel/preview Site-URL host,
+  // where the domain can't imply a language).
   const host =
     request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? null;
-  const carried = request.nextUrl.searchParams.get("locale");
+  const carried = request.cookies.get(AUTH_LOCALE_COOKIE)?.value;
   const locale = localeFromHost(host) ?? (isLocale(carried) ? carried : null);
   if (locale) {
     response.cookies.set(LOCALE_COOKIE, locale, {
@@ -47,6 +48,11 @@ export async function GET(request: NextRequest) {
       sameSite: "lax",
     });
   }
+
+  // Handoff cookies are single-use; clear them so they can't leak into a later
+  // login from this browser.
+  response.cookies.set(AUTH_NEXT_COOKIE, "", { path: "/", maxAge: 0 });
+  response.cookies.set(AUTH_LOCALE_COOKIE, "", { path: "/", maxAge: 0 });
 
   return response;
 }
