@@ -8,6 +8,7 @@ import {
 } from "@/app/dashboard/payments/actions";
 import { formatCurrency } from "@/lib/pricing";
 import { Button } from "@/components/ui";
+import { useT } from "@/components/i18n/locale-provider";
 
 /** Lets a customer settle an accepted quote by card, transfer, or cash. */
 export function PayPanel({
@@ -20,6 +21,8 @@ export function PayPanel({
   /** Server-evaluated stripeEnabled; falls back to the client constant. */
   cardEnabled?: boolean;
 }) {
+  const { dict } = useT();
+  const t = dict.dashboard.payments;
   const canCard = cardEnabled ?? stripeEnabled;
   const [pending, start] = useTransition();
   const [msg, setMsg] = useState<string | null>(null);
@@ -35,8 +38,8 @@ export function PayPanel({
       const res = await startCardPayment(quoteId, amount);
       if (res.url) window.location.href = res.url;
       else if (res.disabled)
-        setMsg("Card payments aren't enabled yet, choose transfer or cash.");
-      else setMsg(res.error ?? "Could not start payment.");
+        setMsg(t.cardNotEnabled);
+      else setMsg(res.error ?? t.couldNotStart);
     });
 
   if (msg) {
@@ -50,23 +53,22 @@ export function PayPanel({
   return (
     <div className="space-y-3">
       <p className="text-sm text-soil/60">
-        Settle {formatCurrency(amount)} by your preferred method:
+        {t.settle} {formatCurrency(amount)} {t.byMethod}
       </p>
       <div className="flex flex-wrap gap-2">
         <Button onClick={card} disabled={pending || !canCard} size="sm">
-          {canCard ? "Pay by card" : "Card (coming soon)"}
+          {canCard ? t.payByCard : t.cardComingSoon}
         </Button>
         <Button variant="outline" size="sm" onClick={() => manual("transfer")} disabled={pending}>
-          Bank transfer
+          {t.bankTransfer}
         </Button>
         <Button variant="outline" size="sm" onClick={() => manual("cash")} disabled={pending}>
-          Cash on service
+          {t.cashOnService}
         </Button>
       </div>
       {!canCard && (
         <p className="text-xs text-soil/40">
-          Card payments activate once Stripe keys are added. Transfer and cash
-          work today.
+          {t.cardActivateNote}
         </p>
       )}
     </div>

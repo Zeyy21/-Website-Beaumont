@@ -6,10 +6,13 @@ import { useEffect, useState, type MouseEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { nav, site } from "@/lib/config";
 import { cn } from "@/lib/cn";
+import { useT } from "@/components/i18n/locale-provider";
+import { LanguageSwitch } from "@/components/i18n/language-switch";
 import { ButtonLink, Container, Wordmark } from "./ui";
 
 export function SiteHeader({ signedIn }: { signedIn: boolean }) {
   const pathname = usePathname();
+  const { dict } = useT();
   const quoteOverlay = pathname === "/quote";
   const [open, setOpen] = useState(false);
   const [activeHash, setActiveHash] = useState("");
@@ -103,7 +106,7 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
         !quoteOverlay &&
           (logoOnDark
             ? "border-ivory/[0.07] bg-soil/90 shadow-[0_12px_35px_-28px_rgba(0,0,0,.9)]"
-            : "border-oak/[0.07] bg-ivory/90 shadow-[0_12px_35px_-28px_rgba(29,23,15,.55)]"),
+            : "border-oak/[0.07] bg-ivory/90 shadow-[0_12px_35px_-28px_rgba(28,28,26,.55)]"),
       )}
     >
       <Container className="flex h-[84px] items-center justify-between gap-3 md:grid md:grid-cols-[1fr_auto_1fr]">
@@ -111,20 +114,20 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
           href="/"
           data-logo-tone={logoOnDark ? "light" : "dark"}
           className="pointer-events-auto flex h-14 w-fit items-center px-2 transition-opacity duration-300 hover:opacity-75 focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ochre"
-          aria-label={`${site.name} home`}
+          aria-label={`${site.name} ${dict.header.homeAria}`}
         >
           <span className="relative block h-[1.35rem] aspect-[7.5/1] md:h-6" aria-hidden="true">
             <span className={cn("absolute inset-0 transition-opacity duration-500 ease-out", logoOnDark ? "opacity-100" : "opacity-0")}>
               <Wordmark className="h-full drop-shadow-[0_2px_6px_rgba(0,0,0,.45)]" />
             </span>
             <span className={cn("absolute inset-0 transition-opacity duration-500 ease-out", logoOnDark ? "opacity-0" : "opacity-100")}>
-              <Wordmark dark priority className="h-full drop-shadow-[0_1px_2px_rgba(249,248,231,.7)]" />
+              <Wordmark dark priority className="h-full drop-shadow-[0_1px_2px_rgba(244,241,236,.7)]" />
             </span>
           </span>
           <span className="sr-only">{site.name}</span>
         </Link>
 
-        <nav className="pointer-events-auto hidden items-center gap-0.5 rounded-full border border-oak/10 bg-ivory/95 p-1.5 shadow-[0_14px_40px_-24px_rgba(29,23,15,.8)] backdrop-blur-xl md:flex" aria-label="Primary navigation">
+        <nav className="pointer-events-auto hidden items-center gap-0.5 rounded-full border border-oak/10 bg-ivory/95 p-1.5 shadow-[0_14px_40px_-24px_rgba(28,28,26,.8)] backdrop-blur-xl md:flex" aria-label={dict.header.primaryNav}>
           {nav.map((item) => {
             const active = activeHash === item.href;
             return (
@@ -137,7 +140,7 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
                   active && "text-oak",
                 )}
               >
-                {item.label}
+                {dict.nav[item.key]}
                 {active && (
                   <motion.span
                     layoutId="nav-active"
@@ -150,19 +153,20 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
           })}
         </nav>
 
-        <div className="pointer-events-auto hidden items-center justify-self-end gap-1 rounded-full border border-oak/10 bg-ivory/95 p-1.5 shadow-[0_14px_40px_-24px_rgba(29,23,15,.8)] backdrop-blur-xl md:flex">
+        <div className="pointer-events-auto hidden items-center justify-self-end gap-1 rounded-full border border-oak/10 bg-ivory/95 p-1.5 shadow-[0_14px_40px_-24px_rgba(28,28,26,.8)] backdrop-blur-xl md:flex">
+          <LanguageSwitch className="mr-1" />
           <ButtonLink href={signedIn ? "/dashboard" : "/login"} variant="ghost" size="sm">
-            {signedIn ? "Account" : "Sign in"}
+            {signedIn ? dict.header.account : dict.header.signIn}
           </ButtonLink>
           <ButtonLink href={quoteHref} onClick={(event) => pathname === "/" && scrollToSection(event, "#quote")} size="sm">
-            Free Estimate
+            {dict.header.freeEstimate}
           </ButtonLink>
         </div>
 
         <button
           className="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full border border-oak/10 bg-ivory/95 text-oak shadow-soft backdrop-blur-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ochre md:hidden"
           onClick={() => setOpen((value) => !value)}
-          aria-label="Toggle menu"
+          aria-label={dict.header.toggleMenu}
           aria-expanded={open}
         >
           <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -184,7 +188,7 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
             transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
             className="pointer-events-auto absolute inset-x-4 top-[76px] overflow-hidden rounded-[1.5rem] border border-oak/10 bg-ivory/95 p-3 shadow-lift backdrop-blur-xl md:hidden"
           >
-            <nav className="flex flex-col" aria-label="Mobile navigation">
+            <nav className="flex flex-col" aria-label={dict.header.mobileNav}>
               {nav.map((item) => (
                 <Link
                   key={item.href}
@@ -195,17 +199,20 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
                     activeHash === item.href && "bg-sand/30 text-oak",
                   )}
                 >
-                  {item.label}
+                  {dict.nav[item.key]}
                 </Link>
               ))}
             </nav>
             <div className="mt-2 grid grid-cols-2 gap-2 border-t border-oak/10 pt-3">
               <ButtonLink href={signedIn ? "/dashboard" : "/login"} variant="outline">
-                {signedIn ? "Account" : "Sign in"}
+                {signedIn ? dict.header.account : dict.header.signIn}
               </ButtonLink>
               <ButtonLink href={quoteHref} onClick={(event) => pathname === "/" && scrollToSection(event, "#quote")}>
-                Quote
+                {dict.header.quote}
               </ButtonLink>
+            </div>
+            <div className="mt-3 flex justify-center border-t border-oak/10 pt-3">
+              <LanguageSwitch />
             </div>
           </motion.div>
         )}

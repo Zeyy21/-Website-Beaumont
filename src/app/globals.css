@@ -18,12 +18,14 @@
 }
 
 :root {
-  --ivory: #f9f8e7;
-  --sand: #d7be96;
-  --ochre: #a1794f;
-  --cinnamon: #7a4327;
-  --oak: #40261a;
-  --soil: #1d170f;
+  /* Three-anchor palette: Off-white / Canopy / Ink. Token names preserved;
+     values mapped onto the anchors so the existing UI hierarchy is unchanged. */
+  --ivory: #f4f1ec;
+  --sand: #e3dccf;
+  --ochre: #6e9476;
+  --cinnamon: #1f4934;
+  --oak: #2b2b28;
+  --soil: #1c1c1a;
 
   /* Display = brand font first, then next/font Cormorant, then system serif. */
   --font-display: "Bombay Black Unicode", var(--font-cormorant), "Cormorant",
@@ -89,18 +91,18 @@ p {
 .texture-soil {
   background-color: var(--soil);
   background-image:
-    radial-gradient(at 20% 15%, rgba(122, 67, 39, 0.35) 0px, transparent 55%),
-    radial-gradient(at 85% 20%, rgba(64, 38, 26, 0.5) 0px, transparent 50%),
-    radial-gradient(at 75% 90%, rgba(122, 67, 39, 0.22) 0px, transparent 55%),
-    radial-gradient(at 10% 85%, rgba(64, 38, 26, 0.45) 0px, transparent 50%);
+    radial-gradient(at 20% 15%, rgba(31, 73, 52, 0.35) 0px, transparent 55%),
+    radial-gradient(at 85% 20%, rgba(28, 28, 26, 0.5) 0px, transparent 50%),
+    radial-gradient(at 75% 90%, rgba(31, 73, 52, 0.22) 0px, transparent 55%),
+    radial-gradient(at 10% 85%, rgba(28, 28, 26, 0.45) 0px, transparent 50%);
 }
 
 /* Soft layered light used behind high-attention editorial sections. */
 .luxe-wash {
   background-color: var(--ivory);
   background-image:
-    radial-gradient(circle at 12% 8%, rgba(215, 190, 150, 0.32), transparent 32rem),
-    radial-gradient(circle at 88% 72%, rgba(161, 121, 79, 0.13), transparent 30rem),
+    radial-gradient(circle at 12% 8%, rgba(227, 220, 207, 0.45), transparent 32rem),
+    radial-gradient(circle at 88% 72%, rgba(31, 73, 52, 0.08), transparent 30rem),
     linear-gradient(135deg, rgba(255, 255, 255, 0.34), transparent 58%);
 }
 
@@ -108,7 +110,7 @@ p {
 .skeleton {
   position: relative;
   overflow: hidden;
-  background: rgba(64, 38, 26, 0.08);
+  background: rgba(43, 43, 40, 0.08);
 }
 .skeleton::after {
   content: "";
@@ -118,7 +120,7 @@ p {
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(249, 248, 231, 0.45),
+    rgba(244, 241, 236, 0.55),
     transparent
   );
   animation: shimmer 1.6s infinite;

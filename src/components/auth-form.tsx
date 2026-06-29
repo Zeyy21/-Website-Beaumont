@@ -11,6 +11,7 @@ import {
   type AuthState,
 } from "@/app/(auth)/login/actions";
 import { Button } from "@/components/ui";
+import { useT } from "@/components/i18n/locale-provider";
 
 type Mode = "signin" | "signup" | "magic";
 
@@ -20,6 +21,8 @@ const inputClass =
   "w-full rounded-xl border border-oak/30 bg-white px-4 py-3 text-soil outline-none transition focus:border-cinnamon focus:ring-2 focus:ring-cinnamon/15";
 
 export function AuthForm({ enabled, next, initialError, initialMode = "signin", quoteReady = false }: { enabled: boolean; next: string; initialError?: string; initialMode?: Mode; quoteReady?: boolean }) {
+  const { dict } = useT();
+  const t = dict.auth;
   const [mode, setMode] = useState<Mode>(initialMode);
   const [cachedContact, setCachedContact] = useState({ fullName: "", email: "" });
 
@@ -40,19 +43,19 @@ export function AuthForm({ enabled, next, initialError, initialMode = "signin", 
   if (!enabled) {
     return (
       <div className="rounded-2xl border border-cinnamon/35 bg-sand/35 p-8 text-center">
-        <h2 className="font-display text-2xl text-oak">Connect Supabase locally</h2>
+        <h2 className="font-display text-2xl text-oak">{t.disabledHeading}</h2>
         <p className="mt-3 text-soil/80">
-          This build cannot see a Supabase URL or public client key. Add them to <code className="font-semibold">.env.local</code> and restart the site to enable real accounts.
+          {t.disabledBodyA} <code className="font-semibold">.env.local</code> {t.disabledBodyB}
         </p>
-        <a href="/quote" className="mt-5 inline-block"><Button>Continue to quote request</Button></a>
+        <a href="/quote" className="mt-5 inline-block"><Button>{t.disabledCta}</Button></a>
       </div>
     );
   }
 
   const tabs: { id: Mode; label: string }[] = [
-    { id: "signin", label: "Sign in" },
-    { id: "signup", label: "Create account" },
-    { id: "magic", label: "Magic link" },
+    { id: "signin", label: t.tabSignin },
+    { id: "signup", label: t.tabSignup },
+    { id: "magic", label: t.tabMagic },
   ];
 
   return (
@@ -63,14 +66,14 @@ export function AuthForm({ enabled, next, initialError, initialMode = "signin", 
             ✓
           </span>
           <div>
-            <p className="text-sm font-semibold">Quote created</p>
-            <p className="mt-0.5 text-sm text-soil/70">Create an account to save it and track Beaumont’s response.</p>
+            <p className="text-sm font-semibold">{t.quoteCreatedTitle}</p>
+            <p className="mt-0.5 text-sm text-soil/70">{t.quoteCreatedBody}</p>
           </div>
         </div>
       )}
-      <h2 className="font-display text-3xl text-oak">{mode === "signup" ? "Create your account" : "Welcome back"}</h2>
+      <h2 className="font-display text-3xl text-oak">{mode === "signup" ? t.headingSignup : t.headingSignin}</h2>
       <p className="mt-2 text-soil/80">
-        {mode === "signup" ? "Save estimates and manage your exterior care." : "Sign in to manage quotes, visits, payments, and points."}
+        {mode === "signup" ? t.subSignup : t.subSignin}
       </p>
 
       <div className="mt-6 flex gap-1 rounded-full bg-oak/10 p-1">
@@ -97,14 +100,14 @@ export function AuthForm({ enabled, next, initialError, initialMode = "signin", 
       />
 
       <div className="my-6 flex items-center gap-4 text-sm font-medium text-soil/65">
-        <span className="h-px flex-1 bg-oak/20" />or<span className="h-px flex-1 bg-oak/20" />
+        <span className="h-px flex-1 bg-oak/20" />{t.or}<span className="h-px flex-1 bg-oak/20" />
       </div>
 
       <form action={signInWithGoogle}>
         <input type="hidden" name="next" value={next} />
         <button type="submit" className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-full border border-oak/30 bg-white px-6 py-3 font-medium text-soil transition hover:border-cinnamon hover:bg-sand/35">
           <GoogleMark />
-          Continue with Google
+          {t.continueGoogle}
         </button>
       </form>
     </div>
@@ -112,17 +115,19 @@ export function AuthForm({ enabled, next, initialError, initialMode = "signin", 
 }
 
 function AuthActionForm({ mode, next, initialError, defaultFullName, defaultEmail }: { mode: Mode; next: string; initialError?: string; defaultFullName: string; defaultEmail: string }) {
+  const { dict } = useT();
+  const t = dict.auth;
   const action = mode === "signin" ? signIn : mode === "signup" ? signUp : signInWithMagicLink;
   const [state, formAction] = useFormState<AuthState, FormData>(action, initialError ? { error: initialError } : {});
 
   return (
     <form action={formAction} className="mt-6 space-y-4">
       <input type="hidden" name="next" value={next} />
-      {mode === "signup" && <Field label="Full name" name="full_name" type="text" autoComplete="name" defaultValue={defaultFullName} required />}
-      <Field label="Email" name="email" type="email" autoComplete="email" defaultValue={defaultEmail} required />
+      {mode === "signup" && <Field label={t.fieldFullName} name="full_name" type="text" autoComplete="name" defaultValue={defaultFullName} required />}
+      <Field label={t.fieldEmail} name="email" type="email" autoComplete="email" defaultValue={defaultEmail} required />
       {mode !== "magic" && (
         <Field
-          label="Password"
+          label={t.fieldPassword}
           name="password"
           type="password"
           autoComplete={mode === "signup" ? "new-password" : "current-password"}
@@ -130,20 +135,21 @@ function AuthActionForm({ mode, next, initialError, defaultFullName, defaultEmai
           required
         />
       )}
-      {mode === "signup" && <Field label="Referral code (optional)" name="referral" type="text" placeholder="Enter a friend's code" />}
+      {mode === "signup" && <Field label={t.fieldReferral} name="referral" type="text" placeholder={t.referralPlaceholder} />}
 
       <AnimatePresence mode="wait">
         {state.error && <Notice key="err" tone="error">{state.error}</Notice>}
         {state.message && <Notice key="msg" tone="ok">{state.message}</Notice>}
       </AnimatePresence>
-      <SubmitButton label={mode === "signin" ? "Sign in" : mode === "signup" ? "Create account" : "Send magic link"} />
+      <SubmitButton label={mode === "signin" ? t.submitSignin : mode === "signup" ? t.submitSignup : t.submitMagic} />
     </form>
   );
 }
 
 function SubmitButton({ label }: { label: string }) {
+  const { dict } = useT();
   const { pending } = useFormStatus();
-  return <Button type="submit" disabled={pending} className="w-full" size="lg">{pending ? "One moment…" : label}</Button>;
+  return <Button type="submit" disabled={pending} className="w-full" size="lg">{pending ? dict.common.oneMoment : label}</Button>;
 }
 
 function Field({ label, name, ...props }: { label: string; name: string } & React.InputHTMLAttributes<HTMLInputElement>) {

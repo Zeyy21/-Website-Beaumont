@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { site } from "@/lib/config";
 import { Button } from "@/components/ui";
+import { useT } from "@/components/i18n/locale-provider";
 
 interface Tag {
   zone: string;
@@ -18,6 +19,8 @@ interface Tag {
  * (see globals via .print-* utility classes inline) lays them out for cutting.
  */
 export function DoorTagGenerator() {
+  const { dict } = useT();
+  const t = dict.admin.doorTags;
   const [zonesText, setZonesText] = useState("Maple Ridge\nKing's Park");
   const [perZone, setPerZone] = useState(4);
   const [tags, setTags] = useState<Tag[]>([]);
@@ -46,15 +49,14 @@ export function DoorTagGenerator() {
     <div>
       {/* controls (hidden when printing) */}
       <div className="no-print rounded-2xl border border-oak/10 bg-white p-6 shadow-soft">
-        <h3 className="text-lg text-oak">Generate door tags</h3>
+        <h3 className="text-lg text-oak">{t.generateHeading}</h3>
         <p className="mt-1 text-sm text-soil/60">
-          One zone per line. Each tag gets a unique QR that pre-seeds the quote
-          tool with its zone and tracks scans → quotes → bookings.
+          {t.generateDescription}
         </p>
         <div className="mt-4 grid gap-4 sm:grid-cols-[1fr_auto]">
           <label className="block">
             <span className="mb-1 block text-sm text-soil/60">
-              Zones / neighbourhoods
+              {t.zonesLabel}
             </span>
             <textarea
               value={zonesText}
@@ -64,7 +66,7 @@ export function DoorTagGenerator() {
             />
           </label>
           <label className="block">
-            <span className="mb-1 block text-sm text-soil/60">Per zone</span>
+            <span className="mb-1 block text-sm text-soil/60">{t.perZone}</span>
             <input
               type="number"
               min={1}
@@ -77,11 +79,11 @@ export function DoorTagGenerator() {
         </div>
         <div className="mt-4 flex gap-3">
           <Button onClick={generate} disabled={loading}>
-            {loading ? "Generating…" : "Generate"}
+            {loading ? t.generating : t.generate}
           </Button>
           {tags.length > 0 && (
             <Button variant="outline" onClick={() => window.print()}>
-              Print {tags.length} tags
+              {t.printTags} {tags.length} {t.tags}
             </Button>
           )}
         </div>
@@ -121,6 +123,8 @@ export function DoorTagGenerator() {
 
 /** A single premium die-cut door hanger (front face shown; QR + URL below). */
 function Hanger({ tag }: { tag: Tag }) {
+  const { dict } = useT();
+  const t = dict.admin.doorTags;
   return (
     <div className="hanger overflow-hidden rounded-[20px] border border-oak/15 bg-white shadow-soft">
       {/* die-cut top notch hint */}
@@ -133,17 +137,17 @@ function Hanger({ tag }: { tag: Tag }) {
           height={42}
           className="mx-auto h-7 w-auto object-contain"
         />
-        <p className="mt-3 font-display text-lg text-sand">{site.promise}</p>
-        <p className="mt-1 text-xs text-ivory/60">{site.tagline}</p>
+        <p className="mt-3 font-display text-lg text-sand">{dict.site.promise}</p>
+        <p className="mt-1 text-xs text-ivory/60">{dict.site.tagline}</p>
       </div>
 
       <div className="p-5 text-center">
         <div className="mx-auto w-fit rounded-xl bg-ivory p-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={tag.qrDataUrl} alt={`QR for ${tag.zone}`} className="h-32 w-32" />
+          <img src={tag.qrDataUrl} alt={`QR — ${tag.zone}`} className="h-32 w-32" />
         </div>
         <p className="mt-3 font-display text-base text-oak">
-          Scan for a free estimate on <em>this</em> home
+          {t.scanFree} <em>{t.thisHome}</em> {t.home}
         </p>
         <p className="mt-1 text-xs text-soil/50">{site.url.replace(/^https?:\/\//, "")}/quote</p>
         <p className="mt-2 text-[10px] uppercase tracking-widest text-ochre">

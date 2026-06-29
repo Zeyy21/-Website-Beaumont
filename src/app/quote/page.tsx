@@ -1,22 +1,26 @@
 import type { Metadata } from "next";
 import { QuoteBuilder } from "@/components/quote/quote-builder";
 import { QuoteResumeAnchor } from "@/components/quote/quote-resume-anchor";
-import { getServices } from "@/lib/data";
+import { getCurrentUser, getServices } from "@/lib/data";
+import { accountFromUser } from "@/lib/quote-account";
+import { getDict } from "@/lib/i18n/server";
 
-export const metadata: Metadata = {
-  title: "Free estimate",
-  description:
-    "Build your Beaumont exterior-care request in about two minutes. A specialist reviews every detail and replies with a clear written quote, usually within 24 hours.",
-};
+export function generateMetadata(): Metadata {
+  const dict = getDict();
+  return {
+    title: dict.quotePage.metaTitle,
+    description: dict.quotePage.metaDescription,
+  };
+}
 
 export default async function QuotePage() {
-  const services = await getServices();
+  const [services, user] = await Promise.all([getServices(), getCurrentUser()]);
 
   return (
     <main className="min-h-screen bg-ivory p-3 sm:p-6 lg:p-8">
       <QuoteResumeAnchor />
       <div id="estimate" className="mx-auto max-w-[96rem]">
-        <QuoteBuilder services={services} />
+        <QuoteBuilder services={services} account={accountFromUser(user)} />
       </div>
     </main>
   );

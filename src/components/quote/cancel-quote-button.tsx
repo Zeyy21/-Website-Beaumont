@@ -3,13 +3,16 @@
 import { useState } from "react";
 import { cancelQuote } from "@/app/dashboard/quotes/actions";
 import { useRouter } from "next/navigation";
+import { useT } from "@/components/i18n/locale-provider";
 
 export function CancelQuoteButton({ quoteId }: { quoteId: string }) {
+  const { dict } = useT();
+  const t = dict.quote.cancel;
   const [isPending, setIsPending] = useState(false);
   const router = useRouter();
 
   async function handleCancel() {
-    if (!confirm("Are you sure you want to cancel and delete this quote request?")) {
+    if (!confirm(t.confirm)) {
       return;
     }
     setIsPending(true);
@@ -31,7 +34,7 @@ export function CancelQuoteButton({ quoteId }: { quoteId: string }) {
       disabled={isPending}
       className="text-sm text-red-700/80 hover:text-red-700 disabled:opacity-50 transition-colors"
     >
-      {isPending ? "Canceling..." : "Cancel Quote"}
+      {isPending ? t.canceling : t.button}
     </button>
   );
 }

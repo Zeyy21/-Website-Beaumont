@@ -3,32 +3,19 @@
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { Container } from "@/components/ui";
+import { useT } from "@/components/i18n/locale-provider";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
-const chapters = [
-  {
-    number: "01",
-    eyebrow: "Arrival",
-    title: "Prepared around your property.",
-    copy: "We arrive with the right treatment, protect the surrounding landscape, and set a clear scope before water touches stone.",
-  },
-  {
-    number: "02",
-    eyebrow: "The work",
-    title: "Pressure, precisely applied.",
-    copy: "Concrete, pavers, natural stone, and siding each receive a method chosen for the material—not a one-setting-fits-all wash.",
-  },
-  {
-    number: "03",
-    eyebrow: "The return",
-    title: "Nothing left but the result.",
-    copy: "Edges are finished, runoff is managed, and the property is returned brighter, orderly, and ready to enjoy.",
-  },
-];
-
 export function ExperienceSequence() {
   const reduce = useReducedMotion();
+  const { dict } = useT();
+  const t = dict.approach;
+  const chapters = [
+    { number: "01", ...t.chapters.arrival },
+    { number: "02", ...t.chapters.work },
+    { number: "03", ...t.chapters.return },
+  ];
 
   return (
     <section id="about" className="relative scroll-mt-24 overflow-hidden bg-sand/20 py-24 md:py-40" aria-labelledby="approach-title">
@@ -45,14 +32,14 @@ export function ExperienceSequence() {
               <div className="flex items-center gap-4">
                 <span className="font-display text-2xl text-ochre">02</span>
                 <span className="h-px w-12 bg-ochre/40" />
-                <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-cinnamon">Who we are</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-cinnamon">{t.eyebrow}</p>
               </div>
               <h2 id="approach-title" className="mt-6 text-balance font-display text-[clamp(3.2rem,5.7vw,5.9rem)] leading-[0.9] text-oak">
-                Quiet service.
-                <span className="block italic text-ochre">Exacting care.</span>
+                {t.titleA}
+                <span className="block italic text-ochre">{t.titleB}</span>
               </h2>
               <p className="mt-7 max-w-lg text-lg font-medium leading-relaxed text-soil/75">
-                Beaumont is exterior restoration without the noise, guesswork, or unnecessary theatre. Every visit is considered from arrival to final walkthrough.
+                {t.intro}
               </p>
             </motion.div>
 
@@ -65,7 +52,7 @@ export function ExperienceSequence() {
             >
               <Image
                 src="/images/montreal-deck-pressure-washing.webp"
-                alt="A Beaumont technician cleaning exterior decking beside a Montreal home"
+                alt={t.imageAlt}
                 fill
                 sizes="(min-width: 1024px) 44vw, 100vw"
                 className="object-cover"
@@ -73,7 +60,7 @@ export function ExperienceSequence() {
               <div className="absolute inset-0 bg-gradient-to-t from-soil/60 via-transparent to-transparent" />
               <div className="pointer-events-none absolute inset-3 rounded-[1.45rem] border border-ivory/15 md:inset-4 md:rounded-[2.3rem]" />
               <div className="absolute bottom-7 left-7 right-7 flex items-center justify-between gap-4 md:bottom-9 md:left-9 md:right-9">
-                <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-ivory/80">Material-aware exterior care</p>
+                <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-ivory/80">{t.imageCaption}</p>
                 <span className="font-display text-2xl text-sand">B.</span>
               </div>
             </motion.div>
@@ -83,7 +70,7 @@ export function ExperienceSequence() {
             {chapters.map((chapter, index) => (
               <motion.li
                 key={chapter.number}
-                className="group grid gap-6 rounded-[2rem] border border-oak/10 bg-ivory/55 p-7 shadow-[0_20px_60px_-46px_rgba(29,23,15,.7)] transition-colors duration-500 hover:bg-ivory/85 md:grid-cols-[5rem_1fr] md:rounded-[2.5rem] md:p-10"
+                className="group grid gap-6 rounded-[2rem] border border-oak/10 bg-ivory/55 p-7 shadow-[0_20px_60px_-46px_rgba(28,28,26,.7)] transition-colors duration-500 hover:bg-ivory/85 md:grid-cols-[5rem_1fr] md:rounded-[2.5rem] md:p-10"
                 initial={reduce ? false : { opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: false, amount: 0.4 }}

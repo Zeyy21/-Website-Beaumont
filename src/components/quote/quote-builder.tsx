@@ -16,12 +16,26 @@ import type { ServiceCard } from "@/lib/data";
 import { Button, Monogram } from "@/components/ui";
 import { AddressSearch } from "./address-search";
 import { saveQuote, type SaveQuotePayload } from "@/app/(site)/quote/actions";
+import { useT } from "@/components/i18n/locale-provider";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
+import type { Locale } from "@/lib/i18n/config";
 
 interface Place {
   label: string;
   lat: number;
   lon: number;
 }
+
+/** Signed-in visitor's saved contact details, used to skip re-entry and to
+ *  route a completed request straight to their dashboard. */
+export interface QuoteAccount {
+  signedIn: boolean;
+  fullName: string;
+  email: string;
+  phone: string;
+}
+
+const dashboardQuotesPath = "/dashboard/quotes";
 
 interface StoredQuoteRequest extends SaveQuotePayload {
   place: Place;
@@ -32,57 +46,48 @@ const pendingQuoteKey = "beaumont:pending-quote";
 const quoteContactKey = "beaumont:quote-contact";
 const quoteReturnPath = "/quote?completeQuote=1";
 
+/** Step + option ids and structure live here; all display copy is pulled from
+ *  the dictionary at render time (keyed by the `copy` id below). */
 const steps = [
-  { label: "Property", shortLabel: "Home" },
-  { label: "Services", shortLabel: "Care" },
-  { label: "Details", shortLabel: "Details" },
-  { label: "Contact", shortLabel: "You" },
+  { copy: "property" },
+  { copy: "services" },
+  { copy: "details" },
+  { copy: "contact" },
 ] as const;
 
-const sceneCopy = [
-  {
-    eyebrow: "A simple beginning",
-    title: "Your address tells us more than a measurement ever could.",
-    copy: "It lets our team review the property, access, and route before we prepare anything.",
-  },
-  {
-    eyebrow: "Built around your home",
-    title: "Choose what you notice. We’ll connect the dots.",
-    copy: "Select one service or create a complete exterior refresh. Nothing is booked today.",
-  },
-  {
-    eyebrow: "No tape measure needed",
-    title: "A quick impression is more than enough.",
-    copy: "Best guesses are welcome. A Beaumont specialist verifies every detail before quoting.",
-  },
-  {
-    eyebrow: "The human touch",
-    title: "A real person reviews every request.",
-    copy: "You’ll receive a clear written quote—usually within 24 hours, with no payment or pressure.",
-  },
+type SceneKey = keyof Dictionary["quote"]["scenes"];
+const sceneKeys: readonly SceneKey[] = ["property", "services", "details", "contact"];
+
+const stepAudioFiles = [
+  "step-1-property.mp3",
+  "step-2-services.mp3",
+  "step-3-details.mp3",
+  "step-4-contact.mp3",
 ] as const;
 
-const quoteAudio = [
-  "/audio/quote/step-1-property.mp3",
-  "/audio/quote/step-2-services.mp3",
-  "/audio/quote/step-3-details.mp3",
-  "/audio/quote/step-4-contact.mp3",
-] as const;
+/** Per-step narration, localized by folder. French files live under `fr/`;
+ *  English is the root set. The signature chime below is non-verbal and shared. */
+function quoteAudioForLocale(locale: Locale): readonly string[] {
+  const base = locale === "fr" ? "/audio/quote/fr" : "/audio/quote";
+  return stepAudioFiles.map((file) => `${base}/${file}`);
+}
 
 const quoteSignatureAudio = "/audio/quote/beaumont-signature.mp3";
 
+/** `copy` maps to dictionaries.quote.propertySizes.<copy>. */
 const propertySizes = [
-  { id: "entry", label: "A small area", note: "Entry, steps, or front walk", icon: "entry" },
-  { id: "single", label: "One main surface", note: "Driveway, deck, patio, or facade", icon: "single" },
-  { id: "multi", label: "A few areas", note: "Two or more exterior surfaces", icon: "multi" },
-  { id: "full", label: "The full exterior", note: "A whole-property refresh", icon: "full" },
+  { id: "entry", copy: "small", icon: "entry" },
+  { id: "single", copy: "single", icon: "single" },
+  { id: "multi", copy: "multi", icon: "multi" },
+  { id: "full", copy: "full", icon: "full" },
 ] as const;
 
+/** `copy` maps to dictionaries.quote.conditions.<copy>. */
 const conditionOptions = [
-  { id: "refresh", label: "A seasonal refresh", note: "Light, everyday buildup" },
-  { id: "organic", label: "Algae or grime", note: "Green, black, or slippery areas" },
-  { id: "stains", label: "Stubborn stains", note: "Oil, rust, or marked spots" },
-  { id: "delicate", label: "A delicate surface", note: "Older, painted, wood, or soft-wash only" },
+  { id: "refresh", copy: "light" },
+  { id: "organic", copy: "algae" },
+  { id: "stains", copy: "stains" },
+  { id: "delicate", copy: "delicate" },
 ] as const;
 
 const ease = [0.22, 1, 0.36, 1] as const;
@@ -90,11 +95,32 @@ const ease = [0.22, 1, 0.36, 1] as const;
 export function QuoteBuilder({
   services,
   initialZone,
+  account,
 }: {
   services: ServiceCard[];
   initialZone?: string | null;
+  account?: QuoteAccount | null;
 }) {
   const reduce = useReducedMotion();
+  const signedIn = Boolean(account?.signedIn);
+  const { dict, locale } = useT();
+  const quoteAudio = useMemo(() => quoteAudioForLocale(locale), [locale]);
+  const tq = dict.quote;
+  const tqResults = tq.results;
+  const stepLabel = (i: number) => tq.steps[steps[i].copy].label;
+  const stepShort = (i: number) => {
+    const s = tq.steps[steps[i].copy];
+    return s.short || s.label;
+  };
+  const serviceDescription = (id: string, fallback: string) => {
+    const map = tq.serviceDescriptions as Record<string, string>;
+    return map[id] ?? fallback;
+  };
+  const servicesSelectedLabel = (n: number) =>
+    (n === 1 ? tq.step1.servicesSelectedOne : tq.step1.servicesSelectedMany).replace(
+      "{n}",
+      String(n),
+    );
   const [step, setStep] = useState(0);
   const [place, setPlace] = useState<Place | null>(null);
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
@@ -105,9 +131,9 @@ export function QuoteBuilder({
   const [frequency, setFrequency] = useState<FrequencyId>("one_time");
   const [selectedAddOns, setSelectedAddOns] = useState<string[]>([]);
   const [scopeDetails, setScopeDetails] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [fullName, setFullName] = useState(account?.fullName ?? "");
+  const [email, setEmail] = useState(account?.email ?? "");
+  const [phone, setPhone] = useState(account?.phone ?? "");
   const [result, setResult] = useState<null | {
     ok: boolean;
     title: string;
@@ -133,19 +159,21 @@ export function QuoteBuilder({
     [services, selectedServiceIds],
   );
   const primaryService = selectedServices[0] ?? services[0];
-  const propertySizeLabel =
-    propertySizes.find((item) => item.id === propertySize)?.label ?? "Not selected";
+  const sizeOption = propertySizes.find((item) => item.id === propertySize);
+  const propertySizeLabel = sizeOption
+    ? tq.propertySizes[sizeOption.copy].label
+    : dict.common.notSelected;
   const conditionLabel = conditions.length
     ? conditionOptions
         .filter((item) => conditions.includes(item.id))
-        .map((item) => item.label)
+        .map((item) => tq.conditions[item.copy].label)
         .join(", ")
-    : "Not selected";
+    : dict.common.notSelected;
   const frequencyLabel =
-    frequencies.find((item) => item.id === frequency)?.label ?? "Not selected";
+    dict.frequencies[frequency]?.label ?? dict.common.notSelected;
   const serviceSummary = selectedServices.length
     ? selectedServices.map((item) => item.name).join(", ")
-    : "Not selected";
+    : dict.common.notSelected;
   const canAdvance =
     step === 0 ? Boolean(place) : step === 1 ? selectedServiceIds.length > 0 : true;
   const contactIsValid =
@@ -208,7 +236,7 @@ export function QuoteBuilder({
 
   const playStepNarration = useCallback(
     (targetStep: number) => playAudio(quoteAudio[targetStep], "narration"),
-    [playAudio],
+    [playAudio, quoteAudio],
   );
 
   const startAudioGuide = useCallback(() => {
@@ -261,7 +289,7 @@ export function QuoteBuilder({
     audioPhaseRef.current = null;
     audioTimerRef.current = window.setTimeout(() => {
       playStepNarration(currentStepRef.current);
-    }, 280);
+    }, 120);
   }, [playStepNarration]);
 
   // Handle step narration changes (only after signature has played)
@@ -368,9 +396,8 @@ export function QuoteBuilder({
           setResult({
             ok: true,
             needsAccount: true,
-            title: "Your quote request is created.",
-            message:
-              "Create your free account to save this request and receive Beaumont's written quote. Your name and email are already filled in.",
+            title: tqResults.createdTitle,
+            message: tqResults.createdMessage,
           });
           return;
         }
@@ -378,29 +405,40 @@ export function QuoteBuilder({
           window.localStorage.removeItem(pendingQuoteKey);
           window.history.replaceState({}, "", window.location.pathname);
           const delivered = response.notificationStatus === "sent";
+          // Signed-in visitors already have the request saved to their account;
+          // send them to their quotes panel rather than the public end card.
+          if (signedIn) {
+            setResult({
+              ok: true,
+              title: tqResults.savedToAccountTitle,
+              message: tqResults.savedToAccountMessage,
+            });
+            window.location.assign(dashboardQuotesPath);
+            return;
+          }
           setResult({
             ok: true,
-            title: "Your request is in good hands.",
+            title: tqResults.goodHandsTitle,
             message: delivered
-              ? "A Beaumont specialist will review everything and reply with your written quote, usually within 24 hours."
-              : "Your request is safely saved. Beaumont can see every detail while the notification is retried.",
+              ? tqResults.deliveredMessage
+              : tqResults.savedMessage,
           });
         } else {
           setResult({
             ok: false,
-            title: "We couldn’t send that just yet.",
-            message: response.error ?? "Something went wrong. Please try again.",
+            title: tqResults.errorTitle,
+            message: response.error ?? tqResults.errorMessage,
           });
         }
       } catch {
         setResult({
           ok: false,
-          title: "We couldn’t send that just yet.",
-          message: "Your details are still here. Please try once more.",
+          title: tqResults.errorTitle,
+          message: tqResults.errorRetryMessage,
         });
       }
     });
-  }, []);
+  }, [tqResults, signedIn]);
 
   useEffect(() => {
     if (resumedRequest.current) return;
@@ -412,8 +450,8 @@ export function QuoteBuilder({
       setStep(3);
       setResult({
         ok: false,
-        title: "Your saved details have expired.",
-        message: "Please complete the request again—it only takes a moment.",
+        title: tqResults.expiredTitle,
+        message: tqResults.expiredMessage,
       });
       return;
     }
@@ -426,8 +464,8 @@ export function QuoteBuilder({
         setStep(3);
         setResult({
           ok: false,
-          title: "Your saved details have expired.",
-          message: "Please complete the request again—it only takes a moment.",
+          title: tqResults.expiredTitle,
+          message: tqResults.expiredMessage,
         });
         return;
       }
@@ -462,11 +500,11 @@ export function QuoteBuilder({
       setStep(3);
       setResult({
         ok: false,
-        title: "We couldn’t restore your request.",
-        message: "Please complete it again—your previous request was not sent.",
+        title: tqResults.restoreErrorTitle,
+        message: tqResults.restoreErrorMessage,
       });
     }
-  }, [sendRequest]);
+  }, [sendRequest, tqResults]);
 
   const toggleService = (id: string) => {
     setSelectedServiceIds((current) =>
@@ -530,11 +568,11 @@ export function QuoteBuilder({
     setStep(0);
   };
 
-  const activeScene = sceneCopy[step];
+  const activeScene = tq.scenes[sceneKeys[step]];
   const progress = ((step + 1) / steps.length) * 100;
 
   return (
-    <div className="quote-experience min-w-0 overflow-hidden rounded-[1.75rem] border border-ivory/10 bg-soil shadow-[0_38px_110px_-42px_rgba(29,23,15,.75)] md:rounded-[2.75rem]">
+    <div className="quote-experience min-w-0 overflow-hidden rounded-[1.75rem] border border-ivory/10 bg-soil shadow-[0_38px_110px_-42px_rgba(28,28,26,.75)] md:rounded-[2.75rem]">
       <audio
         ref={audioRef}
         src={quoteSignatureAudio}
@@ -556,20 +594,20 @@ export function QuoteBuilder({
             </span>
             <span className="min-w-0">
               <span className="block truncate text-[10px] font-semibold uppercase tracking-[0.25em] text-sand/70">
-                Personal estimate
+                {tq.header.eyebrow}
               </span>
               <span className="mt-0.5 block text-xs font-medium text-ivory/55">
-                About 2 minutes · no payment
+                {tq.header.sub}
               </span>
             </span>
           </div>
 
-          <ol className="hidden items-center gap-1 md:flex" aria-label="Estimate progress">
+          <ol className="hidden items-center gap-1 md:flex" aria-label={tq.header.progressAria}>
             {steps.map((item, index) => {
               const active = index === step;
               const complete = index < step;
               return (
-                <li key={item.label} className="flex items-center">
+                <li key={item.copy} className="flex items-center">
                   <button
                     type="button"
                     onClick={() => index <= step && !result && setStep(index)}
@@ -594,7 +632,7 @@ export function QuoteBuilder({
                     >
                       {complete ? <Check /> : index + 1}
                     </span>
-                    {item.label}
+                    {stepLabel(index)}
                   </button>
                   {index < steps.length - 1 && (
                     <span className="mx-1 h-px w-3 bg-ivory/10" aria-hidden="true" />
@@ -622,10 +660,10 @@ export function QuoteBuilder({
             </span>
             <span className="min-w-0">
               <span className="block whitespace-nowrap text-[9px] font-semibold uppercase tracking-[0.22em] text-sand/75">
-                Audio guide
+                {tq.audio.label}
               </span>
               <span className="mt-0.5 hidden truncate text-[11px] font-medium text-ivory/45 sm:block">
-                A quiet cue for each step
+                {tq.audio.description}
               </span>
             </span>
           </div>
@@ -636,8 +674,8 @@ export function QuoteBuilder({
                 type="button"
                 onClick={replayAudioGuide}
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-ivory/15 text-ivory/65 transition-colors hover:border-sand/40 hover:bg-ivory/[0.06] hover:text-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sand/60"
-                aria-label={`Replay the ${steps[step].label.toLowerCase()} guide`}
-                title="Replay this step"
+                aria-label={`${tq.audio.replayTitle} — ${stepLabel(step)}`}
+                title={tq.audio.replayTitle}
               >
                 <ReplayIcon />
               </button>
@@ -653,7 +691,7 @@ export function QuoteBuilder({
               }`}
             >
               {audioGuideEnabled ? <MutedIcon /> : <PlayIcon />}
-              {audioGuideEnabled ? "Mute" : "Unmute"}
+              {audioGuideEnabled ? tq.audio.mute : tq.audio.unmute}
             </button>
           </div>
         </div>
@@ -664,7 +702,7 @@ export function QuoteBuilder({
           aria-valuemin={1}
           aria-valuemax={steps.length}
           aria-valuenow={step + 1}
-          aria-label={`Step ${step + 1} of ${steps.length}: ${steps[step].label}`}
+          aria-label={`${tq.header.progressAria}: ${step + 1}/${steps.length} — ${stepLabel(step)}`}
         >
           <motion.span
             className="block h-full bg-sand"
@@ -689,9 +727,9 @@ export function QuoteBuilder({
                   <div>
                     <StepHeading
                       headingRef={headingRef}
-                      overline="First, the property"
-                      title="Where are we caring for?"
-                      copy="Start with an address. That’s all we need to understand the home and prepare the right next questions."
+                      overline={tq.step0.overline}
+                      title={tq.step0.title}
+                      copy={tq.step0.copy}
                     />
 
                     <div className="mt-8 md:mt-10">
@@ -718,7 +756,7 @@ export function QuoteBuilder({
                             </span>
                             <span className="min-w-0 flex-1">
                               <span className="block text-[9px] font-semibold uppercase tracking-[0.22em] text-cinnamon">
-                                Property found
+                                {tq.step0.propertyFound}
                               </span>
                               <span className="mt-1 block font-display text-xl leading-tight text-oak sm:text-2xl">
                                 {place.label}
@@ -730,9 +768,9 @@ export function QuoteBuilder({
                     </AnimatePresence>
 
                     <div className="mt-7 flex flex-wrap gap-x-6 gap-y-3 border-t border-oak/10 pt-5 text-xs font-medium text-soil/55">
-                      <TrustNote icon={<ShieldIcon />}>Kept private</TrustNote>
-                      <TrustNote icon={<SparkIcon />}>No exact measurements</TrustNote>
-                      <TrustNote icon={<ClockIcon />}>Reply within 24h</TrustNote>
+                      <TrustNote icon={<ShieldIcon />}>{tq.step0.trustPrivate}</TrustNote>
+                      <TrustNote icon={<SparkIcon />}>{tq.step0.trustNoMeasure}</TrustNote>
+                      <TrustNote icon={<ClockIcon />}>{tq.step0.trustReply}</TrustNote>
                     </div>
                   </div>
                 )}
@@ -741,9 +779,9 @@ export function QuoteBuilder({
                   <div>
                     <StepHeading
                       headingRef={headingRef}
-                      overline="Shape your visit"
-                      title="What would you like to refresh?"
-                      copy="Choose everything you’re considering. You can select more than one, and nothing is booked today."
+                      overline={tq.step1.overline}
+                      title={tq.step1.title}
+                      copy={tq.step1.copy}
                     />
 
                     <div className="mt-8 grid gap-3 sm:grid-cols-2 md:mt-10">
@@ -760,7 +798,7 @@ export function QuoteBuilder({
                             transition={{ duration: 0.42, delay: reduce ? 0 : index * 0.05, ease }}
                             className={`group relative min-h-[10.5rem] overflow-hidden rounded-[1.35rem] border p-5 text-left transition-[border-color,background-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 ${
                               selected
-                                ? "border-cinnamon bg-cinnamon text-ivory shadow-[0_18px_45px_-28px_rgba(64,38,26,.9)]"
+                                ? "border-cinnamon bg-cinnamon text-ivory shadow-[0_18px_45px_-28px_rgba(43,43,40,.9)]"
                                 : "border-oak/10 bg-white/65 text-oak hover:border-cinnamon/30 hover:bg-white"
                             }`}
                           >
@@ -786,14 +824,14 @@ export function QuoteBuilder({
                                 </span>
                               </span>
                               <span className="mt-5 block font-display text-2xl leading-[1.05]">
-                                {shortServiceName(item.name)}
+                                {item.name}
                               </span>
                               <span
                                 className={`mt-2 block text-xs font-medium leading-relaxed ${
                                   selected ? "text-ivory/65" : "text-soil/50"
                                 }`}
                               >
-                                {shortServiceDescription(item.id, item.description)}
+                                {serviceDescription(item.id, item.description)}
                               </span>
                             </span>
                           </motion.button>
@@ -803,8 +841,8 @@ export function QuoteBuilder({
 
                     <p className="mt-5 text-center text-xs font-medium text-soil/45">
                       {selectedServices.length
-                        ? `${selectedServices.length} service${selectedServices.length === 1 ? "" : "s"} selected`
-                        : "Select at least one to continue"}
+                        ? servicesSelectedLabel(selectedServices.length)
+                        : tq.step1.selectAtLeastOne}
                     </p>
                   </div>
                 )}
@@ -813,18 +851,18 @@ export function QuoteBuilder({
                   <div>
                     <StepHeading
                       headingRef={headingRef}
-                      overline="The quick picture"
-                      title="Help us see what you see."
-                      copy="No measuring and no technical language. Pick the answers that feel closest—we’ll verify the rest."
+                      overline={tq.step2.overline}
+                      title={tq.step2.title}
+                      copy={tq.step2.copy}
                     />
 
-                    <QuestionBlock number="01" title="How much of the property needs care?">
+                    <QuestionBlock number="01" title={tq.step2.q1}>
                       <div className="grid gap-2 sm:grid-cols-2">
                         {propertySizes.map((item) => (
                           <ChoiceCard
                             key={item.id}
-                            label={item.label}
-                            note={item.note}
+                            label={tq.propertySizes[item.copy].label}
+                            note={tq.propertySizes[item.copy].note}
                             selected={propertySize === item.id}
                             onClick={() => setPropertySize(item.id)}
                             icon={<ScopeIcon type={item.icon} />}
@@ -835,15 +873,15 @@ export function QuoteBuilder({
 
                     <QuestionBlock
                       number="02"
-                      title="What stands out right now?"
-                      hint="Select all that apply"
+                      title={tq.step2.q2}
+                      hint={tq.step2.selectAllApply}
                     >
                       <div className="grid gap-2 sm:grid-cols-2">
                         {conditionOptions.map((item) => (
                           <ChoiceCard
                             key={item.id}
-                            label={item.label}
-                            note={item.note}
+                            label={tq.conditions[item.copy].label}
+                            note={tq.conditions[item.copy].note}
                             selected={conditions.includes(item.id)}
                             onClick={() => toggleCondition(item.id)}
                           />
@@ -851,7 +889,7 @@ export function QuoteBuilder({
                       </div>
                     </QuestionBlock>
 
-                    <QuestionBlock number="03" title="Is this a one-time visit or ongoing care?">
+                    <QuestionBlock number="03" title={tq.step2.q3}>
                       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                         {frequencies.map((item) => (
                           <button
@@ -865,7 +903,7 @@ export function QuoteBuilder({
                                 : "border-oak/10 bg-white/60 text-soil/65 hover:border-cinnamon/30"
                             }`}
                           >
-                            {item.label}
+                            {dict.frequencies[item.id].label}
                           </button>
                         ))}
                       </div>
@@ -874,8 +912,8 @@ export function QuoteBuilder({
                     <details className="group mt-7 rounded-[1.25rem] border border-oak/10 bg-sand/15 open:bg-white/55">
                       <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-sm font-semibold text-oak [&::-webkit-details-marker]:hidden">
                         <span>
-                          Add anything else
-                          <span className="ml-2 font-normal text-soil/45">Optional</span>
+                          {tq.step2.addAnything}
+                          <span className="ml-2 font-normal text-soil/45">{dict.common.optional}</span>
                         </span>
                         <PlusIcon />
                       </summary>
@@ -901,7 +939,7 @@ export function QuoteBuilder({
                                     : "border-oak/10 bg-ivory/60 text-soil/65 hover:border-cinnamon/30"
                                 }`}
                               >
-                                {item.label}
+                                {dict.addOns[item.id]}
                                 <span
                                   className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
                                     selected
@@ -916,12 +954,12 @@ export function QuoteBuilder({
                           })}
                         </div>
                         <label className="mt-4 block text-sm font-semibold text-oak">
-                          A note for the team
+                          {tq.step2.noteLabel}
                           <textarea
                             value={scopeDetails}
                             onChange={(event) => setScopeDetails(event.target.value)}
                             rows={3}
-                            placeholder="Access details, a particular surface, or anything else you’d like us to know…"
+                            placeholder={tq.step2.notePlaceholder}
                             className="mt-2 w-full resize-none rounded-xl border border-oak/15 bg-ivory/70 px-4 py-3 font-medium text-oak outline-none transition placeholder:text-soil/35 focus:border-cinnamon focus:ring-2 focus:ring-cinnamon/10"
                           />
                         </label>
@@ -934,20 +972,24 @@ export function QuoteBuilder({
                   <div>
                     <StepHeading
                       headingRef={headingRef}
-                      overline="Your request is ready"
+                      overline={tq.step3.overlineReady}
                       title={
                         result?.needsAccount
-                          ? "Your request is ready to save."
+                          ? tq.step3.titleSave
                           : result?.ok
-                            ? "Consider it received."
-                            : "Where should we send your quote?"
+                            ? tq.step3.titleReceived
+                            : signedIn
+                              ? tq.step3.titleSignedIn
+                              : tq.step3.titleDefault
                       }
                       copy={
                         result?.needsAccount
-                          ? "One quick step keeps your quote connected to you."
+                          ? tq.step3.copySave
                           : result?.ok
-                          ? "We’ll take it from here."
-                          : "Share the best way to reach you. These details are used only for this request."
+                          ? tq.step3.copyReceived
+                          : signedIn
+                            ? tq.step3.copySignedIn
+                            : tq.step3.copyDefault
                       }
                     />
 
@@ -986,7 +1028,7 @@ export function QuoteBuilder({
                                 )
                               }
                             >
-                              Create account and save quote
+                              {tq.step3.createAccount}
                               <Arrow />
                             </Button>
                             <button
@@ -998,12 +1040,12 @@ export function QuoteBuilder({
                               }
                               className="text-sm font-semibold text-oak underline decoration-oak/25 underline-offset-4 hover:decoration-oak"
                             >
-                              Already have an account? Sign in
+                              {tq.step3.alreadyHaveAccount}
                             </button>
                           </div>
                         ) : (
                           <Button className="mt-7" variant="outline" onClick={result.ok ? reset : () => setResult(null)}>
-                            {result.ok ? "Start another request" : "Try again"}
+                            {result.ok ? tq.step3.startAnother : tq.step3.tryAgain}
                           </Button>
                         )}
                       </motion.div>
@@ -1012,48 +1054,48 @@ export function QuoteBuilder({
                         <div className="mt-8 rounded-[1.35rem] border border-oak/10 bg-sand/15 p-5 md:mt-10 md:p-6">
                           <div className="flex items-center justify-between gap-4">
                             <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cinnamon">
-                              Your care plan
+                              {tq.step3.carePlan}
                             </p>
                             <button
                               type="button"
                               onClick={() => setStep(1)}
                               className="text-xs font-semibold text-oak underline decoration-oak/25 underline-offset-4 hover:decoration-oak"
                             >
-                              Edit
+                              {dict.common.edit}
                             </button>
                           </div>
                           <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-3">
-                            <SummaryRow label="Property" value={place?.label ?? "Not selected"} />
-                            <SummaryRow label="Care" value={serviceSummary} />
-                            <SummaryRow label="Plan" value={`${propertySizeLabel} · ${frequencyLabel}`} />
+                            <SummaryRow label={tq.step3.summaryProperty} value={place?.label ?? dict.common.notSelected} />
+                            <SummaryRow label={tq.step3.summaryCare} value={serviceSummary} />
+                            <SummaryRow label={tq.step3.summaryPlan} value={`${propertySizeLabel} · ${frequencyLabel}`} />
                           </dl>
                         </div>
 
                         <div className="mt-5 grid gap-4 sm:grid-cols-2">
                           <QuoteField
-                            label="Full name"
+                            label={tq.step3.fullName}
                             value={fullName}
                             onChange={setFullName}
                             autoComplete="name"
-                            placeholder="Your name"
+                            placeholder={tq.step3.fullNamePlaceholder}
                           />
                           <QuoteField
-                            label="Email"
+                            label={tq.step3.email}
                             value={email}
                             onChange={setEmail}
                             type="email"
                             autoComplete="email"
-                            placeholder="you@example.com"
+                            placeholder={tq.step3.emailPlaceholder}
                           />
                           <div className="sm:col-span-2">
                             <QuoteField
-                              label="Phone"
-                              hint="For quick scheduling questions"
+                              label={tq.step3.phone}
+                              hint={tq.step3.phoneHint}
                               value={phone}
                               onChange={setPhone}
                               type="tel"
                               autoComplete="tel"
-                              placeholder="(514) 555-0123"
+                              placeholder={tq.step3.phonePlaceholder}
                             />
                           </div>
                         </div>
@@ -1061,7 +1103,7 @@ export function QuoteBuilder({
                         <div className="mt-5 flex items-start gap-3 rounded-xl border border-oak/10 bg-white/50 px-4 py-3 text-xs font-medium leading-relaxed text-soil/50">
                           <ShieldIcon />
                           <span>
-                            Your request is saved securely. If you’re new to Beaumont, we’ll help you create your client access before it’s sent.
+                            {signedIn ? tq.step3.securityNoteSignedIn : tq.step3.securityNote}
                           </span>
                         </div>
                       </>
@@ -1082,7 +1124,7 @@ export function QuoteBuilder({
                   step === 0 ? "pointer-events-none opacity-0" : ""
                 }`}
               >
-                <BackArrow /> Back
+                <BackArrow /> {dict.common.back}
               </button>
 
               {step < steps.length - 1 ? (
@@ -1090,9 +1132,9 @@ export function QuoteBuilder({
                   size="lg"
                   onClick={() => setStep((current) => current + 1)}
                   disabled={!canAdvance}
-                  className="min-w-[10rem] shadow-[0_16px_35px_-18px_rgba(64,38,26,.85)]"
+                  className="min-w-[10rem] shadow-[0_16px_35px_-18px_rgba(43,43,40,.85)]"
                 >
-                  {step === 0 ? "This is the place" : step === 1 ? "Continue" : "Looks good"}
+                  {step === 0 ? tq.step0.submit : step === 1 ? tq.step1.submit : tq.step2.submit}
                   <Arrow />
                 </Button>
               ) : (
@@ -1100,9 +1142,9 @@ export function QuoteBuilder({
                   size="lg"
                   onClick={submit}
                   disabled={pending || !contactIsValid}
-                  className="min-w-[11rem] shadow-[0_16px_35px_-18px_rgba(64,38,26,.85)]"
+                  className="min-w-[11rem] shadow-[0_16px_35px_-18px_rgba(43,43,40,.85)]"
                 >
-                  {pending ? "Sending…" : "Send my request"}
+                  {pending ? tq.step3.sending : tq.step3.submit}
                   {!pending && <Arrow />}
                 </Button>
               )}
@@ -1117,14 +1159,14 @@ export function QuoteBuilder({
           />
           <div
             aria-hidden="true"
-            className="absolute inset-0 bg-[linear-gradient(180deg,rgba(29,23,15,.2)_0%,rgba(29,23,15,.72)_55%,rgba(29,23,15,.96)_100%)]"
+            className="absolute inset-0 bg-[linear-gradient(180deg,rgba(28,28,26,.2)_0%,rgba(28,28,26,.72)_55%,rgba(28,28,26,.96)_100%)]"
           />
           <div aria-hidden="true" className="absolute inset-5 rounded-[1.8rem] border border-ivory/10" />
 
           <div className="relative flex h-full min-h-[43rem] flex-col justify-between p-9 xl:p-11">
             <div className="flex items-center justify-between">
               <span className="rounded-full border border-ivory/15 bg-soil/25 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.24em] text-ivory/70 backdrop-blur-sm">
-                Step {step + 1} · {steps[step].shortLabel}
+                {step + 1} · {stepShort(step)}
               </span>
               <span className="font-display text-2xl text-sand">0{step + 1}</span>
             </div>
@@ -1150,7 +1192,7 @@ export function QuoteBuilder({
                 {(place || selectedServices.length > 0) && (
                   <div className="mt-8 border-t border-ivory/15 pt-6">
                     <p className="text-[9px] font-semibold uppercase tracking-[0.24em] text-ivory/40">
-                      Captured so far
+                      {tq.capturedSoFar}
                     </p>
                     <div className="mt-4 space-y-3 text-sm font-medium text-ivory/80">
                       {place && (
@@ -1162,7 +1204,7 @@ export function QuoteBuilder({
                       {selectedServices.length > 0 && (
                         <p className="flex items-center gap-2.5">
                           <span className="text-sand"><SparkIcon /></span>
-                          {selectedServices.length} service{selectedServices.length === 1 ? "" : "s"} selected
+                          {servicesSelectedLabel(selectedServices.length)}
                         </p>
                       )}
                       {step >= 2 && (
@@ -1336,24 +1378,6 @@ function QuoteField({
       />
     </label>
   );
-}
-
-function shortServiceName(name: string) {
-  return name
-    .replace("Driveway & Hardscape Washing", "Driveways & stone")
-    .replace("Deck & Patio Washing", "Decks & patios")
-    .replace("Soft House Washing", "House washing")
-    .replace("Exterior Window Washing", "Exterior windows");
-}
-
-function shortServiceDescription(id: string, fallback: string) {
-  const descriptions: Record<string, string> = {
-    driveway: "Concrete, interlock, asphalt, steps, and walkways.",
-    deck: "Wood, composite, concrete, and outdoor living areas.",
-    "house-wash": "Siding, brick, stucco, and delicate exterior finishes.",
-    "windows-atlantic": "Exterior glass, frames, and sills, left streak-free.",
-  };
-  return descriptions[id] ?? fallback;
 }
 
 function isPropertySize(value: string | undefined): value is (typeof propertySizes)[number]["id"] {

@@ -1,8 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { fallbackServices, rewards } from "@/lib/config";
+import { getDict } from "@/lib/i18n/server";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Database } from "@/lib/supabase/types";
 
 type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
+type ServiceId = keyof Dictionary["services"];
 
 export interface ServiceCard {
   id: string;
@@ -14,18 +17,24 @@ export interface ServiceCard {
 }
 
 /**
- * Public services are code-owned. Legacy Supabase rows previously replaced the
- * exterior-care catalogue with unrelated cleaning products in production.
+ * Public services are code-owned (legacy Supabase rows previously replaced the
+ * exterior-care catalogue with unrelated products in production). Names and
+ * descriptions are localized from the active request dictionary by stable id.
  */
 export async function getServices(): Promise<ServiceCard[]> {
-  return fallbackServices.map(toCard);
+  const dict = getDict();
+  return fallbackServices.map((s) => toCard(s, dict));
 }
 
-function toCard(s: (typeof fallbackServices)[number]): ServiceCard {
+function toCard(
+  s: (typeof fallbackServices)[number],
+  dict: Dictionary,
+): ServiceCard {
+  const copy = dict.services[s.id as ServiceId];
   return {
     id: s.id,
-    name: s.name,
-    description: s.description,
+    name: copy?.name ?? s.name,
+    description: copy?.description ?? s.description,
     base_price: Number(s.base_price),
     rate_per_m2: Number(s.rate_per_m2),
     multiplier: Number(s.multiplier),

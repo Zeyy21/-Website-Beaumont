@@ -8,14 +8,18 @@ import {
 } from "@/lib/admin-clients";
 import { formatCurrency } from "@/lib/pricing";
 import { cn } from "@/lib/cn";
+import { getDict } from "@/lib/i18n/server";
 
-export const metadata = { title: "Admin - Clients" };
+export function generateMetadata() {
+  return { title: `${getDict().admin.clients.title}${getDict().common.brandSuffix}` };
+}
 
 export default async function AdminClientsPage({
   searchParams,
 }: {
   searchParams?: { q?: string };
 }) {
+  const t = getDict().admin.clients;
   const query = searchParams?.q?.trim() ?? "";
   const clients = await getAdminClientSummaries(query);
   const totalQuotes = clients.reduce((sum, client) => sum + client.quoteCount, 0);
@@ -28,14 +32,13 @@ export default async function AdminClientsPage({
     <div className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <CardTitle>Clients</CardTitle>
+          <CardTitle>{t.title}</CardTitle>
           <p className="mt-1 max-w-2xl text-sm text-soil/60">
-            Search customer accounts, open support context, and confirm previous
-            quote totals before replying.
+            {t.description}
           </p>
         </div>
         <ButtonLink href="/admin" variant="outline" size="sm">
-          Open inbox
+          {t.openInbox}
         </ButtonLink>
       </div>
 
@@ -43,36 +46,32 @@ export default async function AdminClientsPage({
         <input
           name="q"
           defaultValue={query}
-          placeholder="Search name, email, phone, address, service, or status"
+          placeholder={t.searchPlaceholder}
           className="min-h-11 flex-1 rounded-full border border-oak/15 bg-white px-5 text-sm text-oak outline-none transition-colors placeholder:text-soil/35 focus:border-cinnamon"
         />
         <button className="rounded-full bg-cinnamon px-6 py-2.5 text-sm font-medium text-ivory transition-colors hover:bg-oak">
-          Search
+          {t.search}
         </button>
         {query && (
           <Link
             href="/admin/clients"
             className="inline-flex items-center justify-center rounded-full px-4 py-2.5 text-sm text-cinnamon hover:underline"
           >
-            Clear
+            {t.clear}
           </Link>
         )}
       </form>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <StatCard label="Clients shown" value={String(clients.length)} />
-        <StatCard label="Quotes shown" value={String(totalQuotes)} />
-        <StatCard label="Quoted value" value={formatCurrency(quotedValue)} />
+        <StatCard label={t.clientsShown} value={String(clients.length)} />
+        <StatCard label={t.quotesShown} value={String(totalQuotes)} />
+        <StatCard label={t.quotedValue} value={formatCurrency(quotedValue)} />
       </div>
 
       {!clients.length ? (
         <EmptyState
-          title={query ? "No matching clients" : "No clients yet"}
-          body={
-            query
-              ? "Try a different name, email, phone, address, or service."
-              : "Customer accounts and quote requests will appear here."
-          }
+          title={query ? t.noMatchTitle : t.noClientsTitle}
+          body={query ? t.noMatchBody : t.noClientsBody}
         />
       ) : (
         <div className="space-y-3">
@@ -86,6 +85,7 @@ export default async function AdminClientsPage({
 }
 
 function ClientRow({ client }: { client: AdminClientSummary }) {
+  const t = getDict().admin.clients;
   return (
     <Card className="p-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -100,33 +100,33 @@ function ClientRow({ client }: { client: AdminClientSummary }) {
             <RoleBadge role={client.role} />
           </div>
           <p className="mt-1 text-sm text-soil/50">
-            {client.email ?? "No email on file"}
+            {client.email ?? t.noEmail}
             {client.phone ? ` - ${client.phone}` : ""}
           </p>
         </div>
         <ButtonLink href={clientHref(client.key)} size="sm" variant="outline">
-          View account
+          {t.viewAccount}
         </ButtonLink>
       </div>
 
       <dl className="mt-5 grid gap-4 border-t border-oak/10 pt-5 text-sm sm:grid-cols-2 lg:grid-cols-5">
-        <ClientMetric label="Quotes" value={String(client.quoteCount)} />
+        <ClientMetric label={t.quotes} value={String(client.quoteCount)} />
         <ClientMetric
-          label="Last quote"
-          value={client.latestQuoteAt ? formatDate(client.latestQuoteAt) : "None"}
+          label={t.lastQuote}
+          value={client.latestQuoteAt ? formatDate(client.latestQuoteAt) : t.none}
         />
         <ClientMetric
-          label="Last total"
+          label={t.lastTotal}
           value={
-            client.latestTotal ? formatCurrency(client.latestTotal) : "Review needed"
+            client.latestTotal ? formatCurrency(client.latestTotal) : t.reviewNeeded
           }
         />
         <ClientMetric
-          label="Paid"
+          label={t.paid}
           value={client.paidTotal ? formatCurrency(client.paidTotal) : "$0"}
         />
         <ClientMetric
-          label="Points"
+          label={t.points}
           value={
             typeof client.pointsBalance === "number"
               ? String(client.pointsBalance)
@@ -137,8 +137,8 @@ function ClientRow({ client }: { client: AdminClientSummary }) {
 
       {(client.latestAddress || client.latestService) && (
         <p className="mt-4 rounded-xl bg-sand/30 px-4 py-3 text-sm text-soil/65">
-          Latest request: {client.latestService ?? "Service not recorded"}
-          {client.latestAddress ? ` at ${client.latestAddress}` : ""}
+          {t.latestRequest} {client.latestService ?? t.serviceFallback}
+          {client.latestAddress ? ` ${t.at}${client.latestAddress}` : ""}
         </p>
       )}
     </Card>
@@ -157,6 +157,7 @@ function ClientMetric({ label, value }: { label: string; value: string }) {
 }
 
 function RoleBadge({ role }: { role: AdminClientSummary["role"] }) {
+  const t = getDict().admin.clients;
   return (
     <span
       className={cn(
@@ -168,7 +169,7 @@ function RoleBadge({ role }: { role: AdminClientSummary["role"] }) {
             : "bg-green-100 text-green-800",
       )}
     >
-      {role === "quote-only" ? "Quote only" : role}
+      {role === "quote-only" ? t.quoteOnly : role}
     </span>
   );
 }

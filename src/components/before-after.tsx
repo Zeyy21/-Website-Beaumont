@@ -2,6 +2,7 @@
 
 import { useRef, useState, useCallback } from "react";
 import { cn } from "@/lib/cn";
+import { useT } from "@/components/i18n/locale-provider";
 
 /**
  * Draggable before/after image comparison. Works with mouse, touch, and
@@ -11,8 +12,8 @@ import { cn } from "@/lib/cn";
 export function BeforeAfter({
   beforeUrl,
   afterUrl,
-  beforeLabel = "Before",
-  afterLabel = "After",
+  beforeLabel,
+  afterLabel,
   caption,
   className,
 }: {
@@ -23,6 +24,9 @@ export function BeforeAfter({
   caption?: string;
   className?: string;
 }) {
+  const { dict } = useT();
+  const beforeText = beforeLabel ?? dict.admin.gallery.before;
+  const afterText = afterLabel ?? dict.admin.gallery.after;
   const [pos, setPos] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -61,14 +65,14 @@ export function BeforeAfter({
         <div className="absolute inset-0">
           {afterUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={afterUrl} alt={afterLabel} className="h-full w-full object-cover" />
+            <img src={afterUrl} alt={afterText} className="h-full w-full object-cover" />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-sand to-ochre">
-              <span className="font-display text-2xl text-oak/40">After</span>
+              <span className="font-display text-2xl text-oak/40">{afterText}</span>
             </div>
           )}
           <span className="absolute bottom-3 right-3 rounded-full bg-soil/70 px-3 py-1 text-xs font-medium text-ivory">
-            {afterLabel}
+            {afterText}
           </span>
         </div>
 
@@ -84,16 +88,16 @@ export function BeforeAfter({
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={beforeUrl}
-              alt={beforeLabel}
+              alt={beforeText}
               className="h-full w-full object-cover"
             />
           ) : (
             <div className="flex h-full items-center justify-center bg-gradient-to-br from-oak to-soil">
-              <span className="font-display text-2xl text-ivory/40">Before</span>
+              <span className="font-display text-2xl text-ivory/40">{beforeText}</span>
             </div>
           )}
           <span className="absolute bottom-3 left-3 rounded-full bg-ivory/85 px-3 py-1 text-xs font-medium text-oak">
-            {beforeLabel}
+            {beforeText}
           </span>
         </div>
 
@@ -108,7 +112,7 @@ export function BeforeAfter({
           <button
             className="absolute top-1/2 left-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize items-center justify-center rounded-full bg-ivory text-oak shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ochre"
             role="slider"
-            aria-label="Drag to compare before and after"
+            aria-label={dict.admin.gallery.dragToCompare}
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={Math.round(pos)}

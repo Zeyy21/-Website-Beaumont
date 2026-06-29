@@ -2,10 +2,12 @@ import Image from "next/image";
 import { Hero } from "@/components/hero";
 import { ExperienceSequence } from "@/components/home-experience";
 import { QuoteCta } from "@/components/quote-cta";
+import { QuoteCtaBand } from "@/components/quote-cta-band";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion";
 import { Container, Eyebrow } from "@/components/ui";
 import { getServices } from "@/lib/data";
 import { site } from "@/lib/config";
+import { getDict } from "@/lib/i18n/server";
 
 const serviceImages = [
   "/images/montreal-driveway-pressure-washing.webp",
@@ -14,33 +16,34 @@ const serviceImages = [
   "/images/atlantic-window-care-montreal.webp",
 ];
 
-const serviceDetails = [
-  "Driveways & stone",
-  "Decks & patios",
-  "House exteriors",
-  "Specialist window care",
-];
-
-const serviceTypes = [
-  "Pressure washing",
-  "Pressure washing",
-  "Soft washing",
-  "Exterior window cleaning",
-];
-
 export default async function HomePage() {
+  const dict = await getDict();
   const services = await getServices();
+
+  const serviceDetails = [
+    dict.servicesSection.details.driveways,
+    dict.servicesSection.details.decks,
+    dict.servicesSection.details.houses,
+    dict.servicesSection.details.windows,
+  ];
+
+  const serviceTypes = [
+    dict.servicesSection.types.pressure,
+    dict.servicesSection.types.pressure,
+    dict.servicesSection.types.soft,
+    dict.servicesSection.types.windows,
+  ];
 
   return (
     <>
       <Hero />
 
-      <section data-header-tone="dark" className="relative z-10 border-y border-ivory/10 bg-soil text-ivory" aria-label="Beaumont service principles">
+      <section data-header-tone="dark" className="relative z-10 border-y border-ivory/10 bg-soil text-ivory" aria-label={dict.principles.sectionLabel}>
         <Container className="grid divide-y divide-ivory/10 md:grid-cols-3 md:divide-x md:divide-y-0">
           {[
-            ["01", "Material-aware", "A method selected for every surface."],
-            ["02", "Quietly managed", "Clear timing, careful preparation, no theatre."],
-            ["03", "Effortless to arrange", "Request the right exterior care in one place."],
+            ["01", dict.principles.a.title, dict.principles.a.copy],
+            ["02", dict.principles.b.title, dict.principles.b.copy],
+            ["03", dict.principles.c.title, dict.principles.c.copy],
           ].map(([number, title, copy]) => (
             <div key={number} className="group flex gap-5 py-7 md:px-8 md:py-9 first:md:pl-0 last:md:pr-0">
               <span className="font-display text-2xl text-ochre transition-colors group-hover:text-sand">{number}</span>
@@ -61,15 +64,15 @@ export default async function HomePage() {
               <div className="flex items-center gap-4">
                 <span className="font-display text-2xl text-ochre">01</span>
                 <span className="h-px w-12 bg-ochre/40" />
-                <Eyebrow>Services</Eyebrow>
+                <Eyebrow>{dict.servicesSection.eyebrow}</Eyebrow>
               </div>
               <p className="mt-6 max-w-sm text-base font-medium leading-relaxed text-soil/65">
-                Pressure washing, soft washing, and specialist window care selected for each surface, setting, and Montreal home.
+                {dict.servicesSection.intro}
               </p>
             </div>
             <h2 id="services-title" className="max-w-4xl text-balance font-display text-[clamp(3.25rem,6.2vw,6.5rem)] leading-[0.9] text-oak">
-              Every exterior surface.
-              <span className="block italic text-ochre">One considered standard.</span>
+              {dict.servicesSection.titleA}
+              <span className="block italic text-ochre">{dict.servicesSection.titleB}</span>
             </h2>
           </Reveal>
 
@@ -85,7 +88,7 @@ export default async function HomePage() {
                       : "lg:col-span-5"
                 }
               >
-                <article className={`group relative h-full min-h-[30rem] overflow-hidden rounded-[2rem] bg-soil text-ivory shadow-[0_28px_80px_-40px_rgba(29,23,15,.75)] md:rounded-[2.75rem] ${index === 0 ? "lg:min-h-[46rem]" : index === 3 ? "lg:min-h-[28rem]" : "lg:min-h-[22.5rem]"}`}>
+                <article className={`group relative h-full min-h-[30rem] overflow-hidden rounded-[2rem] bg-soil text-ivory shadow-[0_28px_80px_-40px_rgba(28,28,26,.75)] md:rounded-[2.75rem] ${index === 0 ? "lg:min-h-[46rem]" : index === 3 ? "lg:min-h-[28rem]" : "lg:min-h-[22.5rem]"}`}>
                   <Image
                     src={serviceImages[index % serviceImages.length]}
                     alt=""
@@ -100,7 +103,7 @@ export default async function HomePage() {
                   </div>
                   <div className="absolute inset-x-0 bottom-0 p-8 md:p-11">
                     <div className="flex items-center gap-4 text-[9px] font-semibold uppercase tracking-[0.28em] text-sand/90">
-                      <span>Service 0{index + 1}</span>
+                      <span>{dict.servicesSection.service} 0{index + 1}</span>
                       <span className="h-px w-8 bg-sand/40" />
                       <span>{serviceTypes[index]}</span>
                     </div>
@@ -119,28 +122,36 @@ export default async function HomePage() {
 
       <ExperienceSequence />
 
-      <section data-header-tone="dark" className="texture-soil relative overflow-hidden py-24 text-ivory md:py-36" aria-label="Client testimonial">
+      <section className="bg-sand/20 pb-20 md:pb-28" aria-label={dict.cta.process.text}>
+        <QuoteCtaBand variant="process" />
+      </section>
+
+      <section data-header-tone="dark" className="texture-soil relative overflow-hidden py-24 text-ivory md:py-36" aria-label={dict.testimonialSection.sectionLabel}>
         <div aria-hidden="true" className="pointer-events-none absolute -right-12 -top-24 font-display text-[24rem] leading-none text-ivory/[0.025]">“</div>
         <Container>
           <Reveal className="relative grid gap-10 rounded-[2.25rem] border border-ivory/10 bg-ivory/[0.035] p-8 backdrop-blur-sm md:rounded-[3.5rem] md:p-14 lg:grid-cols-[0.3fr_1.7fr] lg:p-20">
             <div>
               <p className="font-display text-5xl text-ochre">01</p>
-              <p className="mt-4 text-[10px] font-semibold uppercase tracking-[0.34em] text-sand">Client note</p>
+              <p className="mt-4 text-[10px] font-semibold uppercase tracking-[0.34em] text-sand">{dict.testimonialSection.clientNote}</p>
             </div>
             <div>
             <blockquote className="text-balance font-display text-[clamp(2.7rem,5.2vw,5.4rem)] leading-[0.96] text-ivory">
-              “It made the whole house look newer. The property simply felt cared for again.”
+              “{dict.testimonialSection.quote}”
             </blockquote>
               <div className="mt-10 flex flex-wrap items-center gap-5 border-t border-ivory/10 pt-7">
                 <span className="h-px w-12 bg-ochre" />
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-ivory/55">Eleanor V. · Beaumont client</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-ivory/55">{dict.testimonialSection.attribution}</p>
               </div>
             </div>
           </Reveal>
         </Container>
       </section>
 
-      <section id="quote" className="luxe-wash relative scroll-mt-24 overflow-hidden py-24 md:py-32" aria-labelledby="quote-title">
+      <section className="bg-ivory pt-20 md:pt-24" aria-label={dict.cta.band.title}>
+        <QuoteCtaBand variant="band" />
+      </section>
+
+      <section id="quote" className="luxe-wash relative scroll-mt-24 overflow-hidden pb-24 pt-16 md:pb-32 md:pt-20" aria-labelledby="quote-title">
         <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-oak/15 to-transparent" />
         <Container>
           <QuoteCta />
@@ -155,15 +166,15 @@ export default async function HomePage() {
             <div className="flex items-center gap-4">
               <span className="font-display text-2xl text-ochre">04</span>
               <span className="h-px w-12 bg-ochre/40" />
-              <Eyebrow>Contact</Eyebrow>
+              <Eyebrow>{dict.contact.eyebrow}</Eyebrow>
             </div>
             <h2 id="contact-title" className="mt-6 max-w-3xl text-balance font-display text-[clamp(3.2rem,6vw,6.1rem)] leading-[0.9] text-oak">
-              Prefer a conversation?
-              <span className="block italic text-ochre">We’re here.</span>
+              {dict.contact.titleA}
+              <span className="block italic text-ochre">{dict.contact.titleB}</span>
             </h2>
             </div>
             <p className="max-w-md text-base font-medium leading-relaxed text-soil/60 lg:justify-self-end">
-              For questions, property details, or a more tailored scope, reach us directly. We reply with clarity and without pressure.
+              {dict.contact.body}
             </p>
           </Reveal>
 
@@ -171,20 +182,20 @@ export default async function HomePage() {
             <Reveal className="min-w-0 lg:col-span-7">
               <a href={`mailto:${site.email}`} className="group flex min-h-[21rem] w-full min-w-0 flex-col justify-between overflow-hidden rounded-[2.25rem] bg-soil p-8 text-ivory shadow-lift md:rounded-[3rem] md:p-12">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-sand">Email Beaumont</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-sand">{dict.contact.emailLabel}</span>
                   <span className="flex h-12 w-12 items-center justify-center rounded-full border border-ivory/15 text-xl transition-all duration-500 group-hover:-rotate-45 group-hover:bg-ivory group-hover:text-soil">↗</span>
                 </div>
                 <span className="break-all font-display text-[clamp(2rem,4vw,4.5rem)] leading-[0.98] transition-colors group-hover:text-sand">{site.email}</span>
               </a>
             </Reveal>
             <Reveal delay={0.08} className="min-w-0 lg:col-span-5">
-              <a href={site.instagram} target="_blank" rel="noreferrer" className="group flex min-h-[21rem] w-full min-w-0 flex-col justify-between overflow-hidden rounded-[2.25rem] border border-oak/10 bg-sand/35 p-8 text-oak shadow-[0_24px_70px_-42px_rgba(29,23,15,.6)] md:rounded-[3rem] md:p-10">
+              <a href={site.instagram} target="_blank" rel="noreferrer" className="group flex min-h-[21rem] w-full min-w-0 flex-col justify-between overflow-hidden rounded-[2.25rem] border border-oak/10 bg-sand/35 p-8 text-oak shadow-[0_24px_70px_-42px_rgba(28,28,26,.6)] md:rounded-[3rem] md:p-10">
                 <div className="flex items-center justify-between">
                   <InstagramMark />
                   <span className="flex h-12 w-12 items-center justify-center rounded-full border border-oak/15 text-xl transition-all duration-500 group-hover:-rotate-45 group-hover:bg-oak group-hover:text-ivory">↗</span>
                 </div>
                 <div>
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-cinnamon">Follow our work</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-cinnamon">{dict.contact.followLabel}</span>
                   <span className="mt-3 block break-all font-display text-[clamp(2rem,3vw,2.75rem)] leading-none tracking-[-0.02em]">{site.instagramHandle}</span>
                 </div>
               </a>
@@ -192,17 +203,17 @@ export default async function HomePage() {
           </div>
 
           <Reveal className="mt-5 flex flex-col justify-between gap-3 border-t border-oak/10 pt-5 text-xs font-semibold uppercase tracking-[0.18em] text-soil/45 sm:flex-row">
-            <span>Greater Montréal</span>
-            <span>Monday–Saturday · Online estimates anytime</span>
+            <span>{dict.common.montreal}</span>
+            <span>{dict.contact.hours}</span>
           </Reveal>
         </Container>
       </section>
 
       <section id="terms" className="scroll-mt-20 border-t border-oak/10 bg-ivory py-12" aria-labelledby="terms-title">
         <Container className="grid gap-5 md:grid-cols-[0.35fr_1.65fr]">
-          <h2 id="terms-title" className="text-xs font-semibold uppercase tracking-[0.25em] text-cinnamon">Terms</h2>
+          <h2 id="terms-title" className="text-xs font-semibold uppercase tracking-[0.25em] text-cinnamon">{dict.terms.title}</h2>
           <p className="max-w-4xl text-sm font-medium leading-relaxed text-soil/60">
-            Estimates are confirmed after Beaumont reviews the selected services, access, weather, and surface condition. No payment is taken when requesting an estimate.
+            {dict.terms.body}
           </p>
         </Container>
       </section>

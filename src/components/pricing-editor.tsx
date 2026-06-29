@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { updateServicePricing } from "@/app/admin/actions";
 import { Button } from "@/components/ui";
 import { Card } from "@/components/dashboard-ui";
+import { useT } from "@/components/i18n/locale-provider";
 
 interface Service {
   id: string;
@@ -15,6 +16,9 @@ interface Service {
 
 /** Inline editor for service pricing fields kept for staff-side quote work. */
 export function PricingEditor({ service }: { service: Service }) {
+  const { dict } = useT();
+  const t = dict.admin.pricing;
+  const c = dict.common;
   const [base, setBase] = useState(service.base_price);
   const [rate, setRate] = useState(service.rate_per_m2);
   const [mult, setMult] = useState(service.multiplier);
@@ -33,22 +37,22 @@ export function PricingEditor({ service }: { service: Service }) {
       if (res.ok) {
         setSaved(true);
         setTimeout(() => setSaved(false), 2500);
-      } else setErr(res.error ?? "Failed");
+      } else setErr(res.error ?? dict.admin.quoteReviewForm.actionFailed);
     });
 
   return (
     <Card>
       <h3 className="text-lg text-oak">{service.name}</h3>
       <div className="mt-4 grid gap-4 sm:grid-cols-3">
-        <NumField label="Base price ($)" value={base} onChange={setBase} step={5} />
-        <NumField label="Legacy area field ($)" value={rate} onChange={setRate} step={0.1} />
-        <NumField label="Multiplier" value={mult} onChange={setMult} step={0.05} />
+        <NumField label={t.basePrice} value={base} onChange={setBase} step={5} />
+        <NumField label={t.legacyArea} value={rate} onChange={setRate} step={0.1} />
+        <NumField label={t.multiplier} value={mult} onChange={setMult} step={0.05} />
       </div>
       <div className="mt-4 flex items-center gap-3">
         <Button size="sm" onClick={save} disabled={pending}>
-          {pending ? "Saving…" : "Save"}
+          {pending ? c.saving : c.save}
         </Button>
-        {saved && <span className="text-sm text-green-700">Saved ✓</span>}
+        {saved && <span className="text-sm text-green-700">{c.saved}</span>}
         {err && <span className="text-sm text-red-700">{err}</span>}
       </div>
     </Card>

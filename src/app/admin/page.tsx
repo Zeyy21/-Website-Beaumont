@@ -11,10 +11,15 @@ import {
   sendQuoteToCustomer,
   applyPreviousQuoteForm,
 } from "./actions";
+import { getDict } from "@/lib/i18n/server";
+import { statusLabel } from "@/lib/i18n/dictionaries";
 
-export const metadata = { title: "Admin - Inbox" };
+export function generateMetadata() {
+  return { title: `${getDict().admin.inbox.title}${getDict().common.brandSuffix}` };
+}
 
 export default async function AdminHome() {
+  const t = getDict().admin.inbox;
   const { cards, counts, awaitingPayments } = await getAdminInboxData();
   const needsQuote = cards.filter((card) => card.quote.status === "requested");
   const sent = cards.filter((card) => card.quote.status === "sent");
@@ -25,50 +30,49 @@ export default async function AdminHome() {
     <div className="space-y-10">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <CardTitle>Inbox</CardTitle>
+          <CardTitle>{t.title}</CardTitle>
           <p className="mt-1 max-w-2xl text-sm text-soil/60">
-            Work quote requests from first review to accepted job. Open a quote
-            to edit price, reuse past pricing, add staff notes, and schedule.
+            {t.description}
           </p>
         </div>
         <ButtonLink href="/admin/clients" variant="outline" size="sm">
-          Find client
+          {t.findClient}
         </ButtonLink>
       </div>
 
       <section className="grid gap-4 md:grid-cols-5">
-        <StatCard label="Needs quote" value={String(counts.needsQuote)} />
-        <StatCard label="Sent" value={String(counts.sent)} />
-        <StatCard label="Accepted" value={String(counts.accepted)} />
-        <StatCard label="Scheduled" value={String(counts.scheduled)} />
-        <StatCard label="Awaiting pay" value={String(awaitingPayments.length)} />
+        <StatCard label={t.needsQuote} value={String(counts.needsQuote)} />
+        <StatCard label={t.sent} value={String(counts.sent)} />
+        <StatCard label={t.accepted} value={String(counts.accepted)} />
+        <StatCard label={t.scheduled} value={String(counts.scheduled)} />
+        <StatCard label={t.awaitingPay} value={String(awaitingPayments.length)} />
       </section>
 
       {!cards.length ? (
         <EmptyState
-          title="No active work"
-          body="New customer quote requests and active jobs will appear here."
+          title={t.noWorkTitle}
+          body={t.noWorkBody}
         />
       ) : (
         <div className="space-y-8">
           <InboxSection
-            title="Needs quote"
-            body="Set a final price or reuse a matching previous quote, then send it."
+            title={t.needsQuote}
+            body={t.needsQuoteBody}
             cards={needsQuote}
           />
           <InboxSection
-            title="Sent, waiting for customer"
-            body="Follow up, resend if needed, or mark accepted once the customer agrees."
+            title={t.sentWaiting}
+            body={t.sentWaitingBody}
             cards={sent}
           />
           <InboxSection
-            title="Accepted, needs scheduling"
-            body="Schedule the job from the quote detail page."
+            title={t.acceptedNeedsScheduling}
+            body={t.acceptedBody}
             cards={accepted}
           />
           <InboxSection
-            title="Scheduled"
-            body="Complete the job when service is done."
+            title={t.scheduled}
+            body={t.scheduledBody}
             cards={scheduled}
           />
         </div>
@@ -109,6 +113,8 @@ function InboxSection({
 }
 
 function InboxCard({ card }: { card: AdminQuoteCard }) {
+  const dict = getDict();
+  const t = dict.admin.inbox;
   const { quote, previousQuote } = card;
   const scope = quoteScopeDetails(quote);
   const hasTotal = Number(quote.total) > 0;
@@ -122,18 +128,18 @@ function InboxCard({ card }: { card: AdminQuoteCard }) {
               href={card.quoteUrl}
               className="font-display text-2xl text-oak hover:text-cinnamon"
             >
-              {quote.requester_name ?? "Quote request"}
+              {quote.requester_name ?? t.quoteRequestFallback}
             </Link>
-            <StatusBadge status={quote.status} />
+            <StatusBadge status={quote.status} label={statusLabel(dict, quote.status)} />
           </div>
           <p className="mt-1 text-sm text-soil/50">
-            {quote.address ?? "Address unavailable"} -{" "}
-            {quote.service_name ?? "Service not recorded"}
+            {quote.address ?? t.addressUnavailable} -{" "}
+            {quote.service_name ?? t.serviceNotRecorded}
           </p>
         </div>
         <div className="text-right">
           <p className="font-display text-3xl text-oak">
-            {hasTotal ? formatCurrency(Number(quote.total)) : "Needs price"}
+            {hasTotal ? formatCurrency(Number(quote.total)) : t.needsPrice}
           </p>
           <p className="text-xs text-soil/45">{card.nextAction}</p>
         </div>
@@ -141,8 +147,8 @@ function InboxCard({ card }: { card: AdminQuoteCard }) {
 
       <dl className="mt-5 grid gap-4 border-t border-oak/10 pt-5 text-sm sm:grid-cols-2 lg:grid-cols-4">
         <AdminDetail
-          label="Email"
-          value={quote.requester_email ?? quote.account_email ?? "Not provided"}
+          label={t.email}
+          value={quote.requester_email ?? quote.account_email ?? dict.common.notProvided}
           href={
             quote.requester_email || quote.account_email
               ? `mailto:${quote.requester_email ?? quote.account_email}`
@@ -150,37 +156,37 @@ function InboxCard({ card }: { card: AdminQuoteCard }) {
           }
         />
         <AdminDetail
-          label="Phone"
-          value={quote.requester_phone ?? "Not provided"}
+          label={t.phone}
+          value={quote.requester_phone ?? dict.common.notProvided}
           href={quote.requester_phone ? `tel:${quote.requester_phone}` : undefined}
         />
         <AdminDetail
-          label="Requested"
+          label={t.requested}
           value={new Date(quote.created_at).toLocaleDateString("en-CA")}
         />
         <AdminDetail
-          label="Scheduled"
+          label={dict.admin.inbox.scheduled}
           value={
             quote.scheduled_for
               ? new Date(quote.scheduled_for).toLocaleDateString("en-CA")
-              : "Not set"
+              : dict.common.notSet
           }
         />
       </dl>
 
       {previousQuote && (
         <div className="mt-4 rounded-xl border border-ochre/20 bg-sand/30 px-4 py-3 text-sm text-soil/70">
-          Previous match:{" "}
+          {t.previousMatch}{" "}
           <strong className="text-oak">
             {formatCurrency(Number(previousQuote.total))}
           </strong>{" "}
-          on {new Date(previousQuote.created_at).toLocaleDateString("en-CA")}
+          {dict.admin.clients.at}{new Date(previousQuote.created_at).toLocaleDateString("en-CA")}
           {!hasTotal && (
             <form action={applyPreviousQuoteForm} className="mt-3">
               <input type="hidden" name="quote_id" value={quote.id} />
               <input type="hidden" name="source_quote_id" value={previousQuote.id} />
               <button className="rounded-full bg-cinnamon px-4 py-2 text-xs font-semibold text-ivory transition-colors hover:bg-oak">
-                Use previous quote
+                {t.usePrevious}
               </button>
             </form>
           )}
@@ -195,19 +201,19 @@ function InboxCard({ card }: { card: AdminQuoteCard }) {
 
       <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-oak/10 pt-5">
         <ButtonLink href={card.quoteUrl} size="sm">
-          Open quote
+          {t.openQuote}
         </ButtonLink>
         {card.clientUrl && (
           <ButtonLink href={card.clientUrl} size="sm" variant="outline">
-            View client
+            {t.viewClient}
           </ButtonLink>
         )}
         {quote.status === "requested" && hasTotal && (
           <AdminActionButton
             id={quote.id}
             action={sendQuoteToCustomer}
-            label="Send quote"
-            doneLabel="Sent"
+            label={t.sendQuote}
+            doneLabel={t.sent}
             variant="outline"
           />
         )}
@@ -215,8 +221,8 @@ function InboxCard({ card }: { card: AdminQuoteCard }) {
           <AdminActionButton
             id={quote.id}
             action={markQuoteAccepted}
-            label="Mark accepted"
-            doneLabel="Accepted"
+            label={t.markAccepted}
+            doneLabel={t.accepted}
             variant="outline"
           />
         )}
@@ -224,8 +230,8 @@ function InboxCard({ card }: { card: AdminQuoteCard }) {
           <AdminActionButton
             id={quote.id}
             action={markQuoteCompleted}
-            label="Mark completed"
-            doneLabel="Completed"
+            label={t.markCompleted}
+            doneLabel={t.completed}
             variant="outline"
           />
         )}
