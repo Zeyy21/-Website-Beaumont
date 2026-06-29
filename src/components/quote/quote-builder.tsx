@@ -18,12 +18,24 @@ import { AddressSearch } from "./address-search";
 import { saveQuote, type SaveQuotePayload } from "@/app/(site)/quote/actions";
 import { useT } from "@/components/i18n/locale-provider";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
+import type { Locale } from "@/lib/i18n/config";
 
 interface Place {
   label: string;
   lat: number;
   lon: number;
 }
+
+/** Signed-in visitor's saved contact details, used to skip re-entry and to
+ *  route a completed request straight to their dashboard. */
+export interface QuoteAccount {
+  signedIn: boolean;
+  fullName: string;
+  email: string;
+  phone: string;
+}
+
+const dashboardQuotesPath = "/dashboard/quotes";
 
 interface StoredQuoteRequest extends SaveQuotePayload {
   place: Place;
@@ -46,12 +58,19 @@ const steps = [
 type SceneKey = keyof Dictionary["quote"]["scenes"];
 const sceneKeys: readonly SceneKey[] = ["property", "services", "details", "contact"];
 
-const quoteAudio = [
-  "/audio/quote/step-1-property.mp3",
-  "/audio/quote/step-2-services.mp3",
-  "/audio/quote/step-3-details.mp3",
-  "/audio/quote/step-4-contact.mp3",
+const stepAudioFiles = [
+  "step-1-property.mp3",
+  "step-2-services.mp3",
+  "step-3-details.mp3",
+  "step-4-contact.mp3",
 ] as const;
+
+/** Per-step narration, localized by folder. French files live under `fr/`;
+ *  English is the root set. The signature chime below is non-verbal and shared. */
+function quoteAudioForLocale(locale: Locale): readonly string[] {
+  const base = locale === "fr" ? "/audio/quote/fr" : "/audio/quote";
+  return stepAudioFiles.map((file) => `${base}/${file}`);
+}
 
 const quoteSignatureAudio = "/audio/quote/beaumont-signature.mp3";
 
@@ -76,12 +95,16 @@ const ease = [0.22, 1, 0.36, 1] as const;
 export function QuoteBuilder({
   services,
   initialZone,
+  account,
 }: {
   services: ServiceCard[];
   initialZone?: string | null;
+  account?: QuoteAccount | null;
 }) {
   const reduce = useReducedMotion();
-  const { dict } = useT();
+  const signedIn = Boolean(account?.signedIn);
+  const { dict, locale } = useT();
+  const quoteAudio = useMemo(() => quoteAudioForLocale(locale), [locale]);
   const tq = dict.quote;
   const tqResults = tq.results;
   const stepLabel = (i: number) => tq.steps[steps[i].copy].label;
@@ -108,9 +131,9 @@ export function QuoteBuilder({
   const [frequency, setFrequency] = useState<FrequencyId>("one_time");
   const [selectedAddOns, setSelectedAddOns] = useState<string[]>([]);
   const [scopeDetails, setScopeDetails] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [fullName, setFullName] = useState(account?.fullName ?? "");
+  const [email, setEmail] = useState(account?.email ?? "");
+  const [phone, setPhone] = useState(account?.phone ?? "");
   const [result, setResult] = useState<null | {
     ok: boolean;
     title: string;
@@ -213,7 +236,7 @@ export function QuoteBuilder({
 
   const playStepNarration = useCallback(
     (targetStep: number) => playAudio(quoteAudio[targetStep], "narration"),
-    [playAudio],
+    [playAudio, quoteAudio],
   );
 
   const startAudioGuide = useCallback(() => {
@@ -266,7 +289,7 @@ export function QuoteBuilder({
     audioPhaseRef.current = null;
     audioTimerRef.current = window.setTimeout(() => {
       playStepNarration(currentStepRef.current);
-    }, 280);
+    }, 120);
   }, [playStepNarration]);
 
   // Handle step narration changes (only after signature has played)
@@ -382,6 +405,17 @@ export function QuoteBuilder({
           window.localStorage.removeItem(pendingQuoteKey);
           window.history.replaceState({}, "", window.location.pathname);
           const delivered = response.notificationStatus === "sent";
+          // Signed-in visitors already have the request saved to their account;
+          // send them to their quotes panel rather than the public end card.
+          if (signedIn) {
+            setResult({
+              ok: true,
+              title: tqResults.savedToAccountTitle,
+              message: tqResults.savedToAccountMessage,
+            });
+            window.location.assign(dashboardQuotesPath);
+            return;
+          }
           setResult({
             ok: true,
             title: tqResults.goodHandsTitle,
@@ -404,7 +438,7 @@ export function QuoteBuilder({
         });
       }
     });
-  }, [tqResults]);
+  }, [tqResults, signedIn]);
 
   useEffect(() => {
     if (resumedRequest.current) return;
@@ -944,14 +978,18 @@ export function QuoteBuilder({
                           ? tq.step3.titleSave
                           : result?.ok
                             ? tq.step3.titleReceived
-                            : tq.step3.titleDefault
+                            : signedIn
+                              ? tq.step3.titleSignedIn
+                              : tq.step3.titleDefault
                       }
                       copy={
                         result?.needsAccount
                           ? tq.step3.copySave
                           : result?.ok
                           ? tq.step3.copyReceived
-                          : tq.step3.copyDefault
+                          : signedIn
+                            ? tq.step3.copySignedIn
+                            : tq.step3.copyDefault
                       }
                     />
 
@@ -1065,7 +1103,7 @@ export function QuoteBuilder({
                         <div className="mt-5 flex items-start gap-3 rounded-xl border border-oak/10 bg-white/50 px-4 py-3 text-xs font-medium leading-relaxed text-soil/50">
                           <ShieldIcon />
                           <span>
-                            {tq.step3.securityNote}
+                            {signedIn ? tq.step3.securityNoteSignedIn : tq.step3.securityNote}
                           </span>
                         </div>
                       </>

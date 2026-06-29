@@ -18,9 +18,9 @@ export default async function LoginPage({
 }: {
   searchParams: { next?: string; error?: string; message?: string; mode?: string; quote?: string };
 }) {
-  // Already signed in? Skip the form.
+  // Already signed in? Skip the form. Default landing is the account dashboard.
   const user = await getCurrentUser();
-  if (user) redirect(searchParams.next ?? "/");
+  if (user) redirect(searchParams.next ?? "/dashboard");
 
   const dict = getDict();
   const fallbackErrors: Record<string, string> = {
@@ -33,7 +33,7 @@ export default async function LoginPage({
   return (
     <AuthForm
       enabled={supabaseConfigured}
-      next={searchParams.next ?? "/"}
+      next={searchParams.next ?? "/dashboard"}
       initialMode={searchParams.mode === "signup" ? "signup" : "signin"}
       quoteReady={searchParams.quote === "ready"}
       initialError={searchParams.message ?? (searchParams.error ? fallbackErrors[searchParams.error] : undefined)}

@@ -398,10 +398,13 @@ const en = {
       titleSave: "Your request is ready to save.",
       titleReceived: "Consider it received.",
       titleDefault: "Where should we send your quote?",
+      titleSignedIn: "Confirm and send to your account.",
       copySave: "One quick step keeps your quote connected to you.",
       copyReceived: "We'll take it from here.",
       copyDefault:
         "Share the best way to reach you. These details are used only for this request.",
+      copySignedIn:
+        "Your details are filled in from your account. Review them and we'll add this quote to your dashboard.",
       fullName: "Full name",
       fullNamePlaceholder: "Your name",
       email: "Email",
@@ -415,6 +418,8 @@ const en = {
       summaryPlan: "Plan",
       securityNote:
         "Your request is saved securely. If you're new to Beaumont, we'll help you create your client access before it's sent.",
+      securityNoteSignedIn:
+        "Your request is saved securely to your account the moment you send it.",
       createAccount: "Create account and save quote",
       alreadyHaveAccount: "Already have an account? Sign in",
       submit: "Send my request",
@@ -427,6 +432,9 @@ const en = {
       createdMessage:
         "Create your free account to save this request and receive Beaumont's written quote. Your name and email are already filled in.",
       goodHandsTitle: "Your request is in good hands.",
+      savedToAccountTitle: "Quote added to your account.",
+      savedToAccountMessage:
+        "Taking you to your quotes…",
       deliveredMessage:
         "A Beaumont specialist will review everything and reply with your written quote, usually within 24 hours.",
       savedMessage:
@@ -962,7 +970,7 @@ const fr: Dictionary = {
   nav: {
     services: "Services",
     about: "Qui nous sommes",
-    quote: "Estimation gratuite",
+    quote: "Soumission gratuite",
     terms: "Conditions",
   },
 
@@ -1014,7 +1022,7 @@ const fr: Dictionary = {
     titleA: "Rentrez à la maison",
     titleB: "sans rien à faire.",
     body: "Entrées, terrasses, extérieurs de maison et fenêtres — pensés ensemble, entretenus méticuleusement, et une chose de moins qui réclame votre temps.",
-    ctaPrimary: "Commencer votre estimation",
+    ctaPrimary: "Commencer votre soumission",
     ctaSecondary: "Notre approche",
     scrollNote: "Une approche réfléchie de l’entretien extérieur",
     imageAlt:
@@ -1094,7 +1102,7 @@ const fr: Dictionary = {
   },
 
   quoteCta: {
-    eyebrow: "Estimation gratuite",
+    eyebrow: "Soumission gratuite",
     titleA: "Votre propriété. Votre entretien.",
     titleB: "Une soumission révisée.",
     body: "Indiquez votre adresse, choisissez les services extérieurs dont vous avez besoin et envoyez la portée pour révision — en quelques étapes tranquilles.",
@@ -1110,12 +1118,12 @@ const fr: Dictionary = {
     body: "Pour des questions, des détails sur la propriété ou une portée plus personnalisée, joignez-nous directement. Nous répondons avec clarté et sans pression.",
     emailLabel: "Écrire à Beaumont",
     followLabel: "Suivez notre travail",
-    hours: "Lundi au samedi · Estimations en ligne en tout temps",
+    hours: "Lundi au samedi · Soumissions en ligne en tout temps",
   },
 
   terms: {
     title: "Conditions",
-    body: "Les estimations sont confirmées après que Beaumont a examiné les services choisis, l’accès, la météo et l’état des surfaces. Aucun paiement n’est exigé pour demander une estimation.",
+    body: "Les soumissions sont confirmées après que Beaumont a examiné les services choisis, l’accès, la météo et l’état des surfaces. Aucun paiement n’est exigé pour demander une soumission.",
   },
 
   header: {
@@ -1124,13 +1132,13 @@ const fr: Dictionary = {
     mobileNav: "Navigation mobile",
     account: "Compte",
     signIn: "Se connecter",
-    freeEstimate: "Estimation gratuite",
+    freeEstimate: "Soumission gratuite",
     toggleMenu: "Ouvrir le menu",
     quote: "Soumission",
   },
 
   footer: {
-    beginEstimate: "Commencer votre estimation",
+    beginEstimate: "Commencer votre soumission",
     explore: "Explorer",
     contact: "Contact",
     clientSignIn: "Connexion client",
@@ -1146,7 +1154,7 @@ const fr: Dictionary = {
       "Créez un compte pour l’enregistrer et suivre la réponse de Beaumont.",
     headingSignup: "Créez votre compte",
     headingSignin: "Bon retour",
-    subSignup: "Enregistrez vos estimations et gérez votre entretien extérieur.",
+    subSignup: "Enregistrez vos soumissions et gérez votre entretien extérieur.",
     subSignin:
       "Connectez-vous pour gérer vos soumissions, visites, paiements et points.",
     tabSignin: "Se connecter",
@@ -1189,7 +1197,7 @@ const fr: Dictionary = {
   },
 
   quotePage: {
-    metaTitle: "Estimation gratuite",
+    metaTitle: "Soumission gratuite",
     metaDescription:
       "Préparez votre demande d’entretien extérieur Beaumont en environ deux minutes. Un spécialiste examine chaque détail et répond avec une soumission écrite claire, habituellement en moins de 24 heures.",
   },
@@ -1215,7 +1223,7 @@ const fr: Dictionary = {
       details: {
         eyebrow: "Aucun ruban à mesurer requis",
         title: "Une impression rapide suffit amplement.",
-        copy: "Les meilleures estimations sont les bienvenues. Un spécialiste Beaumont vérifie chaque détail avant de soumissionner.",
+        copy: "Vos meilleures approximations sont les bienvenues. Un spécialiste Beaumont vérifie chaque détail avant de soumissionner.",
       },
       contact: {
         eyebrow: "La touche humaine",
@@ -1248,9 +1256,9 @@ const fr: Dictionary = {
       "windows-atlantic": "Vitres, cadres et rebords extérieurs, sans traces.",
     },
     header: {
-      eyebrow: "Estimation personnalisée",
+      eyebrow: "Soumission personnalisée",
       sub: "Environ 2 minutes · aucun paiement",
-      progressAria: "Progression de l’estimation",
+      progressAria: "Progression de la soumission",
     },
     audio: {
       label: "Guide audio",
@@ -1320,10 +1328,13 @@ const fr: Dictionary = {
       titleSave: "Votre demande est prête à être enregistrée.",
       titleReceived: "Considérez-la reçue.",
       titleDefault: "Où devons-nous envoyer votre soumission?",
+      titleSignedIn: "Confirmez et envoyez à votre compte.",
       copySave: "Une étape rapide garde votre soumission liée à vous.",
       copyReceived: "On prend le relais.",
       copyDefault:
         "Indiquez la meilleure façon de vous joindre. Ces renseignements ne servent qu’à cette demande.",
+      copySignedIn:
+        "Vos renseignements proviennent de votre compte. Vérifiez-les et nous ajouterons cette soumission à votre tableau de bord.",
       fullName: "Nom complet",
       fullNamePlaceholder: "Votre nom",
       email: "Courriel",
@@ -1337,6 +1348,8 @@ const fr: Dictionary = {
       summaryPlan: "Plan",
       securityNote:
         "Votre demande est enregistrée en toute sécurité. Si vous êtes nouveau chez Beaumont, nous vous aiderons à créer votre accès client avant l’envoi.",
+      securityNoteSignedIn:
+        "Votre demande est enregistrée en toute sécurité dans votre compte dès l’envoi.",
       createAccount: "Créer un compte et enregistrer la soumission",
       alreadyHaveAccount: "Vous avez déjà un compte? Connectez-vous",
       submit: "Envoyer ma demande",
@@ -1349,6 +1362,8 @@ const fr: Dictionary = {
       createdMessage:
         "Créez votre compte gratuit pour enregistrer cette demande et recevoir la soumission écrite de Beaumont. Votre nom et votre courriel sont déjà remplis.",
       goodHandsTitle: "Votre demande est entre bonnes mains.",
+      savedToAccountTitle: "Soumission ajoutée à votre compte.",
+      savedToAccountMessage: "Redirection vers vos soumissions…",
       deliveredMessage:
         "Un spécialiste Beaumont examinera le tout et répondra avec votre soumission écrite, habituellement en moins de 24 heures.",
       savedMessage:
@@ -1699,7 +1714,7 @@ const fr: Dictionary = {
       generating: "Génération…",
       printTags: "Imprimer",
       tags: "étiquettes",
-      scanFree: "Balayez pour une estimation gratuite de",
+      scanFree: "Balayez pour une soumission gratuite de",
       thisHome: "cette",
       home: "maison",
     },

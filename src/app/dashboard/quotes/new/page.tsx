@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { QuoteBuilder } from "@/components/quote/quote-builder";
-import { getServices } from "@/lib/data";
+import { getCurrentUser, getServices } from "@/lib/data";
+import { accountFromUser } from "@/lib/quote-account";
 import { getDict } from "@/lib/i18n/server";
 
 export function generateMetadata() {
@@ -9,7 +10,7 @@ export function generateMetadata() {
 
 export default async function NewDashboardQuotePage() {
   const t = getDict().dashboard.quotes;
-  const services = await getServices();
+  const [services, user] = await Promise.all([getServices(), getCurrentUser()]);
 
   return (
     <div className="space-y-8">
@@ -23,7 +24,7 @@ export default async function NewDashboardQuotePage() {
           {t.newBody}
         </p>
       </div>
-      <QuoteBuilder services={services} />
+      <QuoteBuilder services={services} account={accountFromUser(user)} />
     </div>
   );
 }
