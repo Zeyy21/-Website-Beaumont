@@ -75,15 +75,21 @@ export function QuoteCta() {
         ))}
       </motion.div>
 
-      {/* Tonal scrims keep the white type legible over any tile */}
-      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-soil/82" />
+      {/* Tonal scrims keep the white type legible over any tile. Deepened so the
+          montage reads as quiet texture and the CTA is the clear subject. */}
+      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-soil/90" />
       <div
         aria-hidden="true"
-        className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,transparent_4%,rgba(28,28,26,.55)_58%,rgba(28,28,26,.94)_100%)]"
+        className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,rgba(28,28,26,.35)_0%,rgba(28,28,26,.72)_52%,rgba(28,28,26,.96)_100%)]"
       />
       <div
         aria-hidden="true"
-        className="absolute inset-0 -z-10 bg-gradient-to-t from-soil via-soil/25 to-soil/55"
+        className="absolute inset-0 -z-10 bg-gradient-to-t from-soil via-soil/45 to-soil/65"
+      />
+      {/* A Canopy glow centered behind the CTA pulls the eye to the action. */}
+      <div
+        aria-hidden="true"
+        className="absolute left-1/2 top-1/2 -z-10 h-[34rem] w-[34rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(110,148,118,.22)_0%,transparent_70%)] blur-2xl"
       />
 
       {/* Inner editorial frame, matching the service cards */}
@@ -163,16 +169,17 @@ export function QuoteCta() {
           initial={reduce ? false : "hidden"}
           whileInView="show"
           viewport={{ once: false, amount: 0.6 }}
-          className="mt-11"
+          className="mt-11 flex flex-col items-center"
         >
           <Link
             href="/quote"
-            className="group/btn inline-flex items-center gap-3 rounded-full border border-ivory/45 bg-ivory/[0.16] px-9 py-5 text-base font-semibold tracking-wide text-ivory shadow-[0_24px_60px_-26px_rgba(0,0,0,.85)] ring-1 ring-inset ring-ivory/10 backdrop-blur-xl transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-ivory hover:bg-ivory hover:text-soil hover:shadow-[0_30px_70px_-24px_rgba(0,0,0,.9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ivory focus-visible:ring-offset-2 focus-visible:ring-offset-soil"
+            className="group/btn inline-flex w-full max-w-sm items-center justify-center gap-3 rounded-full bg-ivory px-10 py-5 text-base font-semibold tracking-wide text-soil shadow-[0_26px_70px_-22px_rgba(0,0,0,.95)] ring-1 ring-inset ring-oak/10 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-sand hover:shadow-[0_34px_80px_-20px_rgba(0,0,0,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ivory focus-visible:ring-offset-2 focus-visible:ring-offset-soil sm:w-auto"
           >
             <Tag />
             {t.button}
             <Arrow className="transition-transform duration-300 group-hover/btn:translate-x-1" />
           </Link>
+          <p className="mt-4 text-xs font-medium text-ivory/55">{t.sub}</p>
         </motion.div>
       </div>
     </motion.div>

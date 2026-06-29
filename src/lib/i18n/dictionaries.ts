@@ -183,7 +183,26 @@ const en = {
     body: "Select your address, choose the exterior services you need, and send the scope for review — in a few quiet steps.",
     featureNoPayment: "No payment to request",
     featureWritten: "A written quote within 24 hours",
-    button: "Get Quote",
+    button: "Get your free quote",
+    sub: "Takes about 2 minutes · no payment required",
+  },
+
+  /** Reusable calls to action placed through the page to keep the quote one
+   *  tap away. All route to /quote. */
+  cta: {
+    band: {
+      eyebrow: "Ready when you are",
+      title: "See what Beaumont would do for your home.",
+      button: "Get your free quote",
+    },
+    process: {
+      text: "Like how that sounds? Start with your address.",
+      button: "Request your quote",
+    },
+    sticky: {
+      label: "Free quote · 24h reply",
+      button: "Get a quote",
+    },
   },
 
   contact: {
@@ -1108,7 +1127,24 @@ const fr: Dictionary = {
     body: "Indiquez votre adresse, choisissez les services extérieurs dont vous avez besoin et envoyez la portée pour révision — en quelques étapes tranquilles.",
     featureNoPayment: "Aucun paiement pour faire la demande",
     featureWritten: "Une soumission écrite en moins de 24 heures",
-    button: "Obtenir une soumission",
+    button: "Obtenez votre soumission gratuite",
+    sub: "Environ 2 minutes · aucun paiement requis",
+  },
+
+  cta: {
+    band: {
+      eyebrow: "Quand vous voulez",
+      title: "Voyez ce que Beaumont ferait pour votre maison.",
+      button: "Obtenez votre soumission gratuite",
+    },
+    process: {
+      text: "Ça vous parle? Commencez par votre adresse.",
+      button: "Demander votre soumission",
+    },
+    sticky: {
+      label: "Soumission gratuite · réponse en 24 h",
+      button: "Obtenir une soumission",
+    },
   },
 
   contact: {

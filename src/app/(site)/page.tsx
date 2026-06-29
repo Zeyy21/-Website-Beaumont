@@ -2,6 +2,7 @@ import Image from "next/image";
 import { Hero } from "@/components/hero";
 import { ExperienceSequence } from "@/components/home-experience";
 import { QuoteCta } from "@/components/quote-cta";
+import { QuoteCtaBand } from "@/components/quote-cta-band";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion";
 import { Container, Eyebrow } from "@/components/ui";
 import { getServices } from "@/lib/data";
@@ -121,6 +122,10 @@ export default async function HomePage() {
 
       <ExperienceSequence />
 
+      <section className="bg-sand/20 pb-20 md:pb-28" aria-label={dict.cta.process.text}>
+        <QuoteCtaBand variant="process" />
+      </section>
+
       <section data-header-tone="dark" className="texture-soil relative overflow-hidden py-24 text-ivory md:py-36" aria-label={dict.testimonialSection.sectionLabel}>
         <div aria-hidden="true" className="pointer-events-none absolute -right-12 -top-24 font-display text-[24rem] leading-none text-ivory/[0.025]">“</div>
         <Container>
@@ -142,7 +147,11 @@ export default async function HomePage() {
         </Container>
       </section>
 
-      <section id="quote" className="luxe-wash relative scroll-mt-24 overflow-hidden py-24 md:py-32" aria-labelledby="quote-title">
+      <section className="bg-ivory pt-20 md:pt-24" aria-label={dict.cta.band.title}>
+        <QuoteCtaBand variant="band" />
+      </section>
+
+      <section id="quote" className="luxe-wash relative scroll-mt-24 overflow-hidden pb-24 pt-16 md:pb-32 md:pt-20" aria-labelledby="quote-title">
         <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-oak/15 to-transparent" />
         <Container>
           <QuoteCta />
