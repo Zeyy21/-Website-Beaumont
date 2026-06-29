@@ -26,7 +26,7 @@ async function buildTags(zone: string, count: number): Promise<Tag[]> {
     const qrDataUrl = await QRCode.toDataURL(url, {
       margin: 1,
       width: 512,
-      color: { dark: "#1D170F", light: "#F9F8E7" },
+      color: { dark: "#1C1C1A", light: "#F4F1EC" },
     });
     tags.push({ zone, tagId, url, qrDataUrl });
   }

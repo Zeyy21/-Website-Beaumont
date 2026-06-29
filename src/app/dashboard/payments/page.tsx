@@ -4,10 +4,16 @@ import { formatCurrency } from "@/lib/pricing";
 import { stripeEnabled } from "@/lib/payments";
 import { Card, CardTitle, EmptyState, StatusBadge } from "@/components/dashboard-ui";
 import { PayPanel } from "@/components/pay-panel";
+import { getDict } from "@/lib/i18n/server";
+import { statusLabel } from "@/lib/i18n/dictionaries";
 
-export const metadata = { title: "Payments" };
+export function generateMetadata() {
+  return { title: getDict().dashboard.nav.payments };
+}
 
 export default async function PaymentsPage() {
+  const dict = getDict();
+  const t = dict.dashboard.payments;
   const user = await getCurrentUser();
   const data = user
     ? await getDashboardData(user.id)
@@ -25,21 +31,21 @@ export default async function PaymentsPage() {
   return (
     <div className="space-y-8">
       <section>
-        <CardTitle>Outstanding</CardTitle>
+        <CardTitle>{t.outstanding}</CardTitle>
         <div className="mt-4 space-y-4">
           {payable.length === 0 ? (
             <EmptyState
-              title="Nothing to pay"
-              body="When you accept a quote, you can settle it here by card, transfer, or cash."
+              title={t.nothingTitle}
+              body={t.nothingBody}
               ctaHref="/dashboard/quotes"
-              ctaLabel="View quotes"
+              ctaLabel={t.viewQuotes}
             />
           ) : (
             payable.map((q) => (
               <Card key={q.id}>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-oak">{q.address ?? "Service"}</p>
+                    <p className="text-oak">{q.address ?? t.serviceFallback}</p>
                     <p className="text-sm text-soil/50">
                       {formatCurrency(Number(q.total))}
                     </p>
@@ -59,10 +65,10 @@ export default async function PaymentsPage() {
       </section>
 
       <section>
-        <CardTitle>Payment history</CardTitle>
+        <CardTitle>{t.history}</CardTitle>
         <div className="mt-4">
           {payments.length === 0 ? (
-            <p className="text-sm text-soil/50">No payments recorded yet.</p>
+            <p className="text-sm text-soil/50">{t.noPayments}</p>
           ) : (
             <Card>
               <ul className="divide-y divide-oak/10">
@@ -78,7 +84,7 @@ export default async function PaymentsPage() {
                       <span className="font-display text-lg text-oak">
                         {formatCurrency(Number(p.amount))}
                       </span>
-                      <StatusBadge status={p.status} />
+                      <StatusBadge status={p.status} label={statusLabel(dict, p.status)} />
                     </div>
                   </li>
                 ))}

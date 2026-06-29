@@ -10,6 +10,7 @@ import {
 } from "framer-motion";
 import { useRef } from "react";
 import { ButtonLink, Container } from "@/components/ui";
+import { useT } from "@/components/i18n/locale-provider";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -32,6 +33,8 @@ const line: Variants = {
 export function Hero() {
   const ref = useRef<HTMLElement>(null);
   const reduce = useReducedMotion();
+  const { dict } = useT();
+  const t = dict.hero;
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
@@ -57,7 +60,7 @@ export function Hero() {
       >
         <Image
           src="/images/montreal-home-hero.png"
-          alt="Pale stone Montreal home with a restored interlocking driveway"
+          alt={t.imageAlt}
           fill
           priority
           sizes="100vw"
@@ -79,23 +82,22 @@ export function Hero() {
           style={{ y: contentY }}
         >
           <motion.p variants={line} className="text-[10px] font-semibold uppercase tracking-[0.34em] text-sand md:text-[11px] md:tracking-[0.4em]">
-            Concierge home care <span aria-hidden="true">·</span> Quietly delivered
+            {t.eyebrowA} <span aria-hidden="true">·</span> {t.eyebrowB}
           </motion.p>
           <motion.h1
             variants={line}
             id="hero-title"
             className="mt-6 text-balance font-display text-[clamp(3.45rem,7.7vw,7.6rem)] font-normal leading-[0.86] tracking-[-0.025em]"
           >
-            Come home to
-            <span className="mt-2 block italic text-sand">nothing left to do.</span>
+            {t.titleA}
+            <span className="mt-2 block italic text-sand">{t.titleB}</span>
           </motion.h1>
           <motion.p variants={line} className="mt-8 max-w-xl text-base font-medium leading-relaxed text-ivory/80 md:text-lg">
-            Driveways, decks, home exteriors, and windows—considered together,
-            meticulously cared for, and one less thing asking for your time.
+            {t.body}
           </motion.p>
           <motion.div variants={line} className="mt-10 flex flex-wrap gap-3">
             <ButtonLink href="#quote" variant="light" size="lg">
-              Begin your estimate
+              {t.ctaPrimary}
               <Arrow />
             </ButtonLink>
             <ButtonLink
@@ -103,7 +105,7 @@ export function Hero() {
               size="lg"
               className="border border-ivory/35 bg-soil/20 text-ivory backdrop-blur-sm hover:bg-ivory hover:text-soil"
             >
-              Our approach
+              {t.ctaSecondary}
             </ButtonLink>
           </motion.div>
         </motion.div>
@@ -117,7 +119,7 @@ export function Hero() {
         transition={{ duration: 0.9, ease, delay: 0.9 }}
       >
         <span className="h-px w-12 bg-sand/60" />
-        Greater Montréal
+        {dict.common.montreal}
       </motion.div>
       <motion.div
         className="absolute bottom-10 left-12 hidden items-center gap-3 text-[9px] font-semibold uppercase tracking-[0.25em] text-ivory/45 lg:flex"
@@ -127,7 +129,7 @@ export function Hero() {
         transition={{ duration: 0.9, ease, delay: 1 }}
       >
         <span className="flex h-7 w-7 items-center justify-center rounded-full border border-ivory/20">↓</span>
-        A considered approach to exterior care
+        {t.scrollNote}
       </motion.div>
     </section>
   );

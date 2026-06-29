@@ -14,14 +14,20 @@ import {
   applyPreviousQuoteForm,
 } from "@/app/admin/actions";
 import type { Json, PaymentRow, QuoteRow } from "@/lib/supabase/types";
+import { getDict } from "@/lib/i18n/server";
+import { statusLabel } from "@/lib/i18n/dictionaries";
 
-export const metadata = { title: "Admin - Quote" };
+export function generateMetadata() {
+  return { title: `${getDict().admin.quoteDetail.requestScope}${getDict().common.brandSuffix}` };
+}
 
 export default async function AdminQuotePage({
   params,
 }: {
   params: { quoteId: string };
 }) {
+  const dict = getDict();
+  const t = dict.admin.quoteDetail;
   const details = await getAdminQuoteDetails(params.quoteId);
   if (!details) notFound();
 
@@ -37,49 +43,48 @@ export default async function AdminQuotePage({
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <Link href="/admin" className="text-sm text-cinnamon hover:underline">
-            Back to inbox
+            {t.backToInbox}
           </Link>
           <h1 className="mt-2 font-display text-4xl text-oak">
-            {quote.requester_name ?? profile?.full_name ?? "Quote request"}
+            {quote.requester_name ?? profile?.full_name ?? dict.admin.inbox.quoteRequestFallback}
           </h1>
           <p className="mt-1 text-sm text-soil/55">
-            {quote.address ?? "Address not recorded"} -{" "}
-            {quote.service_name ?? "Service not recorded"}
+            {quote.address ?? dict.admin.jobs.addressNotRecorded} -{" "}
+            {quote.service_name ?? dict.admin.inbox.serviceNotRecorded}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           {clientUrl && (
             <ButtonLink href={clientUrl} variant="outline" size="sm">
-              View client
+              {t.viewClient}
             </ButtonLink>
           )}
-          <StatusBadge status={quote.status} />
+          <StatusBadge status={quote.status} label={statusLabel(dict, quote.status)} />
         </div>
       </div>
 
       <section className="grid gap-4 md:grid-cols-4">
         <SummaryTile
-          label="Final quote"
+          label={t.finalQuote}
           value={
             Number(quote.total) > 0
               ? formatCurrency(Number(quote.total))
-              : "Not set"
+              : dict.common.notSet
           }
         />
-        <SummaryTile label="Status" value={statusLabel(quote.status)} />
-        <SummaryTile label="Requested" value={formatDate(quote.created_at)} />
+        <SummaryTile label={t.status} value={statusLabel(dict, quote.status)} />
+        <SummaryTile label={t.requested} value={formatDate(quote.created_at)} />
         <SummaryTile
-          label="Scheduled"
-          value={quote.scheduled_for ? formatDateTime(quote.scheduled_for) : "Not set"}
+          label={t.scheduled}
+          value={quote.scheduled_for ? formatDateTime(quote.scheduled_for) : dict.common.notSet}
         />
       </section>
 
       <section className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
         <Card>
-          <CardTitle>Review and send</CardTitle>
+          <CardTitle>{t.reviewAndSend}</CardTitle>
           <p className="mt-1 text-sm text-soil/60">
-            Set the final quote, keep staff-only context, and move the request
-            through the real workflow.
+            {t.reviewDescription}
           </p>
           <div className="mt-5">
             <AdminQuoteReviewForm
@@ -93,15 +98,15 @@ export default async function AdminQuotePage({
         </Card>
 
         <Card>
-          <CardTitle>Customer</CardTitle>
+          <CardTitle>{t.customer}</CardTitle>
           <dl className="mt-5 space-y-4 text-sm">
             <DetailItem
-              label="Name"
-              value={quote.requester_name ?? profile?.full_name ?? "Not provided"}
+              label={t.name}
+              value={quote.requester_name ?? profile?.full_name ?? dict.common.notProvided}
             />
             <DetailItem
-              label="Email"
-              value={quote.requester_email ?? quote.account_email ?? profile?.email ?? "Not provided"}
+              label={t.email}
+              value={quote.requester_email ?? quote.account_email ?? profile?.email ?? dict.common.notProvided}
               href={
                 quote.requester_email || quote.account_email || profile?.email
                   ? `mailto:${quote.requester_email ?? quote.account_email ?? profile?.email}`
@@ -109,15 +114,15 @@ export default async function AdminQuotePage({
               }
             />
             <DetailItem
-              label="Phone"
-              value={quote.requester_phone ?? profile?.phone ?? "Not provided"}
+              label={t.phone}
+              value={quote.requester_phone ?? profile?.phone ?? dict.common.notProvided}
               href={
                 quote.requester_phone ?? profile?.phone
                   ? `tel:${quote.requester_phone ?? profile?.phone}`
                   : undefined
               }
             />
-            <DetailItem label="Account email" value={quote.account_email ?? "Not available"} />
+            <DetailItem label={t.accountEmail} value={quote.account_email ?? dict.common.notAvailable} />
           </dl>
 
           <div className="mt-5 flex flex-wrap gap-2 border-t border-oak/10 pt-5">
@@ -125,8 +130,8 @@ export default async function AdminQuotePage({
               <AdminActionButton
                 id={quote.id}
                 action={markQuoteAccepted}
-                label="Mark accepted"
-                doneLabel="Accepted"
+                label={t.markAccepted}
+                doneLabel={dict.admin.inbox.accepted}
                 variant="outline"
               />
             )}
@@ -134,8 +139,8 @@ export default async function AdminQuotePage({
               <AdminActionButton
                 id={quote.id}
                 action={markQuoteScheduled}
-                label="Mark scheduled"
-                doneLabel="Scheduled"
+                label={t.markScheduled}
+                doneLabel={dict.admin.inbox.scheduled}
                 variant="outline"
               />
             )}
@@ -143,8 +148,8 @@ export default async function AdminQuotePage({
               <AdminActionButton
                 id={quote.id}
                 action={markQuoteCompleted}
-                label="Mark completed"
-                doneLabel="Completed"
+                label={t.markCompleted}
+                doneLabel={dict.admin.inbox.completed}
                 variant="outline"
               />
             )}
@@ -154,19 +159,19 @@ export default async function AdminQuotePage({
 
       <section className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
         <Card>
-          <CardTitle>Previous quote match</CardTitle>
+          <CardTitle>{t.previousMatch}</CardTitle>
           {previousQuote ? (
             <div className="mt-4 space-y-4">
               <div className="rounded-2xl border border-ochre/30 bg-sand/30 p-5">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ochre">
-                  Use this to keep pricing consistent
+                  {t.keepConsistent}
                 </p>
                 <p className="mt-2 font-display text-4xl text-oak">
                   {formatCurrency(Number(previousQuote.total))}
                 </p>
                 <p className="mt-1 text-sm text-soil/60">
                   {formatDate(previousQuote.created_at)} -{" "}
-                  {previousQuote.address ?? "Address not recorded"}
+                  {previousQuote.address ?? dict.admin.jobs.addressNotRecorded}
                 </p>
               </div>
               <form action={applyPreviousQuoteForm}>
@@ -177,35 +182,34 @@ export default async function AdminQuotePage({
                   value={previousQuote.id}
                 />
                 <button className="rounded-full bg-cinnamon px-5 py-2.5 text-sm font-medium text-ivory transition-colors hover:bg-oak">
-                  Use previous quote
+                  {t.usePrevious}
                 </button>
               </form>
             </div>
           ) : (
             <p className="mt-4 text-sm text-soil/60">
-              No matching priced quote found for the same client, address, and
-              service.
+              {t.noMatch}
             </p>
           )}
         </Card>
 
         <Card>
-          <CardTitle>Request scope</CardTitle>
+          <CardTitle>{t.requestScope}</CardTitle>
           <dl className="mt-5 grid gap-4 text-sm sm:grid-cols-2">
-            <DetailItem label="Service" value={quote.service_name ?? "Not recorded"} />
-            <DetailItem label="Visit rhythm" value={quote.frequency ?? "Not selected"} />
-            <DetailItem label="Source zone" value={quote.source_zone ?? "Not recorded"} />
-            <DetailItem label="Notification" value={quote.notification_status} />
+            <DetailItem label={t.service} value={quote.service_name ?? dict.common.notRecorded} />
+            <DetailItem label={t.visitRhythm} value={quote.frequency ?? dict.common.notSelected} />
+            <DetailItem label={t.sourceZone} value={quote.source_zone ?? dict.common.notRecorded} />
+            <DetailItem label={t.notification} value={quote.notification_status} />
           </dl>
           {conditionalServices.length > 0 && (
             <p className="mt-4 rounded-xl bg-sand/30 px-4 py-3 text-sm text-soil/70">
-              Review items: {conditionalServices.join(", ")}
+              {t.reviewItems}{conditionalServices.join(", ")}
             </p>
           )}
           {scope && (
             <div className="mt-4 rounded-xl bg-sand/30 px-4 py-3">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-soil/45">
-                Customer scope
+                {t.customerScope}
               </p>
               <p className="mt-2 whitespace-pre-line text-sm text-soil/70">{scope}</p>
             </div>
@@ -215,12 +219,12 @@ export default async function AdminQuotePage({
       </section>
 
       <section>
-        <CardTitle>Priced history</CardTitle>
+        <CardTitle>{t.pricedHistory}</CardTitle>
         <div className="mt-4 space-y-3">
           {!pricedHistory.length ? (
             <EmptyState
-              title="No previous priced quotes"
-              body="Once this customer has a confirmed quote, it will appear here for future consistency."
+              title={t.noPricedTitle}
+              body={t.noPricedBody}
             />
           ) : (
             pricedHistory.map((item) => (
@@ -231,10 +235,10 @@ export default async function AdminQuotePage({
       </section>
 
       <section>
-        <CardTitle>Payments on this quote</CardTitle>
+        <CardTitle>{t.paymentsOnQuote}</CardTitle>
         <div className="mt-4 space-y-3">
           {!payments.length ? (
-            <p className="text-sm text-soil/50">No payments linked yet.</p>
+            <p className="text-sm text-soil/50">{t.noPaymentsLinked}</p>
           ) : (
             payments.map((payment) => <PaymentRowView key={payment.id} payment={payment} />)
           )}
@@ -312,6 +316,8 @@ function HistoryRow({
   quote: QuoteRow;
   currentQuoteId: string;
 }) {
+  const dict = getDict();
+  const t = dict.admin.quoteDetail;
   return (
     <Card className="p-5">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -323,17 +329,17 @@ function HistoryRow({
             {formatCurrency(Number(quote.total))}
           </Link>
           <p className="mt-1 text-sm text-soil/50">
-            {formatDate(quote.created_at)} - {quote.service_name ?? "Service"} -{" "}
-            {quote.address ?? "Address not recorded"}
+            {formatDate(quote.created_at)} - {quote.service_name ?? dict.dashboard.payments.serviceFallback} -{" "}
+            {quote.address ?? dict.admin.jobs.addressNotRecorded}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <StatusBadge status={quote.status} />
+          <StatusBadge status={quote.status} label={statusLabel(dict, quote.status)} />
           <form action={applyPreviousQuoteForm}>
             <input type="hidden" name="quote_id" value={currentQuoteId} />
             <input type="hidden" name="source_quote_id" value={quote.id} />
             <button className="rounded-full border border-oak/30 px-4 py-2 text-sm font-medium text-oak transition-colors hover:bg-oak hover:text-ivory">
-              Use this price
+              {t.useThisPrice}
             </button>
           </form>
         </div>
@@ -343,6 +349,7 @@ function HistoryRow({
 }
 
 function PaymentRowView({ payment }: { payment: PaymentRow }) {
+  const dict = getDict();
   return (
     <Card className="p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -352,7 +359,7 @@ function PaymentRowView({ payment }: { payment: PaymentRow }) {
           </p>
           <p className="text-xs text-soil/50">{formatDate(payment.created_at)}</p>
         </div>
-        <StatusBadge status={payment.status} />
+        <StatusBadge status={payment.status} label={statusLabel(dict, payment.status)} />
       </div>
     </Card>
   );
@@ -363,19 +370,8 @@ function jsonStrings(value: Json) {
   return value.filter((item): item is string => typeof item === "string");
 }
 
-function statusLabel(value: string) {
-  const labels: Record<string, string> = {
-    requested: "Needs quote",
-    sent: "Sent",
-    accepted: "Accepted",
-    scheduled: "Scheduled",
-    completed: "Completed",
-  };
-  return labels[value] ?? value;
-}
-
 function formatDate(value?: string | null) {
-  if (!value) return "Not available";
+  if (!value) return getDict().common.notAvailable;
   return new Date(value).toLocaleDateString("en-CA", {
     month: "short",
     day: "numeric",
@@ -384,7 +380,7 @@ function formatDate(value?: string | null) {
 }
 
 function formatDateTime(value?: string | null) {
-  if (!value) return "Not available";
+  if (!value) return getDict().common.notAvailable;
   return new Date(value).toLocaleString("en-CA", {
     month: "short",
     day: "numeric",

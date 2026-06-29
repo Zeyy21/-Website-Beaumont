@@ -4,10 +4,16 @@ import { formatCurrency } from "@/lib/pricing";
 import { visibleLineItems } from "@/lib/quote-scope";
 import { Card, EmptyState, StatusBadge } from "@/components/dashboard-ui";
 import { CancelQuoteButton } from "@/components/quote/cancel-quote-button";
+import { getDict } from "@/lib/i18n/server";
+import { statusLabel } from "@/lib/i18n/dictionaries";
 
-export const metadata = { title: "Quotes" };
+export function generateMetadata() {
+  return { title: getDict().dashboard.nav.quotes };
+}
 
 export default async function QuotesPage() {
+  const dict = getDict();
+  const t = dict.dashboard.quotes;
   const user = await getCurrentUser();
   const data = user
     ? await getDashboardData(user.id)
@@ -16,10 +22,10 @@ export default async function QuotesPage() {
   if (data.quotes.length === 0) {
     return (
       <EmptyState
-        title="No quotes yet"
-        body="Your saved and requested quotes will appear here. Start by sending the services you need reviewed."
+        title={t.noQuotesTitle}
+        body={t.noQuotesBody}
         ctaHref="/dashboard/quotes/new"
-        ctaLabel="Request a quote"
+        ctaLabel={t.requestQuote}
       />
     );
   }
@@ -34,13 +40,13 @@ export default async function QuotesPage() {
           <Card key={q.id}>
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-lg text-oak">{q.address ?? "Quote"}</h2>
+                <h2 className="text-lg text-oak">{q.address ?? t.quoteFallback}</h2>
                 <p className="text-sm text-soil/50">
                   {q.frequency ?? ""} - {new Date(q.created_at).toLocaleDateString()}
                 </p>
               </div>
               <div className="flex flex-col items-end gap-2">
-                <StatusBadge status={q.status} />
+                <StatusBadge status={q.status} label={statusLabel(dict, q.status)} />
                 {(q.status === "requested" || q.status === "draft") && (
                   <CancelQuoteButton quoteId={q.id} />
                 )}
@@ -66,9 +72,9 @@ export default async function QuotesPage() {
             )}
 
             <div className="mt-4 flex items-center justify-between border-t border-oak/10 pt-4">
-              <span className="text-soil/60">{hasTotal ? "Total" : "Status"}</span>
+              <span className="text-soil/60">{hasTotal ? t.total : t.status}</span>
               <span className="font-display text-2xl text-oak">
-                {hasTotal ? formatCurrency(Number(q.total)) : "Pending review"}
+                {hasTotal ? formatCurrency(Number(q.total)) : t.pendingReview}
               </span>
             </div>
           </Card>

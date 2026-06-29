@@ -5,10 +5,15 @@ import { ButtonLink } from "@/components/ui";
 import { getAdminJobs, quoteHref } from "@/lib/admin-quotes";
 import { formatCurrency } from "@/lib/pricing";
 import { markQuoteCompleted } from "@/app/admin/actions";
+import { getDict } from "@/lib/i18n/server";
+import { statusLabel } from "@/lib/i18n/dictionaries";
 
-export const metadata = { title: "Admin - Jobs" };
+export function generateMetadata() {
+  return { title: `${getDict().admin.jobs.title}${getDict().common.brandSuffix}` };
+}
 
 export default async function AdminJobsPage() {
+  const t = getDict().admin.jobs;
   const jobs = await getAdminJobs();
   const needsScheduling = jobs.filter((job) => job.status === "accepted");
   const scheduled = jobs.filter((job) => job.status === "scheduled");
@@ -18,27 +23,26 @@ export default async function AdminJobsPage() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <CardTitle>Jobs</CardTitle>
+          <CardTitle>{t.title}</CardTitle>
           <p className="mt-1 max-w-2xl text-sm text-soil/60">
-            Accepted quotes become jobs. Schedule them from the quote page and
-            mark them complete when service is finished.
+            {t.description}
           </p>
         </div>
         <ButtonLink href="/admin" variant="outline" size="sm">
-          Inbox
+          {t.inbox}
         </ButtonLink>
       </div>
 
       {!jobs.length ? (
         <EmptyState
-          title="No jobs yet"
-          body="Accepted and scheduled quotes will appear here."
+          title={t.noJobsTitle}
+          body={t.noJobsBody}
         />
       ) : (
         <div className="space-y-8">
-          <JobSection title="Needs scheduling" jobs={needsScheduling} />
-          <JobSection title="Scheduled" jobs={scheduled} />
-          <JobSection title="Completed" jobs={completed} />
+          <JobSection title={t.needsScheduling} jobs={needsScheduling} />
+          <JobSection title={t.scheduled} jobs={scheduled} />
+          <JobSection title={t.completed} jobs={completed} />
         </div>
       )}
     </div>
@@ -53,6 +57,8 @@ function JobSection({
   jobs: Awaited<ReturnType<typeof getAdminJobs>>;
 }) {
   if (!jobs.length) return null;
+  const dict = getDict();
+  const t = dict.admin.jobs;
 
   return (
     <section>
@@ -71,39 +77,39 @@ function JobSection({
                   href={quoteHref(job.id)}
                   className="font-display text-2xl text-oak hover:text-cinnamon"
                 >
-                  {job.requester_name ?? "Job"}
+                  {job.requester_name ?? t.jobFallback}
                 </Link>
                 <p className="mt-1 text-sm text-soil/50">
-                  {job.address ?? "Address not recorded"} -{" "}
-                  {job.service_name ?? "Service not recorded"}
+                  {job.address ?? t.addressNotRecorded} -{" "}
+                  {job.service_name ?? t.serviceNotRecorded}
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-3">
-                <StatusBadge status={job.status} />
+                <StatusBadge status={job.status} label={statusLabel(dict, job.status)} />
                 <span className="font-display text-2xl text-oak">
                   {Number(job.total) > 0
                     ? formatCurrency(Number(job.total))
-                    : "No price"}
+                    : t.noPrice}
                 </span>
               </div>
             </div>
 
             <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-oak/10 pt-5">
               <ButtonLink href={quoteHref(job.id)} size="sm">
-                Open job
+                {t.openJob}
               </ButtonLink>
               {job.status === "scheduled" && (
                 <AdminActionButton
                   id={job.id}
                   action={markQuoteCompleted}
-                  label="Mark completed"
-                  doneLabel="Completed"
+                  label={t.markCompleted}
+                  doneLabel={dict.admin.inbox.completed}
                   variant="outline"
                 />
               )}
               <span className="text-sm text-soil/50">
-                Scheduled:{" "}
-                {job.scheduled_for ? formatDateTime(job.scheduled_for) : "Not set"}
+                {t.scheduledPrefix}
+                {job.scheduled_for ? formatDateTime(job.scheduled_for) : dict.common.notSet}
               </span>
             </div>
           </Card>

@@ -3,16 +3,18 @@
 import { createClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email";
 import { revalidatePath } from "next/cache";
+import { getDict } from "@/lib/i18n/server";
 
 export async function cancelQuote(quoteId: string) {
+  const t = getDict().dashboard.quotes;
   const supabase = createClient();
-  if (!supabase) return { error: "Service unavailable." };
+  if (!supabase) return { error: t.errUnavailable };
 
   const { data: userResponse } = await supabase.auth.getUser();
   const user = userResponse?.user;
 
   if (!user) {
-    return { error: "You must be logged in to cancel a quote." };
+    return { error: t.errMustLogin };
   }
 
   // Fetch the quote to make sure it belongs to the user and to get details for the email
@@ -24,7 +26,7 @@ export async function cancelQuote(quoteId: string) {
     .maybeSingle();
 
   if (fetchError || !quote) {
-    return { error: "Quote not found or you don't have permission to cancel it." };
+    return { error: t.errNotFound };
   }
 
   // Delete the quote
@@ -36,7 +38,7 @@ export async function cancelQuote(quoteId: string) {
 
   if (deleteError) {
     console.error("Failed to delete quote:", deleteError);
-    return { error: "Failed to cancel quote. Please try again." };
+    return { error: t.errCancelFailed };
   }
 
   // Send the cancellation email

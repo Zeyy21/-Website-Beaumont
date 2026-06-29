@@ -13,12 +13,14 @@ export const site = {
   url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
 };
 
+/** `key` maps to dictionaries.nav.<key> for the localized label. `label` is the
+ *  English fallback kept for reference. */
 export const nav = [
-  { href: "#services", label: "Services" },
-  { href: "#about", label: "Who We Are" },
-  { href: "#quote", label: "Free Estimate" },
-  { href: "#terms", label: "Terms" },
-];
+  { href: "#services", key: "services", label: "Services" },
+  { href: "#about", key: "about", label: "Who We Are" },
+  { href: "#quote", key: "quote", label: "Free Estimate" },
+  { href: "#terms", key: "terms", label: "Terms" },
+] as const;
 
 /** Frequencies offered for recurring service. */
 export const frequencies = [

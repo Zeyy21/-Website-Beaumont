@@ -5,15 +5,16 @@ import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/cn";
 import { signOut } from "@/app/(auth)/login/actions";
+import { useT } from "@/components/i18n/locale-provider";
 
 const items = [
-  { href: "/dashboard", label: "Overview", icon: "grid" },
-  { href: "/dashboard/quotes", label: "Quotes", icon: "doc" },
-  { href: "/dashboard/payments", label: "Payments", icon: "card" },
-  { href: "/dashboard/contract", label: "Contract", icon: "pen" },
-  { href: "/dashboard/rewards", label: "Rewards", icon: "star" },
-  { href: "/dashboard/referrals", label: "Referrals", icon: "users" },
-  { href: "/dashboard/gallery", label: "My Gallery", icon: "image" },
+  { href: "/dashboard", key: "overview", icon: "grid" },
+  { href: "/dashboard/quotes", key: "quotes", icon: "doc" },
+  { href: "/dashboard/payments", key: "payments", icon: "card" },
+  { href: "/dashboard/contract", key: "contract", icon: "pen" },
+  { href: "/dashboard/rewards", key: "rewards", icon: "star" },
+  { href: "/dashboard/referrals", key: "referrals", icon: "users" },
+  { href: "/dashboard/gallery", key: "gallery", icon: "image" },
 ] as const;
 
 const paths: Record<string, string> = {
@@ -37,9 +38,11 @@ function Icon({ name }: { name: string }) {
 
 export function DashboardNav() {
   const pathname = usePathname();
+  const { dict } = useT();
+  const t = dict.dashboard.nav;
 
   return (
-    <nav className="flex items-center gap-1 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" aria-label="Account navigation">
+    <nav className="flex items-center gap-1 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" aria-label={t.navAria}>
       {items.map((item) => {
         const active =
           item.href === "/dashboard"
@@ -62,7 +65,7 @@ export function DashboardNav() {
               />
             )}
             <Icon name={item.icon} />
-            <span className="whitespace-nowrap">{item.label}</span>
+            <span className="whitespace-nowrap">{t[item.key]}</span>
           </Link>
         );
       })}
@@ -75,7 +78,7 @@ export function DashboardNav() {
           <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
             <path d="M9 21H5V3h4M16 17l5-5-5-5M21 12H9" />
           </svg>
-          Sign out
+          {t.signOut}
         </button>
       </form>
     </nav>

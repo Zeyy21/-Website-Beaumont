@@ -5,14 +5,7 @@ import type { ReactNode } from "react";
 import { Button } from "@/components/ui";
 import type { QuoteStatus } from "@/lib/supabase/types";
 import { saveAndSendQuote, saveQuoteReview } from "@/app/admin/actions";
-
-const statusOptions: { value: QuoteStatus; label: string }[] = [
-  { value: "requested", label: "Needs quote" },
-  { value: "sent", label: "Sent to customer" },
-  { value: "accepted", label: "Accepted" },
-  { value: "scheduled", label: "Scheduled" },
-  { value: "completed", label: "Completed" },
-];
+import { useT } from "@/components/i18n/locale-provider";
 
 export function AdminQuoteReviewForm({
   quoteId,
@@ -27,6 +20,15 @@ export function AdminQuoteReviewForm({
   scheduledFor: string | null;
   internalNotes: string | null;
 }) {
+  const { dict } = useT();
+  const t = dict.admin.quoteReviewForm;
+  const statusOptions: { value: QuoteStatus; label: string }[] = [
+    { value: "requested", label: t.needsQuote },
+    { value: "sent", label: t.sentToCustomer },
+    { value: "accepted", label: t.accepted },
+    { value: "scheduled", label: t.scheduled },
+    { value: "completed", label: t.completed },
+  ];
   const formRef = useRef<HTMLFormElement>(null);
   const [pending, start] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
@@ -44,9 +46,9 @@ export function AdminQuoteReviewForm({
           ? await saveAndSendQuote(formData)
           : await saveQuoteReview(formData);
       if (result.ok) {
-        setMessage(mode === "send" ? "Quote saved and sent." : "Quote saved.");
+        setMessage(mode === "send" ? t.savedAndSent : t.savedOnly);
       } else {
-        setError(result.error ?? "Action failed.");
+        setError(result.error ?? t.actionFailed);
       }
     });
   }
@@ -56,7 +58,7 @@ export function AdminQuoteReviewForm({
       <input type="hidden" name="quote_id" value={quoteId} />
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Field label="Final quote amount">
+        <Field label={t.finalAmount}>
           <input
             name="total"
             type="number"
@@ -67,7 +69,7 @@ export function AdminQuoteReviewForm({
           />
         </Field>
 
-        <Field label="Status">
+        <Field label={t.status}>
           <select name="status" defaultValue={status} className={inputClass}>
             {statusOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -77,7 +79,7 @@ export function AdminQuoteReviewForm({
           </select>
         </Field>
 
-        <Field label="Scheduled date">
+        <Field label={t.scheduledDate}>
           <input
             name="scheduled_for"
             type="datetime-local"
@@ -87,13 +89,13 @@ export function AdminQuoteReviewForm({
         </Field>
       </div>
 
-      <Field label="Internal staff notes">
+      <Field label={t.internalNotes}>
         <textarea
           name="internal_notes"
           defaultValue={internalNotes ?? ""}
           rows={5}
           className={`${inputClass} min-h-32 resize-y rounded-2xl`}
-          placeholder="What should staff know before quoting, scheduling, or replying?"
+          placeholder={t.notesPlaceholder}
         />
       </Field>
 
@@ -104,10 +106,10 @@ export function AdminQuoteReviewForm({
           onClick={() => run("save")}
           variant="outline"
         >
-          {pending ? "Saving..." : "Save"}
+          {pending ? t.saving : t.save}
         </Button>
         <Button type="button" disabled={pending} onClick={() => run("send")}>
-          {pending ? "Working..." : "Save and send quote"}
+          {pending ? t.working : t.saveAndSend}
         </Button>
         {message && <span className="text-sm font-medium text-green-700">{message}</span>}
         {error && <span className="text-sm font-medium text-red-700">{error}</span>}

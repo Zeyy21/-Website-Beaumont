@@ -35,14 +35,14 @@ interface Rendered {
 const shell = (heading: string, bodyHtml: string) => `
 <!doctype html>
 <html>
-  <body style="margin:0;background:#F9F8E7;font-family:Georgia,'Times New Roman',serif;color:#1D170F;">
+  <body style="margin:0;background:#F4F1EC;font-family:Georgia,'Times New Roman',serif;color:#1C1C1A;">
     <div style="max-width:560px;margin:0 auto;padding:40px 32px;">
-      <div style="text-align:center;margin-bottom:28px;letter-spacing:.18em;font-size:22px;font-weight:700;color:#40261A;">BEAUMONT</div>
-      <div style="background:#ffffff;border:1px solid #E8E0CF;border-radius:16px;padding:32px;">
-        <h1 style="font-size:22px;margin:0 0 16px;color:#40261A;">${heading}</h1>
+      <div style="text-align:center;margin-bottom:28px;letter-spacing:.18em;font-size:22px;font-weight:700;color:#2B2B28;">BEAUMONT</div>
+      <div style="background:#ffffff;border:1px solid #E3DCCF;border-radius:16px;padding:32px;">
+        <h1 style="font-size:22px;margin:0 0 16px;color:#2B2B28;">${heading}</h1>
         ${bodyHtml}
       </div>
-      <p style="text-align:center;color:#A1794F;font-size:12px;margin-top:24px;font-family:Arial,sans-serif;">
+      <p style="text-align:center;color:#1F4934;font-size:12px;margin-top:24px;font-family:Arial,sans-serif;">
         ${site.name} · ${site.promise}
       </p>
     </div>
@@ -53,7 +53,7 @@ const p = (t: string) =>
   `<p style="font-size:15px;line-height:1.7;margin:0 0 14px;font-family:Arial,sans-serif;">${t}</p>`;
 
 const button = (label: string, href: string) =>
-  `<a href="${href}" style="display:inline-block;background:#7A4327;color:#F9F8E7;text-decoration:none;padding:12px 24px;border-radius:999px;font-family:Arial,sans-serif;font-size:14px;">${label}</a>`;
+  `<a href="${href}" style="display:inline-block;background:#1F4934;color:#F4F1EC;text-decoration:none;padding:12px 24px;border-radius:999px;font-family:Arial,sans-serif;font-size:14px;">${label}</a>`;
 
 const escapeHtml = (value: string) =>
   value.replace(

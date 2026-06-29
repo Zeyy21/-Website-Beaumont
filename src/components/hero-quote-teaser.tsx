@@ -15,7 +15,7 @@ export function HeroQuoteTeaser() {
         <div className="relative h-44 overflow-hidden rounded-[20px] bg-gradient-to-br from-ochre/40 to-soil p-5">
           <div className="absolute inset-0 opacity-25">
             <svg className="h-full w-full" viewBox="0 0 320 180" aria-hidden="true">
-              <g stroke="#F9F8E7" strokeOpacity="0.3" fill="none">
+              <g stroke="#F4F1EC" strokeOpacity="0.3" fill="none">
                 <path d="M0 62 H320 M0 122 H320 M70 0 V180 M172 0 V180 M258 0 V180" />
               </g>
             </svg>

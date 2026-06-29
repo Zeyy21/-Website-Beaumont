@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useT } from "@/components/i18n/locale-provider";
 
 export interface Suggestion {
   label: string;
@@ -24,6 +25,9 @@ export function AddressSearch({
   onInputChange?: (value: string) => void;
   initialValue?: string;
 }) {
+  const { dict } = useT();
+  const t = dict.quote.addressSearch;
+  const ts = dict.quote.step0;
   const [q, setQ] = useState(initialValue);
   const [results, setResults] = useState<Suggestion[]>([]);
   const [open, setOpen] = useState(false);
@@ -49,23 +53,23 @@ export function AddressSearch({
         headers: { Accept: "application/json" },
       });
       const data = (await res.json()) as GeocodeResponse;
-      if (!res.ok) throw new Error(data.error || "Address search is unavailable.");
+      if (!res.ok) throw new Error(data.error || t.unavailable);
 
       const next = data.results ?? [];
       setResults(next);
       setOpen(true);
       setActive(next.length ? 0 : -1);
-      if (!next.length) setMessage("No matching address found. Try adding the city or postal code.");
+      if (!next.length) setMessage(t.noMatch);
     } catch (error) {
       if ((error as Error).name !== "AbortError") {
         setResults([]);
         setOpen(false);
-        setMessage(error instanceof Error ? error.message : "Address search failed. Please try again.");
+        setMessage(error instanceof Error ? error.message : t.failed);
       }
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   // Search as the user pauses, while keeping the explicit search button useful.
   useEffect(() => {
@@ -100,14 +104,14 @@ export function AddressSearch({
 
   const locateByNetwork = async () => {
     try {
-      setMessage("Using your network to estimate the nearest city…");
+      setMessage(t.networkEstimating);
       const response = await fetch("https://ipapi.co/json/", {
         headers: { Accept: "application/json" },
       });
       const data = (await response.json()) as { latitude?: number; longitude?: number; city?: string; region?: string; country_code?: string };
-      if (!response.ok || !Number.isFinite(data.latitude) || !Number.isFinite(data.longitude)) throw new Error("Network location unavailable");
+      if (!response.ok || !Number.isFinite(data.latitude) || !Number.isFinite(data.longitude)) throw new Error(t.networkUnavailable);
       const fallback: Suggestion = {
-        label: [data.city, data.region, data.country_code].filter(Boolean).join(", ") || "Your approximate area",
+        label: [data.city, data.region, data.country_code].filter(Boolean).join(", ") || t.approxArea,
         lat: Number(data.latitude),
         lon: Number(data.longitude),
       };
@@ -115,7 +119,7 @@ export function AddressSearch({
       const reverseData = (await reverse.json()) as GeocodeResponse;
       choose(reverse.ok && reverseData.result ? reverseData.result : fallback);
     } catch {
-      setMessage("Location is blocked in this browser. Allow location for this site, or enter a Canadian postal code above.");
+      setMessage(t.blocked);
     } finally {
       setLocating(false);
     }
@@ -129,7 +133,7 @@ export function AddressSearch({
     }
 
     setLocating(true);
-    setMessage("Requesting location permission…");
+    setMessage(t.requesting);
 
     try {
       const permission = await navigator.permissions?.query({ name: "geolocation" });
@@ -144,7 +148,7 @@ export function AddressSearch({
     navigator.geolocation.getCurrentPosition(
       async ({ coords }) => {
         const fallback: Suggestion = {
-          label: "Your approximate location",
+          label: t.approxLocation,
           lat: coords.latitude,
           lon: coords.longitude,
         };
@@ -165,7 +169,7 @@ export function AddressSearch({
         if (error.code === error.PERMISSION_DENIED) void locateByNetwork();
         else {
           setLocating(false);
-          setMessage("We could not determine your location. Enter a Canadian address or postal code instead.");
+          setMessage(t.undetermined);
         }
       },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
@@ -175,9 +179,9 @@ export function AddressSearch({
   return (
     <div ref={boxRef} className="relative">
       <label htmlFor="address" className="mb-2.5 block text-sm font-semibold text-oak">
-        Home address
+        {ts.addressLabel}
       </label>
-      <div className="flex items-center gap-2 rounded-[1.15rem] border border-oak/20 bg-white/85 p-2 shadow-[0_12px_35px_-28px_rgba(29,23,15,.75)] transition focus-within:border-cinnamon focus-within:bg-white focus-within:ring-4 focus-within:ring-cinnamon/10">
+      <div className="flex items-center gap-2 rounded-[1.15rem] border border-oak/20 bg-white/85 p-2 shadow-[0_12px_35px_-28px_rgba(28,28,26,.75)] transition focus-within:border-cinnamon focus-within:bg-white focus-within:ring-4 focus-within:ring-cinnamon/10">
         <svg viewBox="0 0 24 24" className="ml-2 h-5 w-5 shrink-0 text-cinnamon" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
           <path d="M12 21s-7-5.5-7-11a7 7 0 1114 0c0 5.5-7 11-7 11z" strokeLinejoin="round" />
           <circle cx="12" cy="10" r="2.5" />
@@ -207,7 +211,7 @@ export function AddressSearch({
             }
             if (event.key === "Escape") setOpen(false);
           }}
-          placeholder="Street address or postal code"
+          placeholder={ts.addressPlaceholder}
           autoComplete="street-address"
           role="combobox"
           aria-expanded={open}
@@ -218,9 +222,9 @@ export function AddressSearch({
           type="button"
           onClick={() => void search(q)}
           disabled={loading || q.trim().length < 3}
-          className="inline-flex h-11 shrink-0 items-center justify-center rounded-[.85rem] bg-cinnamon px-4 text-sm font-semibold text-ivory shadow-[0_10px_25px_-15px_rgba(64,38,26,.9)] transition hover:bg-oak disabled:cursor-not-allowed disabled:opacity-40 sm:px-5"
+          className="inline-flex h-11 shrink-0 items-center justify-center rounded-[.85rem] bg-cinnamon px-4 text-sm font-semibold text-ivory shadow-[0_10px_25px_-15px_rgba(43,43,40,.9)] transition hover:bg-oak disabled:cursor-not-allowed disabled:opacity-40 sm:px-5"
         >
-          {loading ? "Searching…" : <><span className="sm:hidden">Find</span><span className="hidden sm:inline">Find address</span></>}
+          {loading ? ts.searching : <><span className="sm:hidden">{ts.find}</span><span className="hidden sm:inline">{ts.findAddress}</span></>}
         </button>
       </div>
 
@@ -234,7 +238,7 @@ export function AddressSearch({
           <circle cx="12" cy="12" r="3" />
           <path d="M12 2v3M12 19v3M2 12h3M19 12h3" strokeLinecap="round" />
         </svg>
-        {locating ? "Finding your area…" : "Use my current location"}
+        {locating ? ts.locating : ts.useLocation}
       </button>
 
       {message && (
