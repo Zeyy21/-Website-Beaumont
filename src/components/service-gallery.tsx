@@ -25,6 +25,7 @@ const ease = [0.22, 1, 0.36, 1] as const;
 export function ServiceGallery({ services }: { services: ServiceCard[] }) {
   const section = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
+  const [introCollapsed, setIntroCollapsed] = useState(false);
   const { dict } = useT();
   const t = dict.servicesSection;
   const details = [t.details.driveways, t.details.decks, t.details.houses, t.details.windows];
@@ -42,6 +43,10 @@ export function ServiceGallery({ services }: { services: ServiceCard[] }) {
 
   useMotionValueEvent(smoothProgress, "change", (value) => {
     if (!services.length) return;
+    const shouldCollapse = value > 0.045;
+    setIntroCollapsed((current) =>
+      current === shouldCollapse ? current : shouldCollapse,
+    );
     const next = Math.min(
       services.length - 1,
       Math.max(0, Math.floor(value * services.length)),
@@ -55,18 +60,19 @@ export function ServiceGallery({ services }: { services: ServiceCard[] }) {
     <section
       ref={section}
       id="services"
+      data-mobile-intro-collapsed={introCollapsed ? "true" : "false"}
       className="relative scroll-mt-24 bg-ivory"
       style={{ height: `${services.length * 90 + 100}vh` }}
       aria-labelledby="services-title"
     >
       <div className="sticky top-0 h-[100svh] overflow-hidden bg-ivory">
         <Container className="relative z-10 flex h-full flex-col pb-5 pt-28 md:pb-8 md:pt-32">
-          <motion.div
-            className="grid shrink-0 gap-3 border-b border-oak/10 pb-5 md:gap-5 md:pb-7 lg:grid-cols-[.65fr_1.35fr] lg:items-end"
-            initial={{ opacity: 0, y: 22 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.75, ease }}
+          <div
+            className={`grid shrink-0 overflow-hidden border-b transition-[max-height,opacity,transform,padding,border-color] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] md:gap-5 lg:max-h-[24rem] lg:translate-y-0 lg:grid-cols-[.65fr_1.35fr] lg:items-end lg:border-oak/10 lg:pb-7 lg:opacity-100 ${
+              introCollapsed
+                ? "max-h-0 -translate-y-8 gap-0 border-transparent pb-0 opacity-0"
+                : "max-h-[24rem] translate-y-0 gap-3 border-oak/10 pb-5 opacity-100"
+            }`}
           >
             <div>
               <div className="flex items-center gap-4">
@@ -84,10 +90,10 @@ export function ServiceGallery({ services }: { services: ServiceCard[] }) {
             >
               {t.titleA} <span className="italic text-ochre">{t.titleB}</span>
             </h2>
-          </motion.div>
+          </div>
 
           <motion.div
-            className="mt-5 flex min-h-0 flex-1 flex-col gap-2 lg:mt-8 lg:flex-row lg:gap-3.5"
+            className={`flex min-h-0 flex-1 flex-col gap-2 transition-[margin] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] lg:mt-8 lg:flex-row lg:gap-3.5 ${introCollapsed ? "mt-1" : "mt-5"}`}
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.1 }}
@@ -151,7 +157,7 @@ function ScrollAccordionCard({
   label: string;
   active: boolean;
 }) {
-  const flexGrow = active ? 5.4 : 1;
+  const flexGrow = active ? 5.8 : 1;
 
   return (
     <Link
@@ -159,7 +165,7 @@ function ScrollAccordionCard({
       data-service-card
       data-active-service={active ? "true" : "false"}
       aria-label={`${service.name} — ${detail}`}
-      className="group relative block min-h-0 min-w-0 overflow-hidden rounded-[1.35rem] bg-soil text-ivory shadow-[0_26px_75px_-42px_rgba(28,28,26,.74)] transition-[flex-grow] duration-[850ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[flex-grow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinnamon focus-visible:ring-offset-4 md:rounded-[2.25rem]"
+      className="group relative block min-h-0 min-w-0 overflow-hidden rounded-[1.65rem] bg-soil text-ivory shadow-[0_26px_75px_-42px_rgba(28,28,26,.74)] transition-[flex-grow] duration-[850ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[flex-grow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinnamon focus-visible:ring-offset-4 md:rounded-[2.25rem]"
       style={{ flexGrow, flexBasis: 0 }}
     >
       <Image
@@ -175,37 +181,37 @@ function ScrollAccordionCard({
       <div className="pointer-events-none absolute inset-2 rounded-[.95rem] border border-ivory/14 md:inset-4 md:rounded-[1.7rem]" />
 
       <div
-        className={`absolute inset-0 flex items-center justify-between gap-4 px-5 text-center transition-opacity duration-300 lg:inset-x-0 lg:bottom-0 lg:top-auto lg:flex-col lg:justify-center lg:gap-5 lg:p-7 ${active ? "pointer-events-none opacity-0" : "opacity-100 delay-200"}`}
+        className={`absolute inset-0 flex items-center justify-between gap-4 px-6 text-center transition-opacity duration-300 lg:inset-x-0 lg:bottom-0 lg:top-auto lg:flex-col lg:justify-center lg:gap-5 lg:p-7 ${active ? "pointer-events-none opacity-0" : "opacity-100 delay-200"}`}
       >
-        <span className="font-display text-lg italic leading-none text-sand lg:text-2xl">
+        <span className="font-display text-xl italic leading-none text-sand lg:text-2xl">
           {String(index + 1).padStart(2, "0")}
         </span>
-        <span className="text-balance font-display text-[1.05rem] leading-none text-ivory lg:whitespace-nowrap lg:text-[1.65rem] lg:[writing-mode:vertical-rl] lg:[transform:rotate(180deg)]">
+        <span className="text-balance font-display text-[1.2rem] leading-none text-ivory lg:whitespace-nowrap lg:text-[1.65rem] lg:[writing-mode:vertical-rl] lg:[transform:rotate(180deg)]">
           {service.name}
         </span>
       </div>
 
       <div
-        className={`absolute inset-x-0 top-0 flex items-center justify-between p-4 text-[8px] font-semibold uppercase tracking-[0.21em] text-ivory/68 transition-opacity duration-500 md:p-6 lg:p-9 lg:text-[9px] lg:tracking-[0.24em] ${active ? "opacity-100 delay-150" : "opacity-0"}`}
+        className={`absolute inset-x-0 top-0 flex items-center justify-between p-5 text-[9px] font-semibold uppercase tracking-[0.21em] text-ivory/68 transition-opacity duration-500 md:p-6 lg:p-9 lg:tracking-[0.24em] ${active ? "opacity-100 delay-150" : "opacity-0"}`}
       >
         <span className="whitespace-nowrap">{detail}</span>
         <span>{String(index + 1).padStart(2, "0")}</span>
       </div>
 
       <div
-        className={`absolute inset-x-0 bottom-0 p-4 transition-all duration-500 md:p-6 lg:p-10 ${active ? "translate-y-0 opacity-100 delay-150" : "pointer-events-none translate-y-3 opacity-0"}`}
+        className={`absolute inset-x-0 bottom-0 p-5 transition-all duration-500 md:p-6 lg:p-10 ${active ? "translate-y-0 opacity-100 delay-150" : "pointer-events-none translate-y-3 opacity-0"}`}
       >
-        <div className="flex items-center gap-3 text-[8px] font-semibold uppercase tracking-[0.21em] text-sand/88 lg:text-[9px] lg:tracking-[0.26em]">
+        <div className="flex items-center gap-3 text-[9px] font-semibold uppercase tracking-[0.21em] text-sand/88 lg:tracking-[0.26em]">
           <span>{label}</span>
           <span className="h-px w-6 bg-sand/40 lg:w-8" />
           <span className="whitespace-nowrap">{type}</span>
         </div>
         <div className="mt-2.5 flex items-end justify-between gap-6 lg:mt-4 lg:gap-8">
           <div className="min-w-0">
-            <h3 className="font-display text-[clamp(1.65rem,7vw,4.6rem)] leading-[0.94]">
+            <h3 className="font-display text-[clamp(2.15rem,9vw,4.6rem)] leading-[0.94]">
               {service.name}
             </h3>
-            <p className="mt-2 line-clamp-3 max-w-2xl text-[11px] font-medium leading-relaxed text-ivory/68 sm:text-sm lg:mt-3 lg:line-clamp-none lg:text-base">
+            <p className="mt-3 line-clamp-4 max-w-2xl text-sm font-medium leading-relaxed text-ivory/68 lg:line-clamp-none lg:text-base">
               {service.description}
             </p>
           </div>
