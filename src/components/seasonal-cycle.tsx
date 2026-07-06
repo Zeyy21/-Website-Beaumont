@@ -96,7 +96,7 @@ function PinnedSeasons({
       ref={section}
       data-header-tone="dark"
       className="relative bg-soil text-ivory"
-      style={{ height: `${seasons.length * 100}vh` }}
+      style={{ height: `${seasons.length * 135}vh` }}
       aria-labelledby="seasonal-title"
     >
       <div className="sticky top-0 flex h-screen flex-col overflow-hidden">
