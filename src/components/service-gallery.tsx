@@ -113,7 +113,7 @@ function ExpandingCard({
   type,
   label,
   active,
-
+  isMobile,
   touch,
   onActivate,
 }: {
