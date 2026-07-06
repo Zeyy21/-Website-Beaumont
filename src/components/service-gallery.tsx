@@ -2,7 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion, useScroll, useSpring } from "framer-motion";
+import {
+  motion,
+  useMotionValueEvent,
+  useScroll,
+  useSpring,
+} from "framer-motion";
 import { useRef, useState } from "react";
 import { Container, Eyebrow } from "@/components/ui";
 import { useT } from "@/components/i18n/locale-provider";
@@ -18,227 +23,126 @@ const serviceImages = [
 const ease = [0.22, 1, 0.36, 1] as const;
 
 export function ServiceGallery({ services }: { services: ServiceCard[] }) {
+  const section = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
   const { dict } = useT();
   const t = dict.servicesSection;
-
   const details = [t.details.driveways, t.details.decks, t.details.houses, t.details.windows];
   const types = [t.types.pressure, t.types.pressure, t.types.soft, t.types.windows];
 
+  const { scrollYProgress } = useScroll({
+    target: section,
+    offset: ["start start", "end end"],
+  });
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 72,
+    damping: 24,
+    mass: 0.42,
+  });
+
+  useMotionValueEvent(smoothProgress, "change", (value) => {
+    if (!services.length) return;
+    const next = Math.min(
+      services.length - 1,
+      Math.max(0, Math.floor(value * services.length)),
+    );
+    setActive((current) => (current === next ? current : next));
+  });
+
+  if (!services.length) return null;
+
   return (
     <section
+      ref={section}
       id="services"
-      className="relative scroll-mt-24 overflow-hidden bg-ivory py-24 md:py-32"
+      className="relative scroll-mt-24 bg-ivory"
+      style={{ height: `${services.length * 90 + 100}vh` }}
       aria-labelledby="services-title"
     >
-      <Container className="relative z-10">
-        <motion.div
-          className="grid gap-6 border-b border-oak/10 pb-8 lg:grid-cols-[.65fr_1.35fr] lg:items-end"
-          initial={{ opacity: 0, y: 22 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.1 }}
-          transition={{ duration: 0.75, ease }}
-        >
-          <div>
-            <div className="flex items-center gap-4">
-              <span className="font-display text-2xl text-ochre">01</span>
-              <span className="h-px w-12 bg-ochre/40" />
-              <Eyebrow>{t.eyebrow}</Eyebrow>
+      <div className="sticky top-0 h-[100svh] overflow-hidden bg-ivory">
+        <Container className="relative z-10 flex h-full flex-col pb-5 pt-28 md:pb-8 md:pt-32">
+          <motion.div
+            className="grid shrink-0 gap-3 border-b border-oak/10 pb-5 md:gap-5 md:pb-7 lg:grid-cols-[.65fr_1.35fr] lg:items-end"
+            initial={{ opacity: 0, y: 22 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.75, ease }}
+          >
+            <div>
+              <div className="flex items-center gap-4">
+                <span className="font-display text-2xl text-ochre">01</span>
+                <span className="h-px w-12 bg-ochre/40" />
+                <Eyebrow>{t.eyebrow}</Eyebrow>
+              </div>
+              <p className="mt-3 line-clamp-2 max-w-md text-xs font-medium leading-relaxed text-soil/58 md:mt-4 md:line-clamp-none md:text-sm">
+                {t.intro}
+              </p>
             </div>
-            <p className="mt-4 max-w-sm text-sm font-medium leading-relaxed text-soil/58">{t.intro}</p>
+            <h2
+              id="services-title"
+              className="max-w-4xl text-balance font-display text-[2.35rem] leading-[0.92] text-oak md:text-[clamp(3.25rem,5vw,5.5rem)]"
+            >
+              {t.titleA} <span className="italic text-ochre">{t.titleB}</span>
+            </h2>
+          </motion.div>
+
+          <motion.div
+            className="mt-5 flex min-h-0 flex-1 flex-col gap-2 lg:mt-8 lg:flex-row lg:gap-3.5"
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{ duration: 0.8, ease }}
+          >
+            {services.map((service, index) => (
+              <ScrollAccordionCard
+                key={service.id}
+                service={service}
+                index={index}
+                detail={details[index]}
+                type={types[index]}
+                label={t.service}
+                active={active === index}
+              />
+            ))}
+          </motion.div>
+
+          <div className="flex shrink-0 items-end justify-between gap-6 pt-3 md:pt-5">
+            <div>
+              <p className="text-[9px] font-semibold uppercase tracking-[0.27em] text-soil/48">
+                {t.scrollHint}
+              </p>
+              <p className="mt-1 hidden text-xs font-medium text-soil/55 sm:block" aria-live="polite">
+                {services[active]?.name}
+              </p>
+            </div>
+            <div className="flex w-full max-w-[15rem] items-center gap-2" aria-hidden="true">
+              {services.map((service, index) => (
+                <div key={service.id} className="h-px flex-1 overflow-hidden bg-oak/12">
+                  <motion.div
+                    className="h-full origin-left bg-cinnamon"
+                    animate={{ scaleX: index <= active ? 1 : 0 }}
+                    transition={{ duration: 0.55, ease }}
+                  />
+                </div>
+              ))}
+              <span className="ml-1 font-display text-sm text-cinnamon">
+                {String(active + 1).padStart(2, "0")}/{String(services.length).padStart(2, "0")}
+              </span>
+            </div>
           </div>
-          <h2 id="services-title" className="max-w-4xl text-balance font-display text-[clamp(2.9rem,5vw,5.5rem)] leading-[0.92] text-oak">
-            {t.titleA} <span className="italic text-ochre">{t.titleB}</span>
-          </h2>
-        </motion.div>
-      </Container>
-
-      <Container className="relative z-10">
-        <MobileServiceRail
-          services={services}
-          details={details}
-          types={types}
-          label={t.service}
-          swipeHint={t.swipeHint}
-        />
-
-        <motion.div
-          className="mt-10 hidden h-[46rem] gap-3.5 lg:flex"
-          onMouseLeave={() => setActive(0)}
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.1 }}
-          transition={{ duration: 0.8, ease }}
-        >
-          {services.map((service, index) => (
-            <ExpandingCard
-              key={service.id}
-              service={service}
-              index={index}
-              detail={details[index]}
-              type={types[index]}
-              label={t.service}
-              active={active === index}
-              onActivate={() => setActive(index)}
-            />
-          ))}
-        </motion.div>
-      </Container>
+        </Container>
+      </div>
     </section>
   );
 }
 
-function MobileServiceRail({
-  services,
-  details,
-  types,
-  label,
-  swipeHint,
-}: {
-  services: ServiceCard[];
-  details: string[];
-  types: string[];
-  label: string;
-  swipeHint: string;
-}) {
-  const rail = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useState(0);
-  const { scrollXProgress } = useScroll({ container: rail });
-  const progress = useSpring(scrollXProgress, {
-    stiffness: 110,
-    damping: 25,
-    mass: 0.35,
-  });
-
-  const updateActive = () => {
-    if (!rail.current) return;
-    const center = rail.current.scrollLeft + rail.current.clientWidth / 2;
-    let next = 0;
-    let nearest = Number.POSITIVE_INFINITY;
-    rail.current.querySelectorAll<HTMLElement>("[data-service-card]").forEach((card, index) => {
-      const distance = Math.abs(card.offsetLeft + card.offsetWidth / 2 - center);
-      if (distance < nearest) {
-        nearest = distance;
-        next = index;
-      }
-    });
-    setActive((current) => (current === next ? current : next));
-  };
-
-  const goTo = (index: number) => {
-    const card = rail.current?.querySelectorAll<HTMLElement>("[data-service-card]")[index];
-    if (!rail.current || !card) return;
-    rail.current.scrollTo({
-      left: card.offsetLeft - (rail.current.clientWidth - card.offsetWidth) / 2,
-      behavior: "smooth",
-    });
-  };
-
-  return (
-    <div className="mt-10 lg:hidden">
-      <div
-        ref={rail}
-        onScroll={updateActive}
-        className="mobile-service-rail -mx-6 flex snap-x snap-mandatory gap-3 overflow-x-auto px-6 pb-4"
-        aria-label={swipeHint}
-      >
-        {services.map((service, index) => (
-          <motion.article
-            data-service-card
-            key={service.id}
-            className="w-[calc(100vw-3.5rem)] max-w-[34rem] shrink-0 snap-center"
-            initial={{ opacity: 0.35, y: 18, scale: 0.975 }}
-            whileInView={{ opacity: 1, y: 0, scale: 1 }}
-            viewport={{ root: rail, amount: 0.6 }}
-            transition={{ duration: 0.72, ease }}
-          >
-            <Link
-              href="#quote"
-              aria-label={`${service.name} — ${details[index]}`}
-              className="group relative block h-[34rem] overflow-hidden rounded-[2rem] bg-soil text-ivory shadow-[0_28px_75px_-38px_rgba(28,28,26,.88)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinnamon focus-visible:ring-offset-4"
-            >
-              <motion.div
-                className="absolute inset-0"
-                initial={{ scale: 1.075 }}
-                whileInView={{ scale: 1 }}
-                viewport={{ root: rail, amount: 0.6 }}
-                transition={{ duration: 1.35, ease }}
-              >
-                <Image
-                  src={serviceImages[index % serviceImages.length]}
-                  alt=""
-                  fill
-                  sizes="(max-width: 1023px) 88vw, 34rem"
-                  className="object-cover"
-                />
-              </motion.div>
-              <div className="absolute inset-0 bg-gradient-to-t from-soil via-soil/54 to-soil/10" />
-              <div className="absolute inset-3 rounded-[1.45rem] border border-ivory/16" />
-
-              <div className="absolute inset-x-0 top-0 flex items-center justify-between p-7 text-[9px] font-semibold uppercase tracking-[0.24em] text-ivory/72">
-                <span>{details[index]}</span>
-                <span>{String(index + 1).padStart(2, "0")}</span>
-              </div>
-
-              <div className="absolute inset-x-0 bottom-0 p-7 pb-8">
-                <div className="flex items-center gap-3 text-[9px] font-semibold uppercase tracking-[0.24em] text-sand/90">
-                  <span>{label}</span>
-                  <span className="h-px w-7 bg-sand/45" />
-                  <span>{types[index]}</span>
-                </div>
-                <h3 className="mt-4 max-w-[18rem] font-display text-[2.65rem] leading-[0.93] text-ivory">
-                  {service.name}
-                </h3>
-                <p className="mt-4 line-clamp-4 text-sm font-medium leading-relaxed text-ivory/72">
-                  {service.description}
-                </p>
-                <div className="mt-6 flex items-center gap-3 text-[9px] font-semibold uppercase tracking-[0.22em] text-sand">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full border border-ivory/24 text-base transition-transform duration-500 group-hover:-rotate-45">↗</span>
-                  <span>{String(index + 1).padStart(2, "0")} / {String(services.length).padStart(2, "0")}</span>
-                </div>
-              </div>
-            </Link>
-          </motion.article>
-        ))}
-        <span aria-hidden="true" className="w-3 shrink-0" />
-      </div>
-
-      <div className="mt-3 flex items-center justify-between gap-6">
-        <div>
-          <p className="text-[9px] font-semibold uppercase tracking-[0.27em] text-soil/48">{swipeHint}</p>
-          <div className="mt-3 h-px w-28 overflow-hidden bg-oak/12">
-            <motion.div className="h-full origin-left bg-cinnamon" style={{ scaleX: progress }} />
-          </div>
-        </div>
-        <div className="flex items-center gap-2" aria-label={swipeHint}>
-          {services.map((service, index) => (
-            <button
-              key={service.id}
-              type="button"
-              onClick={() => goTo(index)}
-              aria-label={service.name}
-              aria-current={active === index ? "true" : undefined}
-              className={`h-2 rounded-full transition-all duration-500 ${
-                active === index ? "w-7 bg-cinnamon" : "w-2 bg-oak/18 hover:bg-oak/35"
-              }`}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/** Desktop accordion card: grows on hover or keyboard focus while its
- * neighbours compress. */
-function ExpandingCard({
+function ScrollAccordionCard({
   service,
   index,
   detail,
   type,
   label,
   active,
-  onActivate,
 }: {
   service: ServiceCard;
   index: number;
@@ -246,65 +150,68 @@ function ExpandingCard({
   type: string;
   label: string;
   active: boolean;
-  onActivate: () => void;
 }) {
-  const flexGrow = active ? 4.4 : 1;
+  const flexGrow = active ? 5.4 : 1;
 
   return (
     <Link
       href="#quote"
-      onMouseEnter={onActivate}
-      onFocus={onActivate}
+      data-service-card
+      data-active-service={active ? "true" : "false"}
       aria-label={`${service.name} — ${detail}`}
-      className="group relative block h-full min-w-0 overflow-hidden rounded-[1.5rem] bg-soil text-ivory shadow-[0_30px_90px_-45px_rgba(28,28,26,.68)] transition-[flex-grow] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[flex-grow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinnamon focus-visible:ring-offset-4 md:rounded-[2.25rem]"
+      className="group relative block min-h-0 min-w-0 overflow-hidden rounded-[1.35rem] bg-soil text-ivory shadow-[0_26px_75px_-42px_rgba(28,28,26,.74)] transition-[flex-grow] duration-[850ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[flex-grow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinnamon focus-visible:ring-offset-4 md:rounded-[2.25rem]"
       style={{ flexGrow, flexBasis: 0 }}
     >
       <Image
         src={serviceImages[index % serviceImages.length]}
         alt=""
         fill
-        sizes={active ? "80vw" : "22vw"}
-        className={`object-cover transition-transform duration-[1400ms] ease-out ${active ? "scale-[1.04]" : "scale-100 group-hover:scale-[1.03]"}`}
+        sizes={active ? "(min-width: 1024px) 68vw, 100vw" : "(min-width: 1024px) 14vw, 100vw"}
+        className={`object-cover transition-transform duration-[1500ms] ease-out ${active ? "scale-[1.045]" : "scale-100"}`}
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-soil/94 via-soil/24 to-soil/10" />
-      <div className={`absolute inset-0 bg-gradient-to-t from-soil/98 via-soil/85 to-soil/20 backdrop-blur-[2px] transition-all duration-700 ${active ? "opacity-100" : "opacity-0 pointer-events-none"}`} />
-      {/* Seam accent visible when collapsed */}
-      <div className={`absolute inset-x-0 top-0 h-px bg-sand/30 transition-opacity duration-500 sm:inset-y-0 sm:left-0 sm:h-auto sm:w-px ${active ? "opacity-0" : "opacity-100"}`} />
-      <div className="pointer-events-none absolute inset-2.5 rounded-[1.1rem] border border-ivory/14 md:inset-4 md:rounded-[1.7rem]" />
+      <div className="absolute inset-0 bg-gradient-to-t from-soil/94 via-soil/26 to-soil/10" />
+      <div className={`absolute inset-0 bg-gradient-to-t from-soil/98 via-soil/82 to-soil/18 backdrop-blur-[2px] transition-opacity duration-700 ${active ? "opacity-100" : "pointer-events-none opacity-0"}`} />
+      <div className={`absolute inset-x-0 top-0 h-px bg-sand/30 transition-opacity duration-500 lg:inset-y-0 lg:left-0 lg:h-auto lg:w-px ${active ? "opacity-0" : "opacity-100"}`} />
+      <div className="pointer-events-none absolute inset-2 rounded-[.95rem] border border-ivory/14 md:inset-4 md:rounded-[1.7rem]" />
 
-      {/* Collapsed spine label — vertical text on desktop, horizontal on mobile */}
       <div
-        className={`absolute inset-0 flex flex-row items-center justify-center gap-4 p-4 text-center transition-opacity duration-300 sm:inset-x-0 sm:bottom-0 sm:top-auto sm:flex-col sm:gap-5 sm:p-7 ${active ? "pointer-events-none opacity-0" : "opacity-100 delay-200"}`}
+        className={`absolute inset-0 flex items-center justify-between gap-4 px-5 text-center transition-opacity duration-300 lg:inset-x-0 lg:bottom-0 lg:top-auto lg:flex-col lg:justify-center lg:gap-5 lg:p-7 ${active ? "pointer-events-none opacity-0" : "opacity-100 delay-200"}`}
       >
-        <span className="font-display text-xl italic leading-none text-sand sm:text-2xl">{String(index + 1).padStart(2, "0")}</span>
-        <span
-          className="whitespace-normal text-balance font-display text-[1.25rem] leading-[1.1] tracking-[-0.01em] text-ivory sm:whitespace-nowrap sm:text-[1.65rem] sm:leading-none sm:[writing-mode:vertical-rl] sm:[transform:rotate(180deg)]"
-        >
+        <span className="font-display text-lg italic leading-none text-sand lg:text-2xl">
+          {String(index + 1).padStart(2, "0")}
+        </span>
+        <span className="text-balance font-display text-[1.05rem] leading-none text-ivory lg:whitespace-nowrap lg:text-[1.65rem] lg:[writing-mode:vertical-rl] lg:[transform:rotate(180deg)]">
           {service.name}
         </span>
       </div>
 
-      {/* Expanded content — revealed as the card grows */}
       <div
-        className={`absolute inset-x-0 top-0 flex items-center justify-between p-5 text-[9px] font-semibold uppercase tracking-[0.24em] text-ivory/68 transition-opacity duration-500 sm:p-8 md:p-9 ${active ? "opacity-100 delay-150" : "opacity-0"}`}
+        className={`absolute inset-x-0 top-0 flex items-center justify-between p-4 text-[8px] font-semibold uppercase tracking-[0.21em] text-ivory/68 transition-opacity duration-500 md:p-6 lg:p-9 lg:text-[9px] lg:tracking-[0.24em] ${active ? "opacity-100 delay-150" : "opacity-0"}`}
       >
         <span className="whitespace-nowrap">{detail}</span>
         <span>{String(index + 1).padStart(2, "0")}</span>
       </div>
+
       <div
-        className={`absolute inset-x-0 bottom-0 p-5 transition-all duration-500 sm:p-8 md:p-10 ${active ? "translate-y-0 opacity-100 delay-150" : "pointer-events-none translate-y-3 opacity-0"}`}
+        className={`absolute inset-x-0 bottom-0 p-4 transition-all duration-500 md:p-6 lg:p-10 ${active ? "translate-y-0 opacity-100 delay-150" : "pointer-events-none translate-y-3 opacity-0"}`}
       >
-        <div className="flex items-center gap-3 text-[9px] font-semibold uppercase tracking-[0.26em] text-sand/88 sm:gap-4">
+        <div className="flex items-center gap-3 text-[8px] font-semibold uppercase tracking-[0.21em] text-sand/88 lg:text-[9px] lg:tracking-[0.26em]">
           <span>{label}</span>
-          <span className="h-px w-6 bg-sand/40 sm:w-8" />
+          <span className="h-px w-6 bg-sand/40 lg:w-8" />
           <span className="whitespace-nowrap">{type}</span>
         </div>
-        <div className="mt-3 flex items-end justify-between gap-6 sm:mt-4 sm:gap-8">
+        <div className="mt-2.5 flex items-end justify-between gap-6 lg:mt-4 lg:gap-8">
           <div className="min-w-0">
-            <h3 className="font-display text-[clamp(1.9rem,7vw,4.6rem)] leading-[0.94]">{service.name}</h3>
-            <p className="mt-2.5 max-w-2xl text-sm font-medium leading-relaxed text-ivory/66 sm:mt-3 md:text-base">{service.description}</p>
+            <h3 className="font-display text-[clamp(1.65rem,7vw,4.6rem)] leading-[0.94]">
+              {service.name}
+            </h3>
+            <p className="mt-2 line-clamp-3 max-w-2xl text-[11px] font-medium leading-relaxed text-ivory/68 sm:text-sm lg:mt-3 lg:line-clamp-none lg:text-base">
+              {service.description}
+            </p>
           </div>
-          <span className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-full border border-ivory/25 text-xl transition-all duration-500 group-hover:-rotate-45 group-hover:bg-ivory group-hover:text-soil sm:flex" aria-hidden="true">↗</span>
+          <span className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-full border border-ivory/25 text-xl lg:flex" aria-hidden="true">
+            ↗
+          </span>
         </div>
       </div>
     </Link>

@@ -103,6 +103,7 @@ const en = {
     titleA: "Pressure Washing",
     titleB: "Soft Washing",
     titleC: "Window Care",
+    location: "across Greater Montréal.",
     body: "See your home the way it was meant to look.",
     ctaPrimary: "Get your free quote",
     ctaSecondary: "Our approach",
@@ -131,6 +132,7 @@ const en = {
     titleB: "One standard of care.",
     service: "Service",
     swipeHint: "Swipe to explore",
+    scrollHint: "Scroll through every service",
     details: {
       driveways: "Driveways & stone",
       decks: "Decks & patios",
@@ -1080,6 +1082,7 @@ const fr: Dictionary = {
     titleA: "Lavage à Pression",
     titleB: "Lavage en Douceur",
     titleC: "Entretien des Fenêtres",
+    location: "dans le Grand Montréal.",
     body: "Voyez votre maison comme elle devrait être.",
     ctaPrimary: "Obtenez votre soumission gratuite",
     ctaSecondary: "Notre approche",
@@ -1112,6 +1115,7 @@ const fr: Dictionary = {
     titleB: "Un même standard d’entretien.",
     service: "Service",
     swipeHint: "Balayez pour découvrir",
+    scrollHint: "Faites défiler chaque service",
     details: {
       driveways: "Entrées et pierre",
       decks: "Terrasses et patios",

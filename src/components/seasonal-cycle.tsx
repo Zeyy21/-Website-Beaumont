@@ -96,7 +96,9 @@ function PinnedSeasons({
       ref={section}
       data-header-tone="dark"
       className="relative bg-soil text-ivory"
-      style={{ height: `${seasons.length * 100}vh` }}
+      // Keep the original four-screen pacing even with Winter removed. Each
+      // remaining season now has a little more room to breathe as it dissolves.
+      style={{ height: `${(seasons.length + 1) * 100}vh` }}
       aria-labelledby="seasonal-title"
     >
       <div className="sticky top-0 flex h-screen flex-col overflow-hidden">

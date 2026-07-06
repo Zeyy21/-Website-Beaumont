@@ -108,10 +108,19 @@ export function Hero() {
           </h1>
 
           <motion.p
-            className="mt-7 max-w-xl text-base font-medium leading-relaxed text-ivory/78 md:text-lg drop-shadow"
+            className="mt-3 font-display text-xl italic leading-none text-ivory/88 drop-shadow md:mt-4 md:text-2xl"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.75, delay: 0.7, ease }}
+          >
+            {t.location}
+          </motion.p>
+
+          <motion.p
+            className="mt-5 max-w-xl text-base font-medium leading-relaxed text-ivory/78 drop-shadow md:text-lg"
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.75, delay: 0.72, ease }}
+            transition={{ duration: 0.75, delay: 0.82, ease }}
           >
             {t.body}
           </motion.p>
@@ -119,7 +128,7 @@ export function Hero() {
             className="mt-8"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.75, delay: 0.82, ease }}
+            transition={{ duration: 0.75, delay: 0.92, ease }}
           >
             <ButtonLink href="#quote" variant="light" size="lg">
               {t.ctaPrimary}

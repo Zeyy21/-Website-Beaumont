@@ -28,26 +28,31 @@ export function StickyQuoteBar() {
       return;
     }
 
-    const hideTrigger = document.querySelector("#quote") || document.querySelector("footer");
-    let triggerVisible = false;
+    const hideTriggers = Array.from(
+      document.querySelectorAll("#services, #quote, footer"),
+    );
+    const visibleTriggers = new Set<Element>();
 
-    const observer = hideTrigger
+    const observer = hideTriggers.length
       ? new IntersectionObserver(
           (entries) => {
-            triggerVisible = entries[0]?.isIntersecting ?? false;
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) visibleTriggers.add(entry.target);
+              else visibleTriggers.delete(entry.target);
+            });
             update();
           },
           { rootMargin: "0px 0px -10% 0px" },
         )
       : null;
-    if (hideTrigger) observer?.observe(hideTrigger);
+    hideTriggers.forEach((trigger) => observer?.observe(trigger));
 
     let frame = 0;
     const update = () => {
       window.cancelAnimationFrame(frame);
       frame = window.requestAnimationFrame(() => {
         const scrolledPastHero = window.scrollY > window.innerHeight * 0.85;
-        setVisible(scrolledPastHero && !triggerVisible);
+        setVisible(scrolledPastHero && visibleTriggers.size === 0);
       });
     };
 
