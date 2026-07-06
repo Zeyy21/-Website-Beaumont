@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, useScroll, useSpring, useTransform, useMotionValueEvent } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { Container, Eyebrow } from "@/components/ui";
 import { useT } from "@/components/i18n/locale-provider";
@@ -32,80 +32,108 @@ export function ServiceGallery({ services }: { services: ServiceCard[] }) {
     const update = () => setTouch(query.matches);
     update();
     query.addEventListener("change", update);
-
-    const mobileQuery = window.matchMedia("(max-width: 639px)");
-    const updateMobile = () => setIsMobile(mobileQuery.matches);
-    updateMobile();
-    mobileQuery.addEventListener("change", updateMobile);
-
+    
+    const mQuery = window.matchMedia("(max-width: 639px)");
+    const mUpdate = () => setIsMobile(mQuery.matches);
+    mUpdate();
+    mQuery.addEventListener("change", mUpdate);
+    
     return () => {
       query.removeEventListener("change", update);
-      mobileQuery.removeEventListener("change", updateMobile);
+      mQuery.removeEventListener("change", mUpdate);
     };
   }, []);
 
   const details = [t.details.driveways, t.details.decks, t.details.houses, t.details.windows];
   const types = [t.types.pressure, t.types.pressure, t.types.soft, t.types.windows];
 
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start center", "end center"],
+  });
+  
+  const smooth = useSpring(scrollYProgress, {
+    stiffness: 60,
+    damping: 26,
+    mass: 0.4,
+  });
+
+  useMotionValueEvent(smooth, "change", (v) => {
+    if (isMobile) {
+      const next = Math.min(
+        services.length - 1,
+        Math.max(0, Math.floor(v * services.length)),
+      );
+      setActive((prev) => (prev === next ? prev : next));
+    }
+  });
+
   return (
     <section
       id="services"
+      ref={sectionRef}
       className="relative scroll-mt-24 overflow-hidden bg-ivory py-24 md:py-32"
       aria-labelledby="services-title"
+      style={isMobile ? { height: `${services.length * 75}vh` } : undefined}
     >
-      <Container className="relative z-10">
-        <motion.div
-          className="grid gap-6 border-b border-oak/10 pb-8 lg:grid-cols-[.65fr_1.35fr] lg:items-end"
-          initial={{ opacity: 0, y: 22 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.1 }}
-          transition={{ duration: 0.75, ease }}
-        >
-          <div>
-            <div className="flex items-center gap-4">
-              <span className="font-display text-2xl text-ochre">01</span>
-              <span className="h-px w-12 bg-ochre/40" />
-              <Eyebrow>{t.eyebrow}</Eyebrow>
+      <div className={isMobile ? "sticky top-24 flex h-[calc(100vh-6rem)] flex-col overflow-hidden" : ""}>
+        <Container className="relative z-10">
+          <motion.div
+            className="grid gap-6 border-b border-oak/10 pb-8 lg:grid-cols-[.65fr_1.35fr] lg:items-end"
+            initial={{ opacity: 0, y: 22 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{ duration: 0.75, ease }}
+          >
+            <div>
+              <div className="flex items-center gap-4">
+                <span className="font-display text-2xl text-ochre">01</span>
+                <span className="h-px w-12 bg-ochre/40" />
+                <Eyebrow>{t.eyebrow}</Eyebrow>
+              </div>
+              <p className="mt-4 max-w-sm text-sm font-medium leading-relaxed text-soil/58">{t.intro}</p>
             </div>
-            <p className="mt-4 max-w-sm text-sm font-medium leading-relaxed text-soil/58">{t.intro}</p>
-          </div>
-          <h2 id="services-title" className="max-w-4xl text-balance font-display text-[clamp(2.9rem,5vw,5.5rem)] leading-[0.92] text-oak">
-            {t.titleA} <span className="italic text-ochre">{t.titleB}</span>
-          </h2>
-        </motion.div>
-      </Container>
+            <h2 id="services-title" className="max-w-4xl text-balance font-display text-[clamp(2.9rem,5vw,5.5rem)] leading-[0.92] text-oak">
+              {t.titleA} <span className="italic text-ochre">{t.titleB}</span>
+            </h2>
+          </motion.div>
+        </Container>
 
-      <Container className="relative z-10">
-        <motion.div
-          className="mt-10 flex h-[28rem] w-screen -ml-6 px-6 snap-x snap-mandatory overflow-x-auto scroll-smooth pb-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden gap-4 sm:w-auto sm:ml-0 sm:px-0 sm:h-[38rem] sm:flex-row sm:snap-none sm:overflow-visible sm:pb-0 sm:gap-3 lg:h-[46rem] lg:gap-3.5"
-          onMouseLeave={touch ? undefined : () => setActive(0)}
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.1 }}
-          transition={{ duration: 0.8, ease }}
-        >
-          {services.map((service, index) => (
-            <ExpandingCard
-              key={service.id}
-              service={service}
-              index={index}
-              detail={details[index]}
-              type={types[index]}
-              label={t.service}
-              active={active === index}
-              isMobile={isMobile}
-              touch={touch}
-              onActivate={() => setActive(index)}
-            />
-          ))}
-        </motion.div>
-      </Container>
+        <Container className="relative z-10 flex-1 flex flex-col justify-center">
+          <motion.div
+            className="mt-6 flex h-[42rem] flex-col gap-2.5 sm:mt-10 sm:h-[38rem] sm:flex-row sm:gap-3 lg:h-[46rem] lg:gap-3.5"
+            onMouseLeave={touch && !isMobile ? undefined : () => {
+              if (!isMobile) setActive(0);
+            }}
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{ duration: 0.8, ease }}
+          >
+            {services.map((service, index) => (
+              <ExpandingCard
+                key={service.id}
+                service={service}
+                index={index}
+                detail={details[index]}
+                type={types[index]}
+                label={t.service}
+                active={active === index}
+                touch={touch}
+                isMobile={isMobile}
+                onActivate={() => {
+                  if (!isMobile) setActive(index);
+                }}
+              />
+            ))}
+          </motion.div>
+        </Container>
+      </div>
     </section>
   );
 }
 
-/** Accordion card: grows on hover/focus (pointer) or tap (touch) while
- *  neighbours compress. Reduced-motion renders every card at equal width. */
 function ExpandingCard({
   service,
   index,
@@ -113,8 +141,8 @@ function ExpandingCard({
   type,
   label,
   active,
-  isMobile,
   touch,
+  isMobile,
   onActivate,
 }: {
   service: ServiceCard;
@@ -123,50 +151,45 @@ function ExpandingCard({
   type: string;
   label: string;
   active: boolean;
-  isMobile: boolean;
   touch: boolean;
+  isMobile: boolean;
   onActivate: () => void;
 }) {
   const router = useRouter();
 
-  // On touch, the first tap expands the card; only an already-active card
-  // follows through to the quote. Pointer devices navigate on any click.
   const handleClick = (e: React.MouseEvent) => {
-    if (touch && !active) {
+    if (touch && !isMobile && !active) {
       e.preventDefault();
       onActivate();
     }
   };
 
-  const isExpanded = isMobile || active;
-  const flexGrow = isExpanded ? 4.4 : 1;
+  const flexGrow = active ? 4.4 : 1;
 
   return (
     <Link
       href="#quote"
-      onMouseEnter={touch ? undefined : onActivate}
-      onFocus={onActivate}
+      onMouseEnter={touch || isMobile ? undefined : onActivate}
+      onFocus={isMobile ? undefined : onActivate}
       onClick={handleClick}
       aria-label={`${service.name} — ${detail}`}
-      className={`group relative block min-w-0 overflow-hidden rounded-[1.5rem] bg-soil text-ivory shadow-[0_30px_90px_-45px_rgba(28,28,26,.68)] transition-[flex-grow] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[flex-grow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinnamon focus-visible:ring-offset-4 md:rounded-[2.25rem] ${isMobile ? "h-full w-[80vw] shrink-0 snap-center" : "h-full"}`}
-      style={isMobile ? undefined : { flexGrow, flexBasis: 0 }}
+      className="group relative block h-full min-w-0 overflow-hidden rounded-[1.5rem] bg-soil text-ivory shadow-[0_30px_90px_-45px_rgba(28,28,26,.68)] transition-[flex-grow] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[flex-grow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinnamon focus-visible:ring-offset-4 md:rounded-[2.25rem]"
+      style={{ flexGrow, flexBasis: 0 }}
     >
       <Image
         src={serviceImages[index % serviceImages.length]}
         alt=""
         fill
-        sizes={isExpanded ? "80vw" : "22vw"}
-        className={`object-cover transition-transform duration-[1400ms] ease-out ${isExpanded ? "scale-[1.04]" : "scale-100 group-hover:scale-[1.03]"}`}
+        sizes={active ? "80vw" : "22vw"}
+        className={`object-cover transition-transform duration-[1400ms] ease-out ${active ? "scale-[1.04]" : "scale-100 group-hover:scale-[1.03]"}`}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-soil/94 via-soil/24 to-soil/10" />
-      <div className={`absolute inset-0 bg-gradient-to-t from-soil/98 via-soil/85 to-soil/20 backdrop-blur-[2px] transition-all duration-700 ${isExpanded ? "opacity-100" : "opacity-0 pointer-events-none"}`} />
-      {/* Seam accent visible when collapsed */}
-      <div className={`absolute inset-x-0 top-0 h-px bg-sand/30 transition-opacity duration-500 sm:inset-y-0 sm:left-0 sm:h-auto sm:w-px ${isExpanded ? "opacity-0" : "opacity-100"}`} />
+      <div className={`absolute inset-0 bg-gradient-to-t from-soil/98 via-soil/85 to-soil/20 backdrop-blur-[2px] transition-all duration-700 ${active ? "opacity-100" : "opacity-0 pointer-events-none"}`} />
+      <div className={`absolute inset-x-0 top-0 h-px bg-sand/30 transition-opacity duration-500 sm:inset-y-0 sm:left-0 sm:h-auto sm:w-px ${active ? "opacity-0" : "opacity-100"}`} />
       <div className="pointer-events-none absolute inset-2.5 rounded-[1.1rem] border border-ivory/14 md:inset-4 md:rounded-[1.7rem]" />
 
-      {/* Collapsed spine label — vertical text on desktop, horizontal on mobile */}
       <div
-        className={`absolute inset-0 flex flex-row items-center justify-center gap-4 p-4 text-center transition-opacity duration-300 sm:inset-x-0 sm:bottom-0 sm:top-auto sm:flex-col sm:gap-5 sm:p-7 ${isExpanded ? "pointer-events-none opacity-0" : "opacity-100 delay-200"}`}
+        className={`absolute inset-0 flex flex-row items-center justify-center gap-4 p-4 text-center transition-opacity duration-300 sm:inset-x-0 sm:bottom-0 sm:top-auto sm:flex-col sm:gap-5 sm:p-7 ${active ? "pointer-events-none opacity-0" : "opacity-100 delay-200"}`}
       >
         <span className="font-display text-xl italic leading-none text-sand sm:text-2xl">{String(index + 1).padStart(2, "0")}</span>
         <span
@@ -176,15 +199,14 @@ function ExpandingCard({
         </span>
       </div>
 
-      {/* Expanded content — revealed as the card grows */}
       <div
-        className={`absolute inset-x-0 top-0 flex items-center justify-between p-5 text-[9px] font-semibold uppercase tracking-[0.24em] text-ivory/68 transition-opacity duration-500 sm:p-8 md:p-9 ${isExpanded ? "opacity-100 delay-150" : "opacity-0"}`}
+        className={`absolute inset-x-0 top-0 flex items-center justify-between p-5 text-[9px] font-semibold uppercase tracking-[0.24em] text-ivory/68 transition-opacity duration-500 sm:p-8 md:p-9 ${active ? "opacity-100 delay-150" : "opacity-0"}`}
       >
         <span className="whitespace-nowrap">{detail}</span>
         <span>{String(index + 1).padStart(2, "0")}</span>
       </div>
       <div
-        className={`absolute inset-x-0 bottom-0 p-5 transition-all duration-500 sm:p-8 md:p-10 ${isExpanded ? "translate-y-0 opacity-100 delay-150" : "pointer-events-none translate-y-3 opacity-0"}`}
+        className={`absolute inset-x-0 bottom-0 p-5 transition-all duration-500 sm:p-8 md:p-10 ${active ? "translate-y-0 opacity-100 delay-150" : "pointer-events-none translate-y-3 opacity-0"}`}
       >
         <div className="flex items-center gap-3 text-[9px] font-semibold uppercase tracking-[0.26em] text-sand/88 sm:gap-4">
           <span>{label}</span>
