@@ -3,10 +3,14 @@ import { getDashboardData } from "@/lib/dashboard";
 import { rewards } from "@/lib/config";
 import { formatCurrency } from "@/lib/pricing";
 import { Card, CardTitle, EmptyState, StatCard } from "@/components/dashboard-ui";
+import { getDict } from "@/lib/i18n/server";
 
-export const metadata = { title: "Rewards" };
+export function generateMetadata() {
+  return { title: getDict().dashboard.nav.rewards };
+}
 
 export default async function RewardsPage() {
+  const t = getDict().dashboard.rewards;
   const user = await getCurrentUser();
   const data = user ? await getDashboardData(user.id) : null;
   const ledger = data?.rewards ?? [];
@@ -16,25 +20,25 @@ export default async function RewardsPage() {
     <div className="space-y-8">
       <div className="grid gap-4 sm:grid-cols-2">
         <StatCard
-          label="Points balance"
+          label={t.pointsBalance}
           value={balance.toLocaleString()}
-          sub={`≈ ${formatCurrency(balance / rewards.pointsPerDollar)} toward your next clean`}
+          sub={`${formatCurrency(balance / rewards.pointsPerDollar)} ${t.towardVisit}`}
         />
         <StatCard
-          label="Redemption rate"
-          value={`${rewards.pointsPerDollar} pts`}
-          sub="= $1 discount"
+          label={t.redemptionRate}
+          value={t.pts}
+          sub={t.discount}
         />
       </div>
 
       <Card>
-        <CardTitle>How you earn</CardTitle>
+        <CardTitle>{t.howYouEarn}</CardTitle>
         <ul className="mt-4 grid gap-3 sm:grid-cols-2">
           {[
-            { l: "Create an account", v: rewards.signup },
-            { l: "Accept a quote", v: rewards.quoteAccepted },
-            { l: "Completed job", v: rewards.jobCompleted },
-            { l: "Successful referral", v: rewards.referralSuccess },
+            { l: t.createAccount, v: rewards.signup },
+            { l: t.acceptQuote, v: rewards.quoteAccepted },
+            { l: t.completedJob, v: rewards.jobCompleted },
+            { l: t.successfulReferral, v: rewards.referralSuccess },
           ].map((r) => (
             <li
               key={r.l}
@@ -50,14 +54,14 @@ export default async function RewardsPage() {
       </Card>
 
       <Card>
-        <CardTitle>Activity</CardTitle>
+        <CardTitle>{t.activity}</CardTitle>
         <div className="mt-4">
           {ledger.length === 0 ? (
             <EmptyState
-              title="No activity yet"
-              body="Earn your first points by creating an account and booking a clean."
-              ctaHref="/quote"
-              ctaLabel="Start a quote"
+              title={t.noActivityTitle}
+              body={t.noActivityBody}
+              ctaHref="/dashboard/quotes/new"
+              ctaLabel={t.requestQuote}
             />
           ) : (
             <ul className="divide-y divide-oak/10">

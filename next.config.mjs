@@ -24,7 +24,7 @@ const nextConfig = {
     // the instance Next passes in — do NOT import it at the top level.
     config.plugins.push(
       new webpack.IgnorePlugin({
-        resourceRegExp: /^(nodemailer|stripe)$/,
+        resourceRegExp: /^(stripe)$/,
       }),
     );
     return config;

@@ -1,18 +1,19 @@
 import { CardTitle } from "@/components/dashboard-ui";
 import { DoorTagGenerator } from "@/components/door-tag-generator";
+import { getDict } from "@/lib/i18n/server";
 
-export const metadata = { title: "Admin · Door Tags" };
+export function generateMetadata() {
+  return { title: `${getDict().admin.settings.doorTagTitle}${getDict().common.brandSuffix}` };
+}
 
 export default function AdminDoorTags() {
+  const t = getDict().admin.doorTags;
   return (
     <div className="space-y-6">
       <div>
-        <CardTitle>Door-tag program</CardTitle>
+        <CardTitle>{t.title}</CardTitle>
         <p className="mt-1 max-w-2xl text-sm text-soil/60">
-          Generate premium QR door hangers per neighbourhood. Each tag deep-links
-          into the instant-quote tool pre-tuned for that zone and is tracked, so
-          you can measure the scan → quote → booking funnel. Generate, then print
-          on heavyweight stock and die-cut the top notch.
+          {t.description}
         </p>
       </div>
       <DoorTagGenerator />

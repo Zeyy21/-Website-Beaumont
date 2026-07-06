@@ -1,10 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
 import { CardTitle, EmptyState } from "@/components/dashboard-ui";
 import { PricingEditor } from "@/components/pricing-editor";
+import { getDict } from "@/lib/i18n/server";
 
-export const metadata = { title: "Admin · Pricing" };
+export function generateMetadata() {
+  return { title: `${getDict().admin.pricing.title}${getDict().common.brandSuffix}` };
+}
 
 export default async function AdminPricing() {
+  const t = getDict().admin.pricing;
   const supabase = createClient();
   if (!supabase) return null;
 
@@ -16,17 +20,16 @@ export default async function AdminPricing() {
   return (
     <div className="space-y-6">
       <div>
-        <CardTitle>Pricing</CardTitle>
+        <CardTitle>{t.title}</CardTitle>
         <p className="mt-1 text-sm text-soil/60">
-          Edit the base price, per-m² rate, and multiplier for each service.
-          Changes apply instantly to new quotes, no deploy needed.
+          {t.description}
         </p>
       </div>
 
       {!services?.length ? (
         <EmptyState
-          title="No services"
-          body="Run the database migration to seed the service catalogue."
+          title={t.noServicesTitle}
+          body={t.noServicesBody}
         />
       ) : (
         services.map((s) => (

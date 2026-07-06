@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useInView, useReducedMotion } from "framer-motion";
+import { useInView } from "framer-motion";
 
 /**
  * Counts up to `value` when scrolled into view. Supports a prefix/suffix and
@@ -22,14 +22,12 @@ export function CountUp({
   suffix?: string;
   className?: string;
 }) {
-  const reduce = useReducedMotion();
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "-60px" });
-  const [display, setDisplay] = useState(reduce ? value : 0);
+  const [display, setDisplay] = useState(0);
 
   useEffect(() => {
-    if (!inView || reduce) {
-      if (reduce) setDisplay(value);
+    if (!inView) {
       return;
     }
     let raf = 0;
@@ -43,7 +41,7 @@ export function CountUp({
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [inView, value, duration, reduce]);
+  }, [inView, value, duration]);
 
   return (
     <span ref={ref} className={className}>

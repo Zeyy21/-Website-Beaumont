@@ -2,43 +2,49 @@
 
 export const site = {
   name: "Beaumont",
-  tagline: "Exterior care, beautifully delivered.",
+  tagline: "Concierge home care, quietly delivered.",
   description:
-    "Beaumont restores driveways, walkways, patios, pool surrounds, and home exteriors with meticulous pressure washing and effortless service.",
+    "Beaumont provides professional exterior cleaning for pressure washing, soft washing, and window care across Greater Montreal.",
   promise: "A brighter arrival, quietly delivered.",
-  email: "concierge@beaumont.example",
+  email: "concierge@beaumontgroup.net",
+  instagram: "https://www.instagram.com/groupebeaumont/?hl=en",
+  instagramHandle: "@groupebeaumont",
   phone: "+1 (555) 014-7788",
   url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
 };
 
+/** `key` maps to dictionaries.nav.<key> for the localized label. `label` is the
+ *  English fallback kept for reference. */
 export const nav = [
-  { href: "/services", label: "Services" },
-  { href: "/quote", label: "Instant Quote" },
-  { href: "/about", label: "Who We Are" },
-  { href: "/terms", label: "Terms" },
-];
+  { href: "#services", key: "services", label: "Services" },
+  { href: "#about", key: "about", label: "Who We Are" },
+  { href: "#quote", key: "quote", label: "Free Estimate" },
+  { href: "/terms", key: "terms", label: "Terms" },
+  { href: "/partners", key: "partners", label: "Partners" },
+] as const;
 
-/** Frequencies offered for recurring service. modifier multiplies the line total. */
+/** Frequencies offered for recurring service. */
 export const frequencies = [
   { id: "one_time", label: "One-time", modifier: 1.0, note: "A single visit" },
-  { id: "monthly", label: "Quarterly", modifier: 0.85, note: "Four seasonal visits" },
+  { id: "monthly", label: "Seasonal", modifier: 1.0, note: "A planned seasonal refresh" },
   {
     id: "biweekly",
     label: "Twice yearly",
-    modifier: 0.9,
+    modifier: 1.0,
     note: "Spring and fall, most popular",
   },
-  { id: "weekly", label: "Annual", modifier: 0.95, note: "A yearly restoration" },
+  { id: "weekly", label: "Annual", modifier: 1.0, note: "A yearly restoration" },
 ] as const;
 
 export type FrequencyId = (typeof frequencies)[number]["id"];
 
-/** Optional add-ons surfaced in the quote builder. price is a flat add. */
+/** Legacy DB field default. Public quotes are reviewed, not area-priced. */
+export const quoteRatePerM2 = 0;
+
+/** Conditional services reviewed and priced after the request is submitted. */
 export const addOns = [
-  { id: "windows", label: "Exterior window rinse", price: 60 },
-  { id: "deep", label: "Protective surface seal", price: 120 },
-  { id: "fridge", label: "Oil and rust treatment", price: 45 },
-  { id: "laundry", label: "Gutter-face brightening", price: 35 },
+  { id: "gutters", label: "Gutter Cleaning" },
+  { id: "stain-review", label: "Oil, rust, or algae spot review" },
 ] as const;
 
 /** Reward points economy. */
@@ -47,49 +53,48 @@ export const rewards = {
   quoteAccepted: 250,
   jobCompleted: 500,
   referralSuccess: 1000,
-  pointsPerDollar: 100, // 100 pts = $1 discount
+  pointsPerDollar: 10, // 100 pts = $10 discount
 };
 
 /**
- * Fallback service catalogue used when Supabase is not configured, so the
- * marketing site and quote tool render fully with zero keys. When Supabase is
- * connected these are seeded into the `services` table (see migration).
+ * Canonical public service catalogue. This intentionally remains code-owned so
+ * legacy database rows can never replace the services shown on the website.
  */
 export const fallbackServices = [
   {
     id: "driveway",
-    name: "Driveway & Walkway Restoration",
+    name: "Driveway & Hardscape Washing",
     description:
-      "Concrete, stone, and pavers restored to a brighter, more welcoming arrival.",
-    base_price: 80,
-    rate_per_m2: 2.2,
+      "Concrete, interlock, asphalt, steps, and front walks cleaned for a brighter arrival.",
+    base_price: 0,
+    rate_per_m2: quoteRatePerM2,
     multiplier: 1.0,
   },
   {
-    id: "patio",
-    name: "Patio & Pool Surround",
+    id: "deck",
+    name: "Deck & Patio Washing",
     description:
-      "Outdoor living surfaces refreshed with careful pressure and material-aware treatment.",
-    base_price: 140,
-    rate_per_m2: 2.8,
+      "Wood, composite, concrete, and outdoor living surfaces refreshed with material-aware pressure.",
+    base_price: 0,
+    rate_per_m2: quoteRatePerM2,
     multiplier: 1.0,
   },
   {
     id: "house-wash",
-    name: "Gentle House Wash",
+    name: "Soft House Washing",
     description:
-      "A considered low-pressure exterior wash for siding, stucco, brick, and delicate finishes.",
-    base_price: 160,
-    rate_per_m2: 2.4,
+      "Low-pressure exterior washing for siding, brick, stucco, painted details, and delicate finishes.",
+    base_price: 0,
+    rate_per_m2: quoteRatePerM2,
     multiplier: 1.0,
   },
   {
-    id: "estate",
-    name: "Complete Estate Exterior",
+    id: "windows-atlantic",
+    name: "Exterior Window Washing",
     description:
-      "A tailored restoration of the driveway, paths, terraces, walls, and outdoor living areas.",
-    base_price: 240,
-    rate_per_m2: 3.2,
+      "Exterior glass, frames, and sills cleaned with purified water for a clear, streak-free finish.",
+    base_price: 0,
+    rate_per_m2: quoteRatePerM2,
     multiplier: 1.0,
   },
 ] as const;

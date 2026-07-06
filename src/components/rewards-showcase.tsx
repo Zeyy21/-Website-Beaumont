@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { Container, Eyebrow, ButtonLink } from "@/components/ui";
 import { rewards } from "@/lib/config";
 
@@ -12,14 +12,12 @@ const tiers = [
 ];
 
 export function RewardsShowcase({ referralPoints }: { referralPoints: number }) {
-  const reduce = useReducedMotion();
-
   return (
     <section className="py-16">
       <Container>
         <div className="relative overflow-hidden rounded-[2rem] border border-oak/10 bg-gradient-to-br from-oak to-soil px-8 py-16 text-ivory md:px-16">
           {/* floating point chips */}
-          {!reduce && (
+          {true && (
             <div className="pointer-events-none absolute inset-0">
               {[
                 { t: "+100", x: "12%", y: "22%", d: 0 },
@@ -50,8 +48,8 @@ export function RewardsShowcase({ referralPoints }: { referralPoints: number }) 
               <Eyebrow>Beaumont Rewards</Eyebrow>
               <h2 className="mt-4 text-4xl md:text-5xl">Every clean earns you more</h2>
               <p className="mt-5 max-w-md text-ivory/70">
-                Collect points on signup, completed jobs, and referrals, then
-                redeem them as a discount on future visits. Refer a friend and
+                Collect points on signup, completed jobs, and referrals. Every
+                100 points is worth $10 toward future visits. Refer a friend and
                 you both earn {referralPoints.toLocaleString()} points.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
@@ -76,7 +74,7 @@ export function RewardsShowcase({ referralPoints }: { referralPoints: number }) 
                 {tiers.map((t, i) => (
                   <motion.li
                     key={t.label}
-                    initial={reduce ? false : { opacity: 0, x: 16 }}
+                    initial={{ opacity: 0, x: 16 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.5, delay: i * 0.1 }}

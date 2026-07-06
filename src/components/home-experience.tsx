@@ -1,143 +1,93 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
-import { Monogram } from "@/components/ui";
+import { motion } from "framer-motion";
+import { Container } from "@/components/ui";
+import { useT } from "@/components/i18n/locale-provider";
 
-const chapters = [
-  {
-    number: "01",
-    eyebrow: "Arrival",
-    title: "Your day keeps moving.",
-    copy: "We arrive prepared, protect the surrounding landscape, and work around the rhythm of your property.",
-  },
-  {
-    number: "02",
-    eyebrow: "The ritual",
-    title: "Every surface comes back to life.",
-    copy: "Material-aware pressure, considered treatments, and eyes trained to see where buildup likes to hide.",
-  },
-  {
-    number: "03",
-    eyebrow: "The return",
-    title: "And then, the exhale.",
-    copy: "The stone looks brighter. The entrance feels cared for. Your home makes the right first impression again.",
-  },
-];
+const ease = [0.22, 1, 0.36, 1] as const;
 
 export function ExperienceSequence() {
-  const ref = useRef<HTMLElement>(null);
-  const reduce = useReducedMotion();
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start start", "end end"],
-  });
-
-  const firstOpacity = useTransform(scrollYProgress, [0, 0.08, 0.27, 0.36], [0, 1, 1, 0]);
-  const secondOpacity = useTransform(scrollYProgress, [0.29, 0.39, 0.58, 0.67], [0, 1, 1, 0]);
-  const thirdOpacity = useTransform(scrollYProgress, [0.61, 0.72, 1], [0, 1, 1]);
-  const firstY = useTransform(scrollYProgress, [0, 0.36], [40, -35]);
-  const secondY = useTransform(scrollYProgress, [0.29, 0.67], [40, -35]);
-  const thirdY = useTransform(scrollYProgress, [0.61, 1], [40, 0]);
-  const imageScale = useTransform(scrollYProgress, [0, 1], [1.14, 1]);
-  const imageY = useTransform(scrollYProgress, [0, 1], [24, -18]);
-  const veilOpacity = useTransform(scrollYProgress, [0, 0.5, 1], [0.56, 0.28, 0.08]);
-  const monogramRotate = useTransform(scrollYProgress, [0, 1], [-8, 8]);
-  const firstProgress = useTransform(scrollYProgress, [0, 0.33], [0, 1]);
-  const secondProgress = useTransform(scrollYProgress, [0.33, 0.66], [0, 1]);
-  const thirdProgress = useTransform(scrollYProgress, [0.66, 1], [0, 1]);
-
-  const opacity = [firstOpacity, secondOpacity, thirdOpacity];
-  const y = [firstY, secondY, thirdY];
-  const chapterProgress = [firstProgress, secondProgress, thirdProgress];
+  const { dict } = useT();
+  const t = dict.approach;
+  const chapters = [
+    { number: "01", ...t.chapters.arrival },
+    { number: "02", ...t.chapters.work },
+    { number: "03", ...t.chapters.return },
+  ];
 
   return (
-    <section
-      ref={ref}
-      className="relative h-[270svh] bg-ivory motion-reduce:h-auto"
-      aria-label="The Beaumont way"
-    >
-      <div className="sticky top-0 flex min-h-[100svh] items-center overflow-hidden py-20 motion-reduce:relative motion-reduce:min-h-0">
-        <div className="pointer-events-none absolute -left-[12vw] top-[5vh] font-display text-[36vw] leading-none text-oak/[0.025]">
-          B
-        </div>
-
-        <div className="mx-auto grid w-full max-w-shell items-center gap-12 px-6 md:px-8 lg:grid-cols-[0.86fr_1.14fr] lg:gap-20">
-          <div className="relative z-10 min-h-[21rem] md:min-h-[25rem]">
-            <p className="mb-12 flex items-center gap-4 text-[10px] font-semibold uppercase tracking-[0.34em] text-cinnamon">
-              <span className="h-px w-10 bg-cinnamon/50" />
-              The Beaumont way
-            </p>
-
-            <div className="relative min-h-[17rem]">
-              {chapters.map((chapter, index) => (
-                <motion.article
-                  key={chapter.number}
-                  style={reduce ? undefined : { opacity: opacity[index], y: y[index] }}
-                  className={reduce ? "mb-14" : "absolute inset-0"}
-                >
-                  <div className="flex items-center gap-4">
-                    <span className="font-display text-2xl text-ochre">{chapter.number}</span>
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-soil/45">
-                      {chapter.eyebrow}
-                    </span>
-                  </div>
-                  <h2 className="mt-6 max-w-lg text-balance font-display text-[clamp(3rem,6vw,5.4rem)] leading-[0.92] text-oak">
-                    {chapter.title}
-                  </h2>
-                  <p className="mt-6 max-w-md text-base font-medium leading-relaxed text-soil/80 md:text-lg">
-                    {chapter.copy}
-                  </p>
-                </motion.article>
-              ))}
-            </div>
-
-            {!reduce && (
-              <div className="absolute bottom-0 left-0 flex gap-2">
-                {chapters.map((chapter, index) => (
-                  <div key={chapter.number} className="h-px w-14 overflow-hidden bg-oak/15">
-                    <motion.div
-                      className="h-full origin-left bg-cinnamon"
-                      style={{ scaleX: chapterProgress[index] }}
-                    />
-                  </div>
-                ))}
+    <section id="about" className="relative scroll-mt-24 overflow-hidden bg-sand/20 py-24 md:py-40" aria-labelledby="approach-title">
+      <div aria-hidden="true" className="pointer-events-none absolute -left-12 top-10 font-display text-[20rem] leading-none text-oak/[0.025] md:text-[30rem]">02</div>
+      <Container>
+        <div className="relative grid gap-14 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
+          <div className="lg:sticky lg:top-28 lg:self-start">
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.1 }}
+              transition={{ duration: 0.9, ease }}
+            >
+              <div className="flex items-center gap-4">
+                <span className="font-display text-2xl text-ochre">02</span>
+                <span className="h-px w-12 bg-ochre/40" />
+                <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-cinnamon">{t.eyebrow}</p>
               </div>
-            )}
+              <h2 id="approach-title" className="mt-6 text-balance font-display text-[clamp(3.2rem,5.7vw,5.9rem)] leading-[0.9] text-oak">
+                {t.titleA}
+                <span className="block italic text-ochre">{t.titleB}</span>
+              </h2>
+              <p className="mt-7 max-w-lg text-lg font-medium leading-relaxed text-soil/75">
+                {t.intro}
+              </p>
+            </motion.div>
+
+            <motion.div
+              className="relative mt-10 aspect-[4/3] overflow-hidden rounded-[2rem] bg-oak shadow-lift md:rounded-[3rem]"
+              initial={{ opacity: 0, scale: 0.975 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true, amount: 0.1 }}
+              transition={{ duration: 1.05, ease, delay: 0.08 }}
+            >
+              <Image
+                src="/images/montreal-deck-pressure-washing.webp"
+                alt={t.imageAlt}
+                fill
+                sizes="(min-width: 1024px) 44vw, 100vw"
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-soil/60 via-transparent to-transparent" />
+              <div className="pointer-events-none absolute inset-3 rounded-[1.45rem] border border-ivory/15 md:inset-4 md:rounded-[2.3rem]" />
+              <div className="absolute bottom-7 left-7 right-7 flex items-center justify-between gap-4 md:bottom-9 md:left-9 md:right-9">
+                <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-ivory/80">{t.imageCaption}</p>
+                <span className="font-display text-2xl text-sand">B.</span>
+              </div>
+            </motion.div>
           </div>
 
-          <motion.div
-            className="relative aspect-[4/5] max-h-[74svh] overflow-hidden rounded-[2rem] bg-oak shadow-lift md:rounded-[3.5rem]"
-            style={reduce ? undefined : { y: imageY }}
-          >
-            <motion.div className="absolute inset-[-8%]" style={reduce ? undefined : { scale: imageScale }}>
-              <Image
-                src="/images/pressure-washed-patio-placeholder.png"
-                alt="A freshly pressure-washed stone patio and pool surround"
-                fill
-                sizes="(min-width: 1024px) 54vw, 92vw"
-                className="object-cover"
-                priority={false}
-              />
-            </motion.div>
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-tr from-soil/70 via-cinnamon/15 to-transparent"
-              style={reduce ? undefined : { opacity: veilOpacity }}
-            />
-            <div className="absolute inset-5 rounded-[1.35rem] border border-ivory/25 md:inset-8 md:rounded-[2.6rem]" />
-            <motion.div
-              style={reduce ? undefined : { rotate: monogramRotate }}
-              className="absolute bottom-9 right-9 flex h-20 w-20 items-center justify-center rounded-full border border-ivory/25 bg-soil/20 backdrop-blur-md md:h-28 md:w-28"
-            >
-              <Monogram className="h-10 w-10 md:h-14 md:w-14" size={56} />
-            </motion.div>
-            <p className="absolute left-9 top-9 max-w-[9rem] text-[9px] font-medium uppercase leading-relaxed tracking-[0.28em] text-ivory/75 md:left-12 md:top-12">
-              Care that can be felt
-            </p>
-          </motion.div>
+          <ol className="space-y-4">
+            {chapters.map((chapter, index) => (
+              <motion.li
+                key={chapter.number}
+                className="group grid gap-6 rounded-[2rem] border border-oak/10 bg-ivory/55 p-7 shadow-[0_20px_60px_-46px_rgba(28,28,26,.7)] transition-colors duration-500 hover:bg-ivory/85 md:grid-cols-[5rem_1fr] md:rounded-[2.5rem] md:p-10"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.1 }}
+                transition={{ duration: 0.85, ease, delay: index * 0.08 }}
+              >
+                <div>
+                  <span className="flex h-12 w-12 items-center justify-center rounded-full border border-oak/10 font-display text-xl text-ochre transition-colors duration-500 group-hover:bg-oak group-hover:text-ivory">{chapter.number}</span>
+                  <p className="mt-2 text-[9px] font-semibold uppercase tracking-[0.26em] text-soil/45">{chapter.eyebrow}</p>
+                </div>
+                <div>
+                  <h3 className="max-w-lg font-display text-4xl leading-[0.98] text-oak md:text-5xl">{chapter.title}</h3>
+                  <p className="mt-5 max-w-lg text-base font-medium leading-relaxed text-soil/70 md:text-lg">{chapter.copy}</p>
+                </div>
+              </motion.li>
+            ))}
+          </ol>
         </div>
-      </div>
+      </Container>
     </section>
   );
 }

@@ -1,9 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
-import { fallbackServices } from "@/lib/config";
+import { fallbackServices, rewards } from "@/lib/config";
+import { getDict } from "@/lib/i18n/server";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Database } from "@/lib/supabase/types";
 
-type ServiceRow = Database["public"]["Tables"]["services"]["Row"];
 type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
+type ServiceId = keyof Dictionary["services"];
 
 export interface ServiceCard {
   id: string;
@@ -14,26 +16,25 @@ export interface ServiceCard {
   multiplier: number;
 }
 
-/** Services from Supabase if configured, else the bundled fallback catalogue. */
+/**
+ * Public services are code-owned (legacy Supabase rows previously replaced the
+ * exterior-care catalogue with unrelated products in production). Names and
+ * descriptions are localized from the active request dictionary by stable id.
+ */
 export async function getServices(): Promise<ServiceCard[]> {
-  const supabase = createClient();
-  if (!supabase) return fallbackServices.map(toCard);
-
-  const { data, error } = await supabase
-    .from("services")
-    .select("*")
-    .eq("active", true)
-    .order("sort", { ascending: true });
-
-  if (error || !data?.length) return fallbackServices.map(toCard);
-  return data.map(toCard);
+  const dict = getDict();
+  return fallbackServices.map((s) => toCard(s, dict));
 }
 
-function toCard(s: ServiceRow | (typeof fallbackServices)[number]): ServiceCard {
+function toCard(
+  s: (typeof fallbackServices)[number],
+  dict: Dictionary,
+): ServiceCard {
+  const copy = dict.services[s.id as ServiceId];
   return {
     id: s.id,
-    name: s.name,
-    description: s.description,
+    name: copy?.name ?? s.name,
+    description: copy?.description ?? s.description,
     base_price: Number(s.base_price),
     rate_per_m2: Number(s.rate_per_m2),
     multiplier: Number(s.multiplier),
@@ -71,6 +72,29 @@ export async function getCurrentUser(): Promise<{
       .select("*")
       .single();
     profile = created ?? null;
+  }
+
+  if (profile) {
+    const { data: ledger } = await supabase
+      .from("rewards_ledger")
+      .select("delta, reason")
+      .eq("user_id", user.id);
+    const ledgerBalance = (ledger ?? []).reduce(
+      (total, entry) => total + Number(entry.delta),
+      0,
+    );
+    const hasSignupReward = (ledger ?? []).some(
+      (entry) => entry.reason === "signup_bonus",
+    );
+    const syncedBalance = ledgerBalance + (hasSignupReward ? 0 : rewards.signup);
+
+    if (profile.points_balance !== syncedBalance) {
+      await supabase
+        .from("profiles")
+        .update({ points_balance: syncedBalance })
+        .eq("id", user.id);
+      profile = { ...profile, points_balance: syncedBalance };
+    }
   }
 
   return { id: user.id, email: user.email ?? null, profile: profile ?? null };

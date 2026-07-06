@@ -2,10 +2,14 @@ import { getCurrentUser } from "@/lib/data";
 import { getDashboardData } from "@/lib/dashboard";
 import { EmptyState } from "@/components/dashboard-ui";
 import { BeforeAfter } from "@/components/before-after";
+import { getDict } from "@/lib/i18n/server";
 
-export const metadata = { title: "My Gallery" };
+export function generateMetadata() {
+  return { title: getDict().dashboard.nav.gallery };
+}
 
 export default async function GalleryPage() {
+  const t = getDict().dashboard.gallery;
   const user = await getCurrentUser();
   const data = user ? await getDashboardData(user.id) : null;
   const items = data?.gallery ?? [];
@@ -13,10 +17,10 @@ export default async function GalleryPage() {
   if (items.length === 0) {
     return (
       <EmptyState
-        title="No photos yet"
-        body="After your first clean, we'll post before & after photos of your home here."
+        title={t.noPhotosTitle}
+        body={t.noPhotosBody}
         ctaHref="/quote"
-        ctaLabel="Book your first clean"
+        ctaLabel={t.bookFirst}
       />
     );
   }

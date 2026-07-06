@@ -22,7 +22,7 @@ type ButtonVariant = "primary" | "outline" | "ghost" | "light";
 type ButtonSize = "sm" | "md" | "lg";
 
 const base =
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium tracking-wide transition-all duration-200 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 hover:scale-[1.02] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ochre focus-visible:ring-offset-2 focus-visible:ring-offset-ivory";
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium tracking-wide transition-[background-color,border-color,color,box-shadow,transform] duration-300 ease-out cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 hover:-translate-y-px active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ochre focus-visible:ring-offset-2 focus-visible:ring-offset-ivory";
 
 const variants: Record<ButtonVariant, string> = {
   primary: "bg-cinnamon text-ivory hover:bg-oak shadow-soft",
@@ -83,14 +83,17 @@ export function Wordmark({
   priority?: boolean;
 }) {
   return (
-    <Image
-      src="/brand/wordmark-ivory.png"
-      alt="Beaumont"
-      width={1500}
-      height={500}
-      priority={priority}
-      className={cn("object-contain", dark && "invert", className)}
-    />
+    <span className={cn("relative inline-block aspect-[7.5/1] shrink-0 overflow-hidden", className)}>
+      <Image
+        src="/brand/wordmark-ivory.png"
+        alt="Beaumont"
+        width={1500}
+        height={500}
+        priority={priority}
+        quality={100}
+        className={cn("absolute left-0 top-1/2 h-[250%] w-full -translate-y-1/2 object-fill", dark && "invert")}
+      />
+    </span>
   );
 }
 
@@ -109,6 +112,7 @@ export function Monogram({
       alt="Beaumont"
       width={size}
       height={size}
+      quality={100}
       className={cn("object-contain", dark && "invert", className)}
     />
   );

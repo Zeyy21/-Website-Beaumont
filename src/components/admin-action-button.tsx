@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui";
+import { useT } from "@/components/i18n/locale-provider";
 
 /**
  * Generic button that runs a passed server action by id and shows pending /
@@ -11,7 +12,7 @@ export function AdminActionButton({
   id,
   action,
   label,
-  doneLabel = "Done",
+  doneLabel,
   variant = "primary",
 }: {
   id: string;
@@ -20,12 +21,14 @@ export function AdminActionButton({
   doneLabel?: string;
   variant?: "primary" | "outline";
 }) {
+  const { dict } = useT();
   const [pending, start] = useTransition();
   const [done, setDone] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const resolvedDone = doneLabel ?? dict.admin.actionButton.done;
 
   if (done)
-    return <span className="text-sm font-medium text-green-700">{doneLabel}</span>;
+    return <span className="text-sm font-medium text-green-700">{resolvedDone}</span>;
 
   return (
     <div className="flex items-center gap-2">
@@ -37,7 +40,7 @@ export function AdminActionButton({
           start(async () => {
             const res = await action(id);
             if (res.ok) setDone(true);
-            else setErr(res.error ?? "Failed");
+            else setErr(res.error ?? dict.admin.quoteReviewForm.actionFailed);
           })
         }
       >

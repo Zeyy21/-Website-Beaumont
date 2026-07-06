@@ -10,8 +10,13 @@ import {
   StatCard,
   StatusBadge,
 } from "@/components/dashboard-ui";
+import { CancelQuoteButton } from "@/components/quote/cancel-quote-button";
+import { getDict } from "@/lib/i18n/server";
+import { statusLabel } from "@/lib/i18n/dictionaries";
 
 export default async function DashboardOverview() {
+  const dict = getDict();
+  const t = dict.dashboard.overview;
   const user = await getCurrentUser();
   const data = user
     ? await getDashboardData(user.id)
@@ -36,80 +41,88 @@ export default async function DashboardOverview() {
     <div className="space-y-8">
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard
-          label="Reward points"
+          label={t.rewardPoints}
           value={points.toLocaleString()}
-          sub={`≈ ${formatCurrency(points / rewards.pointsPerDollar)} value`}
+          sub={`${formatCurrency(points / rewards.pointsPerDollar)} ${t.value}`}
         />
-        <StatCard label="Active quotes" value={String(activeQuotes)} />
+        <StatCard label={t.activeQuotes} value={String(activeQuotes)} />
         <StatCard
-          label="Outstanding"
+          label={t.outstanding}
           value={formatCurrency(outstanding)}
-          sub={outstanding > 0 ? "Awaiting payment" : "All settled"}
+          sub={outstanding > 0 ? t.awaitingPayment : t.allSettled}
         />
       </div>
 
       <Card>
         <div className="mb-4 flex items-center justify-between">
-          <CardTitle>Recent quotes</CardTitle>
+          <CardTitle>{t.recentQuotes}</CardTitle>
           <Link href="/dashboard/quotes" className="text-sm text-cinnamon hover:underline">
-            View all
+            {t.viewAll}
           </Link>
         </div>
 
         {data.quotes.length === 0 ? (
           <EmptyState
-            title="No quotes yet"
-            body="Draw your space and get an instant estimate, it takes less than a minute."
-            ctaHref="/quote"
-            ctaLabel="Start a quote"
+            title={t.noQuotesTitle}
+            body={t.noQuotesBody}
+            ctaHref="/dashboard/quotes/new"
+            ctaLabel={t.requestQuote}
           />
         ) : (
           <ul className="divide-y divide-oak/10">
-            {data.quotes.slice(0, 4).map((q) => (
-              <li key={q.id} className="flex items-center justify-between py-4">
-                <div>
-                  <p className="text-oak">{q.address ?? "Quote"}</p>
-                  <p className="text-sm text-soil/50">
-                    {q.area_m2 ? `${q.area_m2} m² · ` : ""}
-                    {new Date(q.created_at).toLocaleDateString()}
-                  </p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="font-display text-xl text-oak">
-                    {formatCurrency(Number(q.total))}
-                  </span>
-                  <StatusBadge status={q.status} />
-                </div>
-              </li>
-            ))}
+            {data.quotes.slice(0, 4).map((q) => {
+              const hasTotal = Number(q.total) > 0;
+
+              return (
+                <li key={q.id} className="flex items-center justify-between gap-4 py-4">
+                  <div>
+                    <p className="text-oak">{q.address ?? t.quoteFallback}</p>
+                    <p className="text-sm text-soil/50">
+                      {new Date(q.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex flex-col items-end gap-1">
+                      <span className="font-display text-xl text-oak">
+                        {hasTotal ? formatCurrency(Number(q.total)) : t.pendingReview}
+                      </span>
+                      {(q.status === "requested" || q.status === "draft") && (
+                        <CancelQuoteButton quoteId={q.id} />
+                      )}
+                    </div>
+                    <StatusBadge status={q.status} label={statusLabel(dict, q.status)} />
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </Card>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Card>
-          <CardTitle>Refer & earn</CardTitle>
+          <CardTitle>{t.referEarn}</CardTitle>
           <p className="mt-2 text-sm text-soil/60">
-            Share your code and you both earn{" "}
-            {rewards.referralSuccess.toLocaleString()} points on their first job.
+            {t.referBody}{" "}
+            {rewards.referralSuccess.toLocaleString()} {t.pointsOnFirstJob}
           </p>
           <Link
             href="/dashboard/referrals"
             className="mt-4 inline-block text-sm text-cinnamon hover:underline"
           >
-            Get your referral link →
+            {t.getReferralLink}
           </Link>
         </Card>
         <Card>
-          <CardTitle>Need another clean?</CardTitle>
+          <CardTitle>{t.needVisit}</CardTitle>
           <p className="mt-2 text-sm text-soil/60">
-            Build a new quote in a minute and redeem points at checkout.
+            {t.needVisitBody}
           </p>
           <Link
-            href="/quote"
+            href="/dashboard/quotes/new"
             className="mt-4 inline-block text-sm text-cinnamon hover:underline"
           >
-            New instant quote →
+            {t.newQuoteRequest}
           </Link>
         </Card>
       </div>

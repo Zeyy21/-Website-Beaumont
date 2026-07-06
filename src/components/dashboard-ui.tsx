@@ -65,15 +65,16 @@ const statusTone: Record<string, string> = {
   signed: "bg-green-100 text-green-800",
 };
 
-export function StatusBadge({ status }: { status: string }) {
+export function StatusBadge({ status, label }: { status: string; label?: string }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full px-3 py-1 text-xs font-medium capitalize",
+        "inline-flex items-center rounded-full px-3 py-1 text-xs font-medium",
+        !label && "capitalize",
         statusTone[status] ?? "bg-oak/10 text-oak",
       )}
     >
-      {status}
+      {label ?? status}
     </span>
   );
 }

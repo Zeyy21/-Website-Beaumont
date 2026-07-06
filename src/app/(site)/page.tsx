@@ -1,203 +1,168 @@
-import Image from "next/image";
-import { WebglHero } from "@/components/webgl-hero";
+import { Hero } from "@/components/hero";
 import { ExperienceSequence } from "@/components/home-experience";
-import { Reveal, Stagger, StaggerItem } from "@/components/motion";
-import { ButtonLink, Container, Monogram } from "@/components/ui";
+import { ServiceGallery } from "@/components/service-gallery";
+import { SeasonalCycle } from "@/components/seasonal-cycle";
+import { ClientAttribution } from "@/components/client-attribution";
+import { BeforeAfter } from "@/components/before-after";
+import { QuoteBuilder } from "@/components/quote/quote-builder";
+import { Reveal } from "@/components/motion";
+import { Container, Eyebrow } from "@/components/ui";
+import { getServices, getCurrentUser } from "@/lib/data";
+import { accountFromUser } from "@/lib/quote-account";
+import { site } from "@/lib/config";
+import { getDict } from "@/lib/i18n/server";
 
-const feelings = [
-  {
-    number: "01",
-    title: "An arrival restored",
-    copy: "The kind of curb appeal that makes the whole property feel considered again.",
-  },
-  {
-    number: "02",
-    title: "Time, given back",
-    copy: "No rented equipment, lost weekends, or guessing which pressure is safe for the surface.",
-  },
-  {
-    number: "03",
-    title: "The finish you feel",
-    copy: "Not merely washed—stone, concrete, and pavers returned to a brighter, cared-for state.",
-  },
-];
+export default async function HomePage() {
+  const [dict, services, user] = await Promise.all([
+    getDict(),
+    getServices(),
+    getCurrentUser(),
+  ]);
 
-const care = [
-  {
-    label: "The arrival",
-    title: "A driveway worth coming home to.",
-    copy: "Built-up grime and organic staining lifted with a treatment tailored to the surface beneath.",
-    image: "/images/pressure-washed-driveway-placeholder.png",
-    alt: "Freshly pressure-washed stone driveway at golden hour",
-  },
-  {
-    label: "The outdoor room",
-    title: "A patio ready to be lived in again.",
-    copy: "Pool surrounds, terraces, and pavers restored for long afternoons and effortless hosting.",
-    image: "/images/pressure-washed-patio-placeholder.png",
-    alt: "Restored stone patio and pool surround",
-  },
-  {
-    label: "The first impression",
-    title: "An entrance that feels cared for.",
-    copy: "Walkways, steps, and front approaches brightened without compromising stone, joints, or gardens.",
-    image: "/images/pressure-washed-entry-placeholder.png",
-    alt: "Clean stone walkway leading to an elegant front entrance",
-  },
-];
-
-export default function HomePage() {
   return (
     <>
-      <WebglHero />
+      <Hero />
 
-      <section className="relative overflow-hidden bg-ivory py-28 md:py-40">
+      <ServiceGallery services={services} />
+
+      <section className="proof-wash relative overflow-hidden py-24 text-oak md:py-36" aria-labelledby="proof-title">
         <Container>
-          <Reveal className="mx-auto max-w-5xl text-center">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.36em] text-cinnamon">
-              Beyond surface clean
-            </p>
-            <h2 className="mt-7 text-balance font-display text-[clamp(3.2rem,7vw,7rem)] leading-[0.9] text-oak">
-              We don’t simply wash
-              <span className="block italic text-ochre">a driveway.</span>
-              We leave a feeling.
-            </h2>
-            <p className="mx-auto mt-9 max-w-2xl text-lg font-medium leading-relaxed text-soil/80 md:text-xl">
-              Beaumont is exterior care designed around the moment after: the water settles, the stone brightens, and your entire property feels renewed.
-            </p>
+          <Reveal className="mb-10 flex items-end justify-between gap-8 md:mb-14">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-cinnamon/70">02</p>
+              <h2 id="proof-title" className="mt-5 font-display text-[clamp(3.25rem,6vw,6.25rem)] leading-[0.88]">
+                {dict.admin.gallery.before} <span className="italic text-ochre">/ {dict.admin.gallery.after}</span>
+              </h2>
+            </div>
+            <p className="hidden text-[10px] font-semibold uppercase tracking-[0.28em] text-soil/42 md:block">{dict.servicesSection.details.driveways}</p>
           </Reveal>
-
-          <Stagger className="mt-24 grid border-y border-oak/15 md:grid-cols-3">
-            {feelings.map((feeling) => (
-              <StaggerItem
-                key={feeling.number}
-                className="group border-b border-oak/15 px-2 py-10 last:border-b-0 md:border-b-0 md:border-r md:px-9 md:last:border-r-0"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-display text-xl text-ochre">{feeling.number}</span>
-                  <span className="h-2 w-2 rounded-full border border-cinnamon transition-colors duration-500 group-hover:bg-cinnamon" />
-                </div>
-                <h3 className="mt-14 font-display text-3xl leading-tight text-oak md:text-4xl">
-                  {feeling.title}
-                </h3>
-                <p className="mt-5 text-sm font-medium leading-relaxed text-soil/80 md:text-base">{feeling.copy}</p>
-              </StaggerItem>
-            ))}
-          </Stagger>
+          <BeforeAfter
+            beforeUrl="/images/pressure-washing-before.png"
+            afterUrl="/images/pressure-washing-after.png"
+            beforeLabel={dict.admin.gallery.before}
+            afterLabel={dict.admin.gallery.after}
+            immersive
+            autoSweep
+          />
         </Container>
       </section>
 
       <ExperienceSequence />
 
-      <section className="relative overflow-hidden bg-soil py-28 text-ivory md:py-40">
-        <div className="absolute inset-0 opacity-40 [background:radial-gradient(circle_at_18%_12%,rgba(122,67,39,.65),transparent_36%),radial-gradient(circle_at_82%_78%,rgba(161,121,79,.25),transparent_38%)]" />
-        <Container className="relative">
-          <Reveal className="grid gap-10 lg:grid-cols-[0.65fr_1.35fr] lg:items-end">
+      <section data-header-tone="dark" className="texture-soil relative overflow-hidden py-24 text-ivory md:py-36" aria-label={dict.testimonialSection.sectionLabel}>
+        <div aria-hidden="true" className="pointer-events-none absolute -right-12 -top-24 font-display text-[24rem] leading-none text-ivory/[0.025]">&ldquo;</div>
+        <Container className="!px-2.5 sm:!px-6 md:!px-8">
+          <Reveal className="relative grid gap-9 rounded-[2.25rem] border border-ivory/10 bg-ivory/[0.035] p-8 backdrop-blur-sm md:gap-10 md:rounded-[3.5rem] md:p-14 lg:grid-cols-[0.3fr_1.7fr] lg:p-20">
             <div>
-              <Monogram className="h-16 w-16 opacity-80" size={64} />
-              <p className="mt-7 text-[10px] font-semibold uppercase tracking-[0.34em] text-sand">
-                Care, curated
-              </p>
+              <p className="font-display text-5xl text-ochre">01</p>
+              <p className="mt-4 text-[10px] font-semibold uppercase tracking-[0.34em] text-sand">{dict.testimonialSection.clientNote}</p>
             </div>
-            <h2 className="max-w-4xl text-balance font-display text-[clamp(3.3rem,7vw,7.2rem)] leading-[0.88] text-ivory">
-              One standard.
-              <span className="block italic text-sand">Your rhythm.</span>
-            </h2>
-          </Reveal>
-
-          <div className="mt-20 border-t border-ivory/15">
-            {care.map((item, index) => (
-              <Reveal key={item.label} delay={index * 0.06}>
-                <article className="group grid gap-6 border-b border-ivory/20 py-9 transition-colors duration-500 hover:bg-ivory/[0.05] md:grid-cols-[0.5fr_0.8fr_1fr_1fr_auto] md:items-center md:px-4 md:py-12">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-sand">
-                    {item.label}
-                  </p>
-                  <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-ivory/20 bg-oak">
-                    <Image src={item.image} alt={item.alt} fill sizes="(min-width: 768px) 180px, 100vw" className="object-cover transition duration-700 group-hover:scale-105" />
-                    <div className="absolute inset-0 bg-soil/10" />
-                  </div>
-                  <h3 className="max-w-sm font-display text-3xl leading-[1.05] text-ivory md:text-4xl">
-                    {item.title}
-                  </h3>
-                  <p className="max-w-sm text-sm font-medium leading-relaxed text-ivory/80 md:text-base">{item.copy}</p>
-                  <span className="flex h-12 w-12 items-center justify-center rounded-full border border-ivory/20 text-sand transition-all duration-500 group-hover:border-sand group-hover:bg-sand group-hover:text-soil">
-                    <Arrow />
-                  </span>
-                </article>
-              </Reveal>
-            ))}
-          </div>
-
-          <Reveal className="mt-12 flex justify-end">
-            <ButtonLink href="/services" variant="light" size="lg">
-              Explore your care
-              <Arrow />
-            </ButtonLink>
-          </Reveal>
-        </Container>
-      </section>
-
-      <section className="bg-sand/25 py-28 md:py-40">
-        <Container>
-          <Reveal className="mx-auto max-w-4xl text-center">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-cinnamon">
-              Felt, not announced
-            </p>
-            <blockquote className="mt-7 text-balance font-display text-[clamp(2.8rem,6vw,5.8rem)] leading-[0.96] text-oak">
-              “It made the whole house look newer. I didn’t realize how much the driveway was changing the way the property felt.”
+            <div>
+            <blockquote className="text-balance font-display text-[clamp(2.7rem,5.2vw,5.4rem)] leading-[0.96] text-ivory">
+              &ldquo;{dict.testimonialSection.quote}&rdquo;
             </blockquote>
-            <p className="mt-8 text-sm font-semibold uppercase tracking-[0.22em] text-soil/70">Eleanor V. · Beaumont client</p>
+              <div className="mt-10 flex flex-col items-start gap-5 border-t border-ivory/10 pt-7 sm:flex-row sm:items-center">
+                <span className="h-px w-12 bg-ochre" />
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-ivory/55">
+                  <ClientAttribution items={dict.testimonialSection.attributions} />
+                </p>
+              </div>
+            </div>
           </Reveal>
         </Container>
       </section>
 
-      <section className="bg-ivory px-4 py-4 md:px-6 md:py-6">
-        <div className="relative min-h-[82svh] overflow-hidden rounded-[2rem] md:rounded-[3.5rem]">
-          <Image
-            src="/images/pressure-washed-entry-placeholder.png"
-            alt="A restored stone walkway and welcoming home entrance"
-            fill
-            sizes="100vw"
-            className="object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-soil/95 via-soil/72 to-soil/25" />
-          <Container className="relative flex min-h-[82svh] items-center py-20">
-            <Reveal className="max-w-2xl text-ivory">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.36em] text-sand">
-                Your time is waiting
-              </p>
-              <h2 className="mt-6 text-balance font-display text-[clamp(3.5rem,7vw,7rem)] leading-[0.88]">
-                Leave the exterior to us.
-                <span className="mt-2 block italic text-sand">Keep the weekend.</span>
-              </h2>
-              <p className="mt-8 max-w-lg text-lg font-medium leading-relaxed text-ivory/85">
-                Tell us about your space and receive a tailored estimate in under a minute. No calls, no waiting, no guesswork.
-              </p>
-              <div className="mt-10 flex flex-wrap gap-3">
-                <ButtonLink href="/quote" variant="light" size="lg">
-                  Begin your reset
-                  <Arrow />
-                </ButtonLink>
-                <ButtonLink
-                  href="/contact"
-                  size="lg"
-                  className="border border-ivory/25 bg-transparent text-ivory hover:bg-ivory hover:text-soil"
-                >
-                  Speak to concierge
-                </ButtonLink>
-              </div>
-            </Reveal>
-          </Container>
-        </div>
+      <section id="quote" className="luxe-wash relative scroll-mt-24 overflow-hidden pb-24 pt-16 md:pb-32 md:pt-20" aria-labelledby="quote-title">
+        <div className="pointer-events-none absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-oak/15 to-transparent" />
+        <Container>
+          <div className="mx-auto max-w-[96rem]">
+            <QuoteBuilder services={services} account={accountFromUser(user)} />
+          </div>
+        </Container>
       </section>
+
+      <SeasonalCycle services={services} />
+
+      <section id="contact" className="relative scroll-mt-24 overflow-hidden bg-ivory py-24 md:py-40" aria-labelledby="contact-title">
+        <div aria-hidden="true" className="pointer-events-none absolute -left-16 bottom-0 font-display text-[22rem] leading-none text-oak/[0.025]">04</div>
+        <Container>
+          <Reveal className="grid gap-10 lg:grid-cols-[1.25fr_.75fr] lg:items-end">
+            <div>
+            <div className="flex items-center gap-4">
+              <span className="font-display text-2xl text-ochre">04</span>
+              <span className="h-px w-12 bg-ochre/40" />
+              <Eyebrow>{dict.contact.eyebrow}</Eyebrow>
+            </div>
+            <h2 id="contact-title" className="mt-6 max-w-3xl text-balance font-display text-[clamp(3.2rem,6vw,6.1rem)] leading-[0.9] text-oak">
+              {dict.contact.titleA}
+              <span className="block italic text-ochre">{dict.contact.titleB}</span>
+            </h2>
+            </div>
+            <p className="max-w-md text-base font-medium leading-relaxed text-soil/60 lg:justify-self-end">
+              {dict.contact.body}
+            </p>
+          </Reveal>
+
+          <div className="relative mt-14 grid gap-4 lg:grid-cols-12">
+            <Reveal className="min-w-0 lg:col-span-7">
+              <a
+                href={`mailto:${site.email}`}
+                className="group relative flex h-full min-h-[22rem] w-full min-w-0 flex-col justify-between overflow-hidden rounded-[2.25rem] bg-soil p-8 text-ivory shadow-lift md:rounded-[3rem] md:p-11"
+              >
+                <div aria-hidden="true" className="pointer-events-none absolute -right-10 -top-16 font-display text-[15rem] leading-none text-ivory/[0.04] md:text-[19rem]">@</div>
+                <div className="relative flex items-start justify-between gap-6">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-sand">{dict.contact.emailLabel}</span>
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-ivory/20 text-lg transition-all duration-500 group-hover:-rotate-45 group-hover:border-ivory group-hover:bg-ivory group-hover:text-soil md:h-12 md:w-12 md:text-xl">↗</span>
+                </div>
+                <div className="relative">
+                  <p className="font-display text-[clamp(2.6rem,4.4vw,4rem)] italic leading-[0.9] text-ivory/95">Write to us</p>
+                  <span className="mt-5 block break-words font-display text-[clamp(1.35rem,2.1vw,2rem)] leading-[1.05] tracking-[-0.01em] text-sand transition-colors group-hover:text-ivory">
+                    {site.email}
+                  </span>
+                  <span className="mt-4 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.24em] text-ivory/45">
+                    <span className="h-px w-8 bg-ivory/25" />
+                    {dict.contact.hours}
+                  </span>
+                </div>
+              </a>
+            </Reveal>
+            <Reveal delay={0.08} className="min-w-0 lg:col-span-5">
+              <a
+                href={site.instagram}
+                target="_blank"
+                rel="noreferrer"
+                className="group relative flex h-full min-h-[22rem] w-full min-w-0 flex-col justify-between overflow-hidden rounded-[2.25rem] border border-oak/10 bg-sand/40 p-8 text-oak shadow-[0_24px_70px_-42px_rgba(28,28,26,.6)] transition-colors duration-500 hover:bg-sand/55 md:rounded-[3rem] md:p-11"
+              >
+                <div className="flex items-start justify-between gap-6">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-full border border-oak/15 text-cinnamon md:h-12 md:w-12">
+                    <InstagramMark />
+                  </span>
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-oak/20 text-lg transition-all duration-500 group-hover:-rotate-45 group-hover:border-oak group-hover:bg-oak group-hover:text-ivory md:h-12 md:w-12 md:text-xl">↗</span>
+                </div>
+                <div>
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-cinnamon">{dict.contact.followLabel}</span>
+                  <span className="mt-3 block break-words font-display text-[clamp(2rem,3vw,2.75rem)] leading-[0.95] tracking-[-0.02em]">{site.instagramHandle}</span>
+                  <span className="mt-4 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.24em] text-soil/45">
+                    <span className="h-px w-8 bg-oak/20" />
+                    {dict.common.montreal}
+                  </span>
+                </div>
+              </a>
+            </Reveal>
+          </div>
+        </Container>
+      </section>
+
     </>
   );
 }
 
-function Arrow() {
+function InstagramMark() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">
-      <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
     </svg>
   );
 }

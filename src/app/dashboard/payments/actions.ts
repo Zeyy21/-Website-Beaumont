@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createCardCheckout } from "@/lib/payments";
 import { sendEmail } from "@/lib/email";
 import { site } from "@/lib/config";
+import { getDict } from "@/lib/i18n/server";
 
 export interface PayResult {
   ok: boolean;
@@ -23,13 +24,14 @@ export async function recordManualPayment(
   amount: number,
   method: "transfer" | "cash",
 ): Promise<PayResult> {
+  const t = getDict().dashboard.payments;
   const supabase = createClient();
-  if (!supabase) return { ok: false, error: "Payments are not enabled yet." };
+  if (!supabase) return { ok: false, error: t.errNotEnabled };
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "Please sign in." };
+  if (!user) return { ok: false, error: t.errSignIn };
 
   const { error } = await supabase.from("payments").insert({
     user_id: user.id,
@@ -45,8 +47,8 @@ export async function recordManualPayment(
     ok: true,
     message:
       method === "transfer"
-        ? "Recorded. Use your quote number as the transfer reference, we'll confirm once funds arrive."
-        : "Recorded. Pay your team at the appointment and we'll mark it complete.",
+        ? t.recordedTransfer
+        : t.recordedCash,
   };
 }
 
@@ -66,5 +68,5 @@ export async function startCardPayment(
   });
   if (res.disabled) return { ok: false, disabled: true };
   if (res.ok && res.url) return { ok: true, url: res.url };
-  return { ok: false, error: res.error ?? "Could not start card payment." };
+  return { ok: false, error: res.error ?? getDict().dashboard.payments.errCard };
 }

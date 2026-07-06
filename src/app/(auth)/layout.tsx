@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { Monogram } from "@/components/ui";
 import { site } from "@/lib/config";
+import { getDict } from "@/lib/i18n/server";
 
 export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const dict = getDict();
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       {/* brand panel */}
@@ -17,9 +19,9 @@ export default function AuthLayout({
         </Link>
         <div>
           <h1 className="max-w-md font-display text-5xl leading-tight">
-            Your home, returned to quiet perfection.
+            {dict.auth.panelHeading}
           </h1>
-          <p className="mt-5 max-w-sm text-ivory/85">{site.promise}</p>
+          <p className="mt-5 max-w-sm text-ivory/85">{dict.site.promise}</p>
         </div>
         <p className="text-sm text-ivory/70">
           © {new Date().getFullYear()} {site.name}

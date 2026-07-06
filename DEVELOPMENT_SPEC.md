@@ -6,12 +6,12 @@
 
 ## 1. Product summary
 
-Beaumont is a luxury cleaning/service company with a warm, earthy heritage-luxury identity (see §3). The site must feel **super premium** — like a native app, not a brochure. Visitors can browse services, get an **instant AI-estimated quote from a property's area** (drawn on an interactive map), request a formal quote, and manage everything inside a **logged-in profile** (quotes, contract, payments, reward points, referrals).
+Beaumont is a luxury cleaning/service company with a warm, earthy heritage-luxury identity (see §3). The site must feel **super premium** — like a native app, not a brochure. Visitors can browse services, send a **review-based exterior-care quote request**, and manage everything inside a **logged-in profile** (quotes, contract, payments, reward points, referrals).
 
 > **Zero-key principle:** The entire site must run end-to-end with **no API keys and no credit card** using free, open services (see §2 and §2.1). Paid/keyed services (live email, premium geocoding, card payments) sit behind adapters with safe free defaults and are switched on later by dropping env vars in — **no code changes**. The owner will link real keys *after* the site is built.
 
 **Two surfaces, one codebase:**
-1. **Public marketing site** — Home, Services, Who We Are, instant quote tool, Terms & Conditions.
+1. **Public marketing site** — Home, Services, Who We Are, free estimate request, Terms & Conditions.
 2. **Customer app (authenticated)** — Profile dashboard: quotes, contract, payments, points, referrals, before/after galleries.
 
 ---
@@ -22,7 +22,6 @@ Beaumont is a luxury cleaning/service company with a warm, earthy heritage-luxur
 - **Styling:** Tailwind CSS + a small design-token layer for brand colors.
 - **Animation:** Framer Motion (page transitions, scroll reveals, micro-interactions). Keep it tasteful and 60fps — never janky.
 - **Backend / DB / Auth:** Supabase (Postgres + Auth + Row Level Security + Storage for before/after images).
-- **Maps & area (free, no key, no card):** **Leaflet** + **OpenStreetMap** raster tiles for the map; **Leaflet-Geoman** (or `leaflet-draw`) for polygon drawing; **Turf.js** (`@turf/area`) to compute the drawn area in m². All MIT, all client-side, no billing key. (Google Maps is NOT used.)
 - **Address search / geocoding (free):** **Photon** (Komoot, autocomplete-friendly) as primary, **Nominatim** as fallback, accessed through a **server-side `/api/geocode` route** (debounced + cached in DB + proper `User-Agent`) to honor OSM usage policy. Behind a `GEOCODER` adapter so a paid provider can be swapped in later via env.
 - **Email (free, no card):** a thin **`sendEmail()` adapter** (`src/lib/email/`). **Default driver = `console`** — emails render to the server log so the app works with zero setup. Drivers for **MailerSend**, **Brevo**, **Resend**, and **SMTP (Nodemailer)** included; pick one later by setting `EMAIL_PROVIDER` + its key. Use React Email (or simple HTML) templates for: quote sent, welcome, referral credited, payment receipt.
 - **Payments:** **Stripe** for cards, behind a `payments` adapter that renders a **disabled/test state when no key is set** (flow visible, no charge). The **manual transfer / cash** path works with **no key at all**, so customers can transact day one.
@@ -34,7 +33,7 @@ Beaumont is a luxury cleaning/service company with a warm, earthy heritage-luxur
 
 | Env var(s) | Service | Default behavior with no key | What setting it unlocks |
 |---|---|---|---|
-| *(none)* | Maps, draw, area | **Fully works** (Leaflet/OSM/Turf) | — already free forever |
+| *(none)* | Quote request flow | **Fully works** (address search + service scope request) | — already free forever |
 | *(none)* | Geocoding | **Works** via Photon/Nominatim free endpoints | — |
 | `GEOCODER`, `GEOCODER_KEY` | Premium geocoder (optional) | Free Photon/Nominatim | higher rate limits / better autocomplete |
 | `EMAIL_PROVIDER`, `EMAIL_API_KEY`, `EMAIL_FROM` | Transactional email | Emails logged to **console** | real email delivery (MailerSend/Brevo/Resend/SMTP) |
@@ -90,12 +89,12 @@ The brand font ships at `Logo + Icons/FONT/Bombay-Black-Unicode/…ttf` and is c
 
 ## 4. Core features
 
-### 4.1 Instant AI quote (the hero feature — make it effortless)
-- User enters an address → **Photon autocomplete** (via `/api/geocode`) → **Leaflet/OSM** map flies to it.
-- User **draws the property/area** with the **Leaflet-Geoman** polygon tool; **Turf.js** computes area live in m²/ft². (No building-footprint autosuggest — OSM residential footprints are unreliable; user-drawn polygon is the source of truth.)
-- Pick **service type** + frequency (one-time / weekly / bi-weekly / monthly) + options (deep clean, windows, etc.).
-- **Quote engine** = transparent pricing model: `base + (area × rate_per_m² × service_multiplier × frequency_modifier) + add-ons`. Show an animated price range instantly. Store the rate table in DB so pricing is editable without code changes.
-- CTA: **"Save quote to my account"** (prompts login/signup) and **"Request formal quote"** (notifies staff + emails the customer).
+### 4.1 Review-based quote request (the hero feature — make it effortless)
+- User enters an address → **Photon autocomplete** (via `/api/geocode`) → Beaumont receives the selected property context.
+- User chooses all relevant exterior services: pressure washing, soft washing, window care, and review items.
+- User describes scope size, condition, frequency, and optional notes. Public copy must not expose a per-area rate.
+- **Quote engine** stores a review-based request and staff confirms final pricing after access, material, and surface condition are reviewed.
+- CTA: **"Request formal quote"** (prompts login/signup when needed, notifies staff, and emails the customer).
 - Keep the whole flow to **3 steps max**, with a progress indicator. No friction.
 
 ### 4.2 Authentication & profile
@@ -122,9 +121,9 @@ The brand font ships at `Logo + Icons/FONT/Bombay-Black-Unicode/…ttf` and is c
 
 ## 5. Door-tag program (offline → online bridge)
 
-A **physical door-hanger / tag system** to put a branded tag on every door in target neighborhoods, driving people to the instant-quote tool.
+A **physical door-hanger / tag system** to put a branded tag on every door in target neighborhoods, driving people to the free estimate request.
 
-- **Design:** premium die-cut door hanger in brand colors — front: logo + one-line promise ("Beaumont. Effortless luxury cleaning."); back: **per-door QR code** + short URL + "Scan for an instant quote on *this* home."
+- **Design:** premium die-cut door hanger in brand colors — front: logo + one-line promise ("Beaumont. Effortless luxury cleaning."); back: **per-door QR code** + short URL + "Scan for a free estimate on *this* home."
 - **Smart QR:** each tag encodes a campaign + (optionally) a geo/route ID → lands on the quote tool **pre-seeded with that neighborhood**, and attributes the lead to that door-tag batch. Store scans in a `door_tag_scans` table for conversion tracking.
 - **Strategy / rollout:** organize by route/zone; generate QR batches per zone; track scan → quote → booking funnel in admin. Tags should feel like a gift left on the door, not a flyer (heavyweight stock, gold foil accent, rounded die-cut).
 - **Deliverable in repo:** a print-ready door-hanger template (SVG/HTML→PDF) plus a `/api/door-tag` route that generates QR codes for a list of addresses/zones.
@@ -153,7 +152,7 @@ A **physical door-hanger / tag system** to put a branded tag on every door in ta
 1. Scaffold Next.js + Tailwind + design tokens + fonts + Framer Motion shell with animated nav/page transitions.
 2. Supabase project: schema migration + RLS + Auth + Storage bucket.
 3. Marketing pages (Home, Services w/ before-after slider, Who We Are, T&C) — fully animated.
-4. Instant quote tool (Leaflet/OSM map + Leaflet-Geoman draw + Turf area + `/api/geocode` Photon autocomplete + pricing engine + save/request).
+4. Free estimate request tool (`/api/geocode` Photon autocomplete + service scope selection + staff review request).
 5. Auth + profile dashboard (quotes, contract, payments, points, referrals, galleries).
 6. **Adapters:** `sendEmail()` (console default + MailerSend/Brevo/Resend/SMTP drivers) and `payments` (manual transfer/cash working; Stripe behind disabled-when-no-key state). Wire transactional emails through the adapter.
 7. Rewards + referral logic.
@@ -165,9 +164,9 @@ A **physical door-hanger / tag system** to put a branded tag on every door in ta
 ## 8. Definition of done
 
 - Loads fast, animates smoothly, fully responsive, feels like an app.
-- A visitor can: draw their property → get an instant estimate → sign up → request a formal quote → see it in their profile.
+- A visitor can: select their address → choose exterior services → sign up → request a formal quote → see it in their profile.
 - A logged-in user sees real quotes, points, referral link, contract, payment history, and before/after galleries — all backed by Supabase with RLS.
 - Staff can send quotes, upload galleries, mark payments, edit pricing.
 - Door-tag QR generator outputs working per-zone codes and a print-ready hanger template.
-- **Runs with zero keys:** `npm run dev` boots on an empty `.env`; map/draw/area, geocode autocomplete, manual payments, and console-email all work. Live email + Stripe + premium geocode switch on via env vars with no code change.
+- **Runs with zero keys:** `npm run dev` boots on an empty `.env`; quote request, geocode autocomplete, manual payments, and console-email all work. Live email + Stripe + premium geocode switch on via env vars with no code change.
 - `.env.example` + `README` with setup steps and the §2.1 key table. No hardcoded secrets.

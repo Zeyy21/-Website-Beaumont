@@ -2,7 +2,6 @@
 
 import {
   motion,
-  useReducedMotion,
   type TargetAndTransition,
 } from "framer-motion";
 
@@ -16,20 +15,15 @@ import {
  * All GPU-friendly (transform/opacity). Honors reduced-motion (orbs hold still).
  */
 export function AnimatedBackdrop() {
-  const reduce = useReducedMotion();
-
-  const orb = (anim: TargetAndTransition) =>
-    reduce
-      ? {}
-      : {
-          animate: anim,
-          transition: {
-            duration: 18,
-            repeat: Infinity,
-            ease: "easeInOut" as const,
-            repeatType: "mirror" as const,
-          },
-        };
+  const orb = (anim: TargetAndTransition) => ({
+    animate: anim,
+    transition: {
+      duration: 18,
+      repeat: Infinity,
+      ease: "easeInOut" as const,
+      repeatType: "mirror" as const,
+    },
+  });
 
   return (
     <div className="pointer-events-none absolute inset-0 -z-0 overflow-hidden">

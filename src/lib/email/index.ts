@@ -125,17 +125,15 @@ async function sendResend({ to, subject, html, text }: DriverArgs) {
   return { ok: true as const, provider: "resend" as Provider };
 }
 
+import * as nodemailer from "nodemailer";
+
 /**
  * SMTP driver. Uses nodemailer if installed (npm i nodemailer); otherwise it
  * falls back to console so the build never breaks for a missing optional dep.
  * Expects SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS.
  */
 async function sendSmtp({ to, subject, html, text }: DriverArgs) {
-  let nodemailer: typeof import("nodemailer") | null = null;
-  try {
-    // Optional dependency, only required if you choose the smtp provider.
-    nodemailer = (await import("nodemailer")) as typeof import("nodemailer");
-  } catch {
+  if (!nodemailer) {
     console.warn(
       "[email:smtp] nodemailer not installed, run `npm i nodemailer`. Falling back to console.",
     );

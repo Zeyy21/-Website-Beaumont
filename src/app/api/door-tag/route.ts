@@ -4,7 +4,7 @@ import { site } from "@/lib/config";
 
 /**
  * Generates per-zone door-tag QR codes. Each QR encodes a deep link into the
- * instant-quote tool pre-seeded with the zone + a unique tag id, so scans are
+ * quote request tool pre-seeded with the zone + a unique tag id, so scans are
  * attributable (logged into door_tag_scans) and the quote is pre-tuned.
  *
  * POST { zones: string[], perZone?: number }  →  { tags: [...] }
@@ -26,7 +26,7 @@ async function buildTags(zone: string, count: number): Promise<Tag[]> {
     const qrDataUrl = await QRCode.toDataURL(url, {
       margin: 1,
       width: 512,
-      color: { dark: "#1D170F", light: "#F9F8E7" },
+      color: { dark: "#1C1C1A", light: "#F4F1EC" },
     });
     tags.push({ zone, tagId, url, qrDataUrl });
   }

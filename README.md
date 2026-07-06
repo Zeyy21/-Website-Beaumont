@@ -11,8 +11,7 @@ later by adding environment variables. No code changes required.
 
 - **Next.js 14** (App Router, TypeScript) · **Tailwind** · **Framer Motion**
 - **Supabase** — Postgres + Auth + RLS + Storage (the only keys the core app needs)
-- **Leaflet + OpenStreetMap + Leaflet-Geoman + Turf.js** — the instant area-based quote (free, keyless)
-- **Photon → Nominatim** — address autocomplete via a server route (free, keyless)
+- **Photon -> Nominatim** - address autocomplete via a server route (free, keyless)
 - Email behind a swappable adapter (console default · MailerSend/Brevo/Resend/SMTP)
 - Payments: manual transfer/cash (keyless) + Stripe (optional)
 
@@ -24,8 +23,8 @@ npm run dev
 ```
 
 Open http://localhost:3000. With no `.env`, you get the full experience in
-**preview mode**: marketing site, instant quote (draw your home on the map, get
-a live price), and the dashboard/admin shells. Emails print to your terminal.
+**preview mode**: marketing site, review-based quote request, and the
+dashboard/admin shells. Emails print to your terminal.
 
 ## Enabling accounts & data (Supabase)
 
@@ -49,7 +48,7 @@ Everything below is off by default and documented in [`.env.example`](./.env.exa
 
 | Capability | Add to `.env.local` | Notes |
 | --- | --- | --- |
-| Live email | `EMAIL_PROVIDER` + `EMAIL_API_KEY` + `EMAIL_FROM` | MailerSend/Brevo/Resend (no card) or `smtp` (`npm i nodemailer`) |
+| Formal quote email | `EMAIL_PROVIDER` + `EMAIL_API_KEY` + `EMAIL_FROM` + `QUOTE_NOTIFICATION_TO` | Required in production; Resend is recommended and quotes remain saved if delivery fails |
 | Card payments | `STRIPE_SECRET_KEY` + `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | also `npm i stripe`; transfer/cash work without it |
 | Premium geocoder | `GEOCODER` + `GEOCODER_KEY` | free Photon/Nominatim used otherwise |
 
@@ -62,7 +61,7 @@ until then they fall back to **Cormorant** automatically.
 
 ## Key features
 
-- **Instant quote** — address search → draw property on map → live area-based price → save or request.
+- **Quote request** - address search -> choose exterior services -> send scope for staff review.
 - **Customer dashboard** — quotes, contract (in-profile e-sign), payments (card/transfer/cash), reward points, referral link, before/after gallery.
 - **Rewards & referrals** — points on signup/jobs/referrals, redeemable as discounts.
 - **Admin** (`/admin`, staff-gated) — confirm & send quotes, mark payments paid, edit pricing live, manage gallery, **generate per-zone QR door tags** (print-ready).

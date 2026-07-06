@@ -2,10 +2,14 @@ import { getCurrentUser } from "@/lib/data";
 import { getDashboardData } from "@/lib/dashboard";
 import { EmptyState } from "@/components/dashboard-ui";
 import { ContractCard } from "@/components/contract-card";
+import { getDict } from "@/lib/i18n/server";
 
-export const metadata = { title: "Contract" };
+export function generateMetadata() {
+  return { title: getDict().dashboard.nav.contract };
+}
 
 export default async function ContractPage() {
+  const t = getDict().dashboard.contract;
   const user = await getCurrentUser();
   const data = user ? await getDashboardData(user.id) : null;
   const contracts = data?.contracts ?? [];
@@ -13,10 +17,10 @@ export default async function ContractPage() {
   if (contracts.length === 0) {
     return (
       <EmptyState
-        title="No contract yet"
-        body="When you accept a quote, your service agreement will appear here to review and e-sign."
+        title={t.noContractTitle}
+        body={t.noContractBody}
         ctaHref="/dashboard/quotes"
-        ctaLabel="View quotes"
+        ctaLabel={t.viewQuotes}
       />
     );
   }
