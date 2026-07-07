@@ -77,9 +77,8 @@ export function ServiceGallery({ services }: { services: ServiceCard[] }) {
       aria-labelledby="services-title"
       style={isMobile ? { height: `${services.length * 75}vh` } : undefined}
     >
-      <div className={isMobile ? "sticky top-24 flex h-[calc(100vh-6rem)] flex-col overflow-hidden" : ""}>
-        <Container className="relative z-10">
-          <motion.div
+      <Container className="relative z-10">
+        <motion.div
             className="grid gap-6 border-b border-oak/10 pb-8 lg:grid-cols-[.65fr_1.35fr] lg:items-end"
             initial={{ opacity: 0, y: 22 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -98,8 +97,9 @@ export function ServiceGallery({ services }: { services: ServiceCard[] }) {
               {t.titleA} <span className="italic text-ochre">{t.titleB}</span>
             </h2>
           </motion.div>
-        </Container>
+      </Container>
 
+      <div className={isMobile ? "sticky top-24 flex h-[calc(100vh-6rem)] flex-col overflow-hidden" : ""}>
         <Container className="relative z-10 flex-1 flex flex-col justify-center">
           <motion.div
             className="mt-6 mb-6 flex flex-1 min-h-0 w-full flex-col gap-2.5 sm:mb-0 sm:mt-10 sm:h-[38rem] sm:flex-none sm:flex-row sm:gap-3 lg:h-[46rem] lg:gap-3.5"
@@ -173,7 +173,7 @@ function ExpandingCard({
       onFocus={isMobile ? undefined : onActivate}
       onClick={handleClick}
       aria-label={`${service.name} — ${detail}`}
-      className="group relative block h-full min-w-0 overflow-hidden rounded-[1.5rem] bg-soil text-ivory shadow-[0_30px_90px_-45px_rgba(28,28,26,.68)] transition-[flex-grow] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[flex-grow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinnamon focus-visible:ring-offset-4 md:rounded-[2.25rem]"
+      className="group relative block h-full min-h-[4.25rem] sm:min-h-0 min-w-0 overflow-hidden rounded-[1.5rem] bg-soil text-ivory shadow-[0_30px_90px_-45px_rgba(28,28,26,.68)] transition-[flex-grow] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[flex-grow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinnamon focus-visible:ring-offset-4 md:rounded-[2.25rem]"
       style={{ flexGrow, flexBasis: 0 }}
     >
       <Image
@@ -191,9 +191,9 @@ function ExpandingCard({
       <div
         className={`absolute inset-0 flex flex-row items-center justify-center gap-4 px-4 py-2 text-center transition-opacity duration-300 sm:inset-x-0 sm:bottom-0 sm:top-auto sm:flex-col sm:gap-5 sm:p-7 ${active ? "pointer-events-none opacity-0" : "opacity-100 delay-200"}`}
       >
-        <span className="font-display text-xl italic leading-none text-sand sm:text-2xl">{String(index + 1).padStart(2, "0")}</span>
+        <span className="font-display text-xl italic leading-none text-sand sm:text-2xl shrink-0">{String(index + 1).padStart(2, "0")}</span>
         <span
-          className="whitespace-normal text-balance font-display text-[1.25rem] leading-[1.1] tracking-[-0.01em] text-ivory sm:whitespace-nowrap sm:text-[1.65rem] sm:leading-none sm:[writing-mode:vertical-rl] sm:[transform:rotate(180deg)]"
+          className="truncate text-balance font-display text-[1.25rem] leading-[1.1] tracking-[-0.01em] text-ivory sm:overflow-visible sm:whitespace-nowrap sm:text-[1.65rem] sm:leading-none sm:[writing-mode:vertical-rl] sm:[transform:rotate(180deg)]"
         >
           {service.name}
         </span>
