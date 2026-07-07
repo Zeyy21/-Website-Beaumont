@@ -47,7 +47,7 @@ export function ServiceGallery({ services }: { services: ServiceCard[] }) {
   const details = [t.details.driveways, t.details.decks, t.details.houses, t.details.windows];
   const types = [t.types.pressure, t.types.pressure, t.types.soft, t.types.windows];
 
-  const sectionRef = useRef<HTMLElement>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start 96px", "end end"],
