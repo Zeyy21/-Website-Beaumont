@@ -50,7 +50,7 @@ export function ServiceGallery({ services }: { services: ServiceCard[] }) {
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    offset: ["start center", "end center"],
+    offset: ["start 96px", "end end"],
   });
   
   const smooth = useSpring(scrollYProgress, {
@@ -72,10 +72,8 @@ export function ServiceGallery({ services }: { services: ServiceCard[] }) {
   return (
     <section
       id="services"
-      ref={sectionRef}
       className="relative scroll-mt-24 overflow-hidden bg-ivory py-24 md:py-32"
       aria-labelledby="services-title"
-      style={isMobile ? { height: `${services.length * 75}vh` } : undefined}
     >
       <Container className="relative z-10">
         <motion.div
@@ -99,8 +97,9 @@ export function ServiceGallery({ services }: { services: ServiceCard[] }) {
           </motion.div>
       </Container>
 
-      <div className={isMobile ? "sticky top-24 flex h-[calc(100vh-6rem)] flex-col overflow-hidden" : ""}>
-        <Container className="relative z-10 flex-1 flex flex-col justify-center">
+      <div ref={sectionRef} style={isMobile ? { height: `${services.length * 75}vh` } : undefined}>
+        <div className={isMobile ? "sticky top-24 flex h-[calc(100dvh-6rem)] flex-col overflow-hidden" : ""}>
+          <Container className="relative z-10 flex-1 flex flex-col justify-center">
           <motion.div
             className="mt-6 mb-6 flex flex-1 min-h-0 w-full flex-col gap-2.5 sm:mb-0 sm:mt-10 sm:h-[38rem] sm:flex-none sm:flex-row sm:gap-3 lg:h-[46rem] lg:gap-3.5"
             onMouseLeave={touch && !isMobile ? undefined : () => {
@@ -129,6 +128,7 @@ export function ServiceGallery({ services }: { services: ServiceCard[] }) {
             ))}
           </motion.div>
         </Container>
+      </div>
       </div>
     </section>
   );
@@ -164,7 +164,7 @@ function ExpandingCard({
     }
   };
 
-  const flexGrow = active ? 4.4 : 1;
+  const flexGrow = active ? (isMobile ? 2.5 : 4.4) : 1;
 
   return (
     <Link
