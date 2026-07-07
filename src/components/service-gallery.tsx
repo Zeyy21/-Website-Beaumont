@@ -53,17 +53,25 @@ export function ServiceGallery({ services }: { services: ServiceCard[] }) {
     offset: ["start 96px", "end end"],
   });
   
+  // On mobile the accordion is scroll-driven: this spring only smooths the jump
+  // between which card is "active". It is intentionally much stiffer than the
+  // seasonal cross-fade so the selection tracks the finger closely — a soft
+  // spring here made the expanding card lag ~1s behind the scroll, so it never
+  // lined up with the section the reader was actually looking at.
   const smooth = useSpring(scrollYProgress, {
-    stiffness: 60,
-    damping: 26,
-    mass: 0.4,
+    stiffness: 210,
+    damping: 34,
+    mass: 0.35,
   });
 
   useMotionValueEvent(smooth, "change", (v) => {
     if (isMobile) {
+      // Flip at the centre of each scroll slice (+0.5) instead of its leading
+      // edge, so a card becomes active as it reaches the middle of the viewport
+      // rather than the instant scrolling into its band begins.
       const next = Math.min(
         services.length - 1,
-        Math.max(0, Math.floor(v * services.length)),
+        Math.max(0, Math.floor(v * services.length + 0.5)),
       );
       setActive((prev) => (prev === next ? prev : next));
     }
@@ -72,7 +80,7 @@ export function ServiceGallery({ services }: { services: ServiceCard[] }) {
   return (
     <section
       id="services"
-      className="relative scroll-mt-24 overflow-hidden bg-ivory py-24 md:py-32"
+      className="relative scroll-mt-24 overflow-visible bg-ivory py-24 sm:overflow-hidden md:py-32"
       aria-labelledby="services-title"
     >
       <Container className="relative z-10">
@@ -97,11 +105,11 @@ export function ServiceGallery({ services }: { services: ServiceCard[] }) {
           </motion.div>
       </Container>
 
-      <div ref={sectionRef} style={isMobile ? { height: `${services.length * 75}vh` } : undefined}>
-        <div className={isMobile ? "sticky top-24 flex h-[calc(100dvh-6rem)] flex-col overflow-hidden" : ""}>
+      <div ref={sectionRef} className="relative" style={isMobile ? { height: `${services.length * 90}vh` } : undefined}>
+        <div className={isMobile ? "sticky top-24 flex h-[calc(100dvh-13rem)] flex-col overflow-hidden" : ""}>
           <Container className="relative z-10 flex-1 flex flex-col justify-center">
           <motion.div
-            className="mt-6 mb-6 flex flex-1 min-h-0 w-full flex-col gap-2.5 sm:mb-0 sm:mt-10 sm:h-[38rem] sm:flex-none sm:flex-row sm:gap-3 lg:h-[46rem] lg:gap-3.5"
+            className="my-0 flex flex-1 min-h-0 w-full flex-col gap-2.5 sm:mb-0 sm:mt-10 sm:h-[38rem] sm:flex-none sm:flex-row sm:gap-3 lg:h-[46rem] lg:gap-3.5"
             onMouseLeave={touch && !isMobile ? undefined : () => {
               if (!isMobile) setActive(0);
             }}
@@ -164,7 +172,7 @@ function ExpandingCard({
     }
   };
 
-  const flexGrow = active ? (isMobile ? 2.5 : 4.4) : 1;
+  const flexGrow = active ? (isMobile ? 3.6 : 4.4) : 1;
 
   return (
     <Link
@@ -173,7 +181,7 @@ function ExpandingCard({
       onFocus={isMobile ? undefined : onActivate}
       onClick={handleClick}
       aria-label={`${service.name} — ${detail}`}
-      className="group relative block h-full min-h-[4.25rem] sm:min-h-0 min-w-0 overflow-hidden rounded-[1.5rem] bg-soil text-ivory shadow-[0_30px_90px_-45px_rgba(28,28,26,.68)] transition-[flex-grow] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[flex-grow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinnamon focus-visible:ring-offset-4 md:rounded-[2.25rem]"
+      className="group relative block h-full min-h-[3.75rem] sm:min-h-0 min-w-0 overflow-hidden rounded-[1.5rem] bg-soil text-ivory shadow-[0_30px_90px_-45px_rgba(28,28,26,.68)] transition-[flex-grow] duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[flex-grow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cinnamon focus-visible:ring-offset-4 sm:duration-700 md:rounded-[2.25rem]"
       style={{ flexGrow, flexBasis: 0 }}
     >
       <Image
