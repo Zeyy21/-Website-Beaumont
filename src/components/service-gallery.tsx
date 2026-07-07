@@ -102,7 +102,7 @@ export function ServiceGallery({ services }: { services: ServiceCard[] }) {
 
         <Container className="relative z-10 flex-1 flex flex-col justify-center">
           <motion.div
-            className="mt-6 flex h-[42rem] flex-col gap-2.5 sm:mt-10 sm:h-[38rem] sm:flex-row sm:gap-3 lg:h-[46rem] lg:gap-3.5"
+            className="mt-6 mb-6 flex flex-1 min-h-0 w-full flex-col gap-2.5 sm:mb-0 sm:mt-10 sm:h-[38rem] sm:flex-none sm:flex-row sm:gap-3 lg:h-[46rem] lg:gap-3.5"
             onMouseLeave={touch && !isMobile ? undefined : () => {
               if (!isMobile) setActive(0);
             }}
@@ -189,7 +189,7 @@ function ExpandingCard({
       <div className="pointer-events-none absolute inset-2.5 rounded-[1.1rem] border border-ivory/14 md:inset-4 md:rounded-[1.7rem]" />
 
       <div
-        className={`absolute inset-0 flex flex-row items-center justify-center gap-4 p-4 text-center transition-opacity duration-300 sm:inset-x-0 sm:bottom-0 sm:top-auto sm:flex-col sm:gap-5 sm:p-7 ${active ? "pointer-events-none opacity-0" : "opacity-100 delay-200"}`}
+        className={`absolute inset-0 flex flex-row items-center justify-center gap-4 px-4 py-2 text-center transition-opacity duration-300 sm:inset-x-0 sm:bottom-0 sm:top-auto sm:flex-col sm:gap-5 sm:p-7 ${active ? "pointer-events-none opacity-0" : "opacity-100 delay-200"}`}
       >
         <span className="font-display text-xl italic leading-none text-sand sm:text-2xl">{String(index + 1).padStart(2, "0")}</span>
         <span
