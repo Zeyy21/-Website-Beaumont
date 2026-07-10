@@ -1,0 +1,30 @@
+import Link from "next/link";
+import { QuoteBuilder } from "@/components/quote/quote-builder";
+import { getCurrentUser, getServices } from "@/lib/data";
+import { accountFromUser } from "@/lib/quote-account";
+import { getDict } from "@/lib/i18n/server";
+
+export function generateMetadata() {
+  return { title: getDict().dashboard.overview.requestQuote };
+}
+
+export default async function NewDashboardQuotePage() {
+  const t = getDict().dashboard.quotes;
+  const [services, user] = await Promise.all([getServices(), getCurrentUser()]);
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <Link href="/dashboard/quotes" className="text-sm font-medium text-cinnamon hover:underline">
+          {t.newBack}
+        </Link>
+        <p className="mt-6 text-[10px] font-semibold uppercase tracking-[0.28em] text-cinnamon">{t.newEyebrow}</p>
+        <h2 className="mt-3 font-display text-4xl leading-tight text-oak md:text-5xl">{t.newTitle}</h2>
+        <p className="mt-3 max-w-2xl text-sm font-medium leading-relaxed text-soil/60">
+          {t.newBody}
+        </p>
+      </div>
+      <QuoteBuilder services={services} account={accountFromUser(user)} />
+    </div>
+  );
+}

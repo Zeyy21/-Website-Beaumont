@@ -1,0 +1,170 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Bombay Black Unicode, the brand display font (provided by the owner).
+ * Loaded from /public/fonts. If the file is ever removed, the stack falls back
+ * to Cormorant (declared in tailwind.config.ts fontFamily.display). For best
+ * performance you can additionally export a .woff2 and add it as the first src.
+ */
+@font-face {
+  font-family: "Bombay Black Unicode";
+  src: url("/fonts/BombayBlackUnicode.ttf") format("truetype");
+  font-weight: 400 900;
+  font-display: swap;
+}
+
+:root {
+  /* Three-anchor palette: Off-white / Canopy / Ink. Token names preserved;
+     values mapped onto the anchors so the existing UI hierarchy is unchanged. */
+  --ivory: #f4f1ec;
+  --sand: #e3dccf;
+  --ochre: #6e9476;
+  --cinnamon: #1f4934;
+  --oak: #2b2b28;
+  --soil: #1c1c1a;
+
+  /* Display = brand font first, then next/font Cormorant, then system serif. */
+  --font-display: "Bombay Black Unicode", var(--font-cormorant), "Cormorant",
+    Georgia, serif;
+  --font-body: var(--font-inter), "Inter", system-ui, sans-serif;
+
+  /* z-index scale */
+  --z-nav: 50;
+  --z-overlay: 40;
+  --z-modal: 60;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--ivory);
+  color: var(--soil);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+/* Editorial display text benefits from balanced line wrapping where supported. */
+.text-balance {
+  text-wrap: balance;
+}
+
+h1, h2, h3, h4, .font-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.01em;
+  /* Bombay Black Unicode renders a very narrow space glyph, so words visually
+     collide. Restore a comfortable word gap proportionally at every size. The
+     Cormorant fallback already spaces well, so a touch extra here is harmless. */
+  word-spacing: 0.16em;
+}
+
+/* Body copy comfortable defaults */
+p {
+  line-height: 1.7;
+}
+
+/* Selection in brand tone */
+::selection {
+  background: var(--ochre);
+  color: var(--ivory);
+}
+
+/* Thin custom scrollbar on dark sections */
+.dark-scope {
+  scrollbar-color: var(--ochre) transparent;
+}
+
+/* Subtle organic texture for dark sections (CSS fallback for texture-dark.jpg).
+   Layered radial gradients evoke the plaster/wood look behind the logo. */
+.texture-soil {
+  background-color: var(--soil);
+  background-image:
+    radial-gradient(at 20% 15%, rgba(31, 73, 52, 0.35) 0px, transparent 55%),
+    radial-gradient(at 85% 20%, rgba(28, 28, 26, 0.5) 0px, transparent 50%),
+    radial-gradient(at 75% 90%, rgba(31, 73, 52, 0.22) 0px, transparent 55%),
+    radial-gradient(at 10% 85%, rgba(28, 28, 26, 0.45) 0px, transparent 50%);
+}
+
+/* Soft layered light used behind high-attention editorial sections. */
+.luxe-wash {
+  background-color: var(--ivory);
+  background-image:
+    radial-gradient(circle at 12% 8%, rgba(227, 220, 207, 0.45), transparent 32rem),
+    radial-gradient(circle at 88% 72%, rgba(31, 73, 52, 0.08), transparent 30rem),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.34), transparent 58%);
+}
+
+/* Reusable shimmer skeleton */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: rgba(43, 43, 40, 0.08);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(244, 241, 236, 0.55),
+    transparent
+  );
+  animation: shimmer 1.6s infinite;
+}
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.hero-film-grain {
+  background-image:
+    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.5) 0 0.6px, transparent 0.8px),
+    radial-gradient(circle at 75% 65%, rgba(0, 0, 0, 0.45) 0 0.55px, transparent 0.8px);
+  background-size: 4px 4px, 5px 5px;
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
+/* Slow cinematic drift on the hero video — a barely-there push-in that keeps
+   the footage feeling alive without pulling focus. Disabled under
+   prefers-reduced-motion by the global rule below. */
+@keyframes hero-video-drift {
+  0% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1.09);
+  }
+}
+
+.hero-video-drift {
+  transform: scale(1.02);
+  transform-origin: 60% 45%;
+  animation: hero-video-drift 26s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.proof-wash {
+  background-color: #e9e4db;
+  background-image:
+    radial-gradient(circle at 15% 10%, rgba(255, 255, 255, 0.72), transparent 34rem),
+    radial-gradient(circle at 88% 74%, rgba(110, 148, 118, 0.13), transparent 30rem),
+    linear-gradient(135deg, rgba(244, 241, 236, 0.75), rgba(227, 220, 207, 0.45));
+}
+
+
