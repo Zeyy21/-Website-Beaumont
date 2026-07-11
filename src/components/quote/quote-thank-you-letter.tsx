@@ -35,7 +35,7 @@ export function QuoteThankYouLetter({
   const reduceMotion = useReducedMotion();
   const [phase, setPhase] = useState<Phase>(completePendingQuote ? "saving" : "ready");
   const [delivery, setDelivery] = useState<Delivery>(initialDelivery);
-  const [seconds, setSeconds] = useState(reduceMotion ? 2 : 4);
+  const [seconds, setSeconds] = useState(reduceMotion ? 6 : 8);
   const [error, setError] = useState("");
 
   const signupPath = useMemo(
@@ -105,7 +105,7 @@ export function QuoteThankYouLetter({
 
   useEffect(() => {
     if (!autoProceed || phase !== "ready") return;
-    const delay = reduceMotion ? 1800 : 4200;
+    const delay = reduceMotion ? 5300 : 7700;
     const started = Date.now();
     const ticker = window.setInterval(() => {
       setSeconds(Math.max(1, Math.ceil((delay - (Date.now() - started)) / 1000)));
