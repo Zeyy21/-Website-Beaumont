@@ -53,6 +53,7 @@ const en = {
     quote: "Free Quote",
     terms: "Terms",
     partners: "Partners",
+    hiring: "Hiring",
   },
 
   site: {
@@ -225,6 +226,89 @@ const en = {
       "Specialists in window washing, spider treatments, and condo window washing. QuickClean ensures your property's delicate surfaces are treated with the utmost care and professionalism.",
     atlanticDescription:
       "Specialists in window and gutter cleaning, as well as soffits and garage doors. Atlantic brings years of experience restoring homes to their best condition.",
+  },
+
+  hiring: {
+    homeEyebrow: "Build with Beaumont",
+    homeTitleA: "Good work.",
+    homeTitleB: "Real momentum.",
+    homeBody:
+      "Join a team that values discipline, clear communication, and work you can be proud to put your name on.",
+    techniciansLabel: "For technicians",
+    techniciansTitle: "Master a craft outdoors.",
+    techniciansBody:
+      "Learn material-aware exterior care, deliver exacting work, and grow with a team that respects the details.",
+    repsLabel: "For sales representatives",
+    repsTitle: "Turn people skills into a career asset.",
+    repsBody:
+      "Build confidence, communication, and a repeatable sales skill set with support from people who want you to win.",
+    exploreRole: "Explore this role",
+    page: {
+      metaTitle: "Hiring",
+      metaDescription:
+        "Explore technician and sales representative opportunities with Beaumont in Greater Montréal.",
+      eyebrow: "Careers at Beaumont",
+      titleA: "Work that builds",
+      titleB: "more than a résumé.",
+      intro:
+        "We are building a focused team across Greater Montréal—people who care about the quality of their work, the way they communicate, and the skills they carry forward.",
+      principlesLabel: "What you can expect",
+      principleOneTitle: "Standards you can see",
+      principleOneBody:
+        "Clear expectations, thoughtful training, and work completed with care from arrival to final walkthrough.",
+      principleTwoTitle: "Skills that compound",
+      principleTwoBody:
+        "Practical coaching in service, communication, responsibility, and problem-solving—useful here and everywhere after.",
+      principleThreeTitle: "Room to earn and grow",
+      principleThreeBody:
+        "Performance is noticed. Initiative, consistency, and leadership create a path to greater responsibility.",
+      techniciansEyebrow: "Field team",
+      techniciansTitle: "Exterior Care Technicians",
+      techniciansIntro:
+        "For people who like tangible results, active days, and becoming excellent at a hands-on craft.",
+      techniciansPointOne: "Learn safe pressure-washing and soft-washing methods",
+      techniciansPointTwo: "Work with a detail-focused crew across Greater Montréal",
+      techniciansPointThree: "Build customer-service, planning, and field leadership skills",
+      techniciansFitTitle: "You may be a fit if",
+      techniciansFitBody:
+        "You are dependable, comfortable working outdoors, attentive to details, and willing to learn a careful process. Experience is welcome, but character and consistency matter most.",
+      techniciansCta: "Apply as a technician",
+      repsEyebrow: "Growth team",
+      repsTitle: "Sales Representatives",
+      repsIntro:
+        "For driven communicators—including athletes—who want flexible earning potential and a skill they can use for life.",
+      partnershipLabel: "Athlete pathway",
+      partnershipTitle: "In partnership with PROTOTYPE SPORTS GROUP",
+      partnershipBody:
+        "Through our partnership with PROTOTYPE SPORTS GROUP, we hire athletes and help them fund their careers while developing durable skills in communication, relationship-building, discipline, and sales. These are skills they can use throughout their athletic journey and for the rest of their lives.",
+      repsPointOne: "Learn a clear, ethical, repeatable sales process",
+      repsPointTwo: "Develop confidence in outreach and real conversations",
+      repsPointThree: "Create flexible income while building long-term career skills",
+      repsCta: "Apply as a sales representative",
+      emailNote: "Tell us a little about yourself and why this role interests you.",
+    },
+  },
+
+  quoteThankYou: {
+    metaTitle: "Thank you",
+    metaDescription: "Your Beaumont quote request has been received.",
+    eyebrow: "Request received",
+    titleA: "Thank you.",
+    titleB: "Your home is in good hands.",
+    body:
+      "Your request is safely with Beaumont. A specialist will review the property, services, and details you shared before preparing your written quote.",
+    nextLabel: "What happens next",
+    stepOneTitle: "We review the scope",
+    stepOneBody: "A real person checks the services, surfaces, access, and notes you provided.",
+    stepTwoTitle: "We prepare your quote",
+    stepTwoBody: "You receive clear, written pricing—usually within 24 hours.",
+    stepThreeTitle: "You decide",
+    stepThreeBody: "There is no payment now and no pressure to proceed.",
+    notificationSent: "A confirmation has also been sent to your email.",
+    notificationSaved: "Your request is saved. Our team will follow up directly.",
+    viewQuotes: "View my quotes",
+    returnHome: "Return home",
+    support: "Need to add something? Email our concierge team.",
   },
 
   terms: {
@@ -1021,6 +1105,7 @@ const fr: Dictionary = {
     quote: "Soumission gratuite",
     terms: "Conditions",
     partners: "Partenaires",
+    hiring: "Emplois",
   },
 
   site: {
@@ -1195,6 +1280,89 @@ const fr: Dictionary = {
       "Spécialistes du lavage de fenêtres, des traitements contre les araignées et du lavage de fenêtres de condos. QuickClean veille à ce que les surfaces délicates de votre propriété soient traitées avec le plus grand soin et professionnalisme.",
     atlanticDescription:
       "Spécialistes du nettoyage de fenêtres et de gouttières, ainsi que des soffites et des portes de garage. Atlantic apporte des années d'expérience pour redonner aux maisons leur meilleur aspect.",
+  },
+
+  hiring: {
+    homeEyebrow: "Bâtissez avec Beaumont",
+    homeTitleA: "Du bon travail.",
+    homeTitleB: "Un véritable élan.",
+    homeBody:
+      "Joignez-vous à une équipe qui valorise la discipline, une communication claire et un travail dont vous pouvez être fier.",
+    techniciansLabel: "Pour les techniciens",
+    techniciansTitle: "Maîtrisez un métier sur le terrain.",
+    techniciansBody:
+      "Apprenez l’entretien extérieur adapté aux matériaux, livrez un travail rigoureux et évoluez avec une équipe attentive aux détails.",
+    repsLabel: "Pour les représentants",
+    repsTitle: "Transformez vos aptitudes relationnelles en atout professionnel.",
+    repsBody:
+      "Développez votre confiance, votre communication et une méthode de vente durable avec le soutien d’une équipe qui veut votre réussite.",
+    exploreRole: "Découvrir ce rôle",
+    page: {
+      metaTitle: "Emplois",
+      metaDescription:
+        "Découvrez les possibilités de technicien et de représentant chez Beaumont dans le Grand Montréal.",
+      eyebrow: "Carrières chez Beaumont",
+      titleA: "Un travail qui bâtit",
+      titleB: "plus qu’un CV.",
+      intro:
+        "Nous bâtissons une équipe engagée dans le Grand Montréal—des personnes qui se soucient de la qualité de leur travail, de leur communication et des compétences qu’elles développent.",
+      principlesLabel: "Ce que vous pouvez attendre",
+      principleOneTitle: "Des standards visibles",
+      principleOneBody:
+        "Des attentes claires, une formation réfléchie et un travail soigné de l’arrivée jusqu’à l’inspection finale.",
+      principleTwoTitle: "Des compétences qui grandissent",
+      principleTwoBody:
+        "Un accompagnement pratique en service, communication, responsabilité et résolution de problèmes—utile ici comme ailleurs.",
+      principleThreeTitle: "La possibilité de gagner et d’évoluer",
+      principleThreeBody:
+        "Le rendement est reconnu. L’initiative, la constance et le leadership ouvrent la voie à davantage de responsabilités.",
+      techniciansEyebrow: "Équipe terrain",
+      techniciansTitle: "Techniciens en entretien extérieur",
+      techniciansIntro:
+        "Pour ceux qui aiment les résultats concrets, les journées actives et l’apprentissage d’un métier pratique.",
+      techniciansPointOne: "Apprendre des méthodes sécuritaires de lavage à pression et en douceur",
+      techniciansPointTwo: "Travailler avec une équipe minutieuse partout dans le Grand Montréal",
+      techniciansPointThree: "Développer ses compétences en service, planification et leadership terrain",
+      techniciansFitTitle: "Ce rôle pourrait vous convenir si",
+      techniciansFitBody:
+        "Vous êtes fiable, à l’aise de travailler dehors, attentif aux détails et prêt à apprendre un processus rigoureux. L’expérience est un atout, mais le caractère et la constance comptent avant tout.",
+      techniciansCta: "Postuler comme technicien",
+      repsEyebrow: "Équipe croissance",
+      repsTitle: "Représentants des ventes",
+      repsIntro:
+        "Pour les communicateurs ambitieux—notamment les athlètes—qui recherchent un potentiel de revenu flexible et une compétence utile à vie.",
+      partnershipLabel: "Parcours pour athlètes",
+      partnershipTitle: "En partenariat avec PROTOTYPE SPORTS GROUP",
+      partnershipBody:
+        "Grâce à notre partenariat avec PROTOTYPE SPORTS GROUP, nous embauchons des athlètes et les aidons à financer leur carrière tout en développant des compétences durables en communication, relations, discipline et vente. Ils pourront utiliser ces compétences pendant leur parcours sportif et pour le reste de leur vie.",
+      repsPointOne: "Apprendre une méthode de vente claire, éthique et reproductible",
+      repsPointTwo: "Développer sa confiance dans la prospection et les vraies conversations",
+      repsPointThree: "Créer un revenu flexible tout en bâtissant des compétences de carrière",
+      repsCta: "Postuler comme représentant",
+      emailNote: "Parlez-nous un peu de vous et de ce qui vous attire dans ce rôle.",
+    },
+  },
+
+  quoteThankYou: {
+    metaTitle: "Merci",
+    metaDescription: "Votre demande de soumission Beaumont a été reçue.",
+    eyebrow: "Demande reçue",
+    titleA: "Merci.",
+    titleB: "Votre maison est entre bonnes mains.",
+    body:
+      "Votre demande a bien été transmise à Beaumont. Un spécialiste examinera la propriété, les services et les détails fournis avant de préparer votre soumission écrite.",
+    nextLabel: "La suite",
+    stepOneTitle: "Nous examinons la demande",
+    stepOneBody: "Une personne vérifie les services, les surfaces, l’accès et les notes fournis.",
+    stepTwoTitle: "Nous préparons votre soumission",
+    stepTwoBody: "Vous recevez une tarification écrite et claire, habituellement en moins de 24 heures.",
+    stepThreeTitle: "Vous décidez",
+    stepThreeBody: "Aucun paiement maintenant et aucune pression pour aller de l’avant.",
+    notificationSent: "Une confirmation a également été envoyée à votre adresse courriel.",
+    notificationSaved: "Votre demande est enregistrée. Notre équipe communiquera directement avec vous.",
+    viewQuotes: "Voir mes soumissions",
+    returnHome: "Retour à l’accueil",
+    support: "Vous souhaitez ajouter un détail? Écrivez à notre équipe de conciergerie.",
   },
 
   terms: {

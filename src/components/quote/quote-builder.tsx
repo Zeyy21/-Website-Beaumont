@@ -35,7 +35,7 @@ export interface QuoteAccount {
   phone: string;
 }
 
-const dashboardQuotesPath = "/dashboard/quotes";
+const quoteThankYouPath = "/quote/thank-you";
 
 interface StoredQuoteRequest extends SaveQuotePayload {
   place: Place;
@@ -223,26 +223,9 @@ export function QuoteBuilder({
         }
         if (response.ok) {
           window.localStorage.removeItem(pendingQuoteKey);
-          window.history.replaceState({}, "", window.location.pathname);
-          const delivered = response.notificationStatus === "sent";
-          // Signed-in visitors already have the request saved to their account;
-          // send them to their quotes panel rather than the public end card.
-          if (signedIn) {
-            setResult({
-              ok: true,
-              title: tqResults.savedToAccountTitle,
-              message: tqResults.savedToAccountMessage,
-            });
-            window.location.assign(dashboardQuotesPath);
-            return;
-          }
-          setResult({
-            ok: true,
-            title: tqResults.goodHandsTitle,
-            message: delivered
-              ? tqResults.deliveredMessage
-              : tqResults.savedMessage,
-          });
+          const delivery = response.notificationStatus === "sent" ? "sent" : "saved";
+          window.location.assign(`${quoteThankYouPath}?delivery=${delivery}`);
+          return;
         } else {
           setResult({
             ok: false,
@@ -258,7 +241,7 @@ export function QuoteBuilder({
         });
       }
     });
-  }, [tqResults, signedIn]);
+  }, [tqResults]);
 
   useEffect(() => {
     if (resumedRequest.current) return;
