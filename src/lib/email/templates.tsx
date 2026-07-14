@@ -24,7 +24,15 @@ export type EmailTemplate =
   | { kind: "quote_sent"; name: string; total: number; quoteUrl: string }
   | { kind: "payment_receipt"; name: string; amount: number; method: string }
   | { kind: "referral_credited"; name: string; points: number }
-  | { kind: "quote_cancelled"; name: string; address: string; total: number };
+  | { kind: "quote_cancelled"; name: string; address: string; total: number }
+  | {
+      kind: "sales_application";
+      name: string;
+      email: string;
+      phone: string;
+      motivation: string;
+      scheduleOk: boolean;
+    };
 
 interface Rendered {
   subject: string;
@@ -129,6 +137,36 @@ export function renderEmail(t: EmailTemplate): Rendered {
             p(`<strong>Services:</strong> ${service}<br><strong>Scope size:</strong> ${propertySize}<br><strong>Surface condition:</strong> ${condition}<br><strong>Visit rhythm:</strong> ${frequency}`) +
             p(`<strong>Additional review items:</strong> ${conditionalServices}`) +
             p(`<strong>Scope details:</strong><br>${scopeDetails}`),
+        ),
+      };
+    }
+    case "sales_application": {
+      const name = escapeHtml(t.name);
+      const email = escapeHtml(t.email);
+      const phone = escapeHtml(t.phone);
+      const motivation = escapeHtml(t.motivation).replace(/\n/g, "<br>");
+      const schedule = t.scheduleOk
+        ? "Yes — comfortable with Mon–Sat, 11 AM–7 PM"
+        : "No / not sure about Mon–Sat, 11 AM–7 PM";
+      const text = [
+        `New sales rep application from ${t.name}`,
+        `Email: ${t.email}`,
+        `Phone: ${t.phone}`,
+        `Mon–Sat 11 AM–7 PM schedule: ${t.scheduleOk ? "Yes" : "No / not sure"}`,
+        "",
+        "Why they want to get into sales:",
+        t.motivation,
+      ].join("\n");
+
+      return {
+        subject: `New sales rep application — ${t.name}`,
+        text,
+        html: shell(
+          "New sales rep application",
+          p(`<strong>${name}</strong> applied to join the sales team.`) +
+            p(`<strong>Email:</strong> ${email}<br><strong>Phone:</strong> ${phone}`) +
+            p(`<strong>Schedule (Mon–Sat, 11 AM–7 PM):</strong> ${schedule}`) +
+            p(`<strong>Why they want to get into sales:</strong><br>${motivation}`),
         ),
       };
     }
