@@ -1,4 +1,4 @@
-import { Cormorant, Inter } from "next/font/google";
+import { Cormorant, Inter, Fraunces, Instrument_Sans } from "next/font/google";
 
 /**
  * Body font. Loaded from Google and exposed as --font-body fallback.
@@ -19,5 +19,24 @@ export const cormorant = Cormorant({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-cormorant",
+  display: "swap",
+});
+
+/**
+ * Funnel display + body fonts. The ad-funnel landing pages (/getquote,
+ * /learnmore) reproduce a design built on Fraunces + Instrument Sans; these are
+ * scoped to those pages via the (funnels) layout and don't affect the main site.
+ */
+export const fraunces = Fraunces({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-fraunces",
+  display: "swap",
+});
+
+export const instrumentSans = Instrument_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-instrument",
   display: "swap",
 });

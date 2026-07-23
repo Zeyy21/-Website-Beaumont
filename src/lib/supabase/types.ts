@@ -153,6 +153,17 @@ export type DoorTagScanRow = {
   converted_quote_id: string | null;
 };
 
+export type SalesApplicationRow = {
+  id: string;
+  full_name: string;
+  phone: string;
+  email: string;
+  motivation: string;
+  schedule_ok: boolean;
+  source: string | null;
+  created_at: string;
+};
+
 /** Insert = required keys `Req` stay required; everything else optional. */
 type Insert<T, Req extends keyof T = never> = Partial<T> & Pick<T, Req>;
 
@@ -184,6 +195,10 @@ export interface Database {
         Insert<GalleryRow, "before_url" | "after_url">
       >;
       door_tag_scans: Table<DoorTagScanRow, Insert<DoorTagScanRow>>;
+      sales_applications: Table<
+        SalesApplicationRow,
+        Insert<SalesApplicationRow, "full_name" | "phone" | "email" | "motivation">
+      >;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

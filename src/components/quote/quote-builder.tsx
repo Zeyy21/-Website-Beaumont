@@ -35,7 +35,7 @@ export interface QuoteAccount {
   phone: string;
 }
 
-const dashboardQuotesPath = "/dashboard/quotes";
+const quoteThankYouPath = "/quote/thankyou";
 
 interface StoredQuoteRequest extends SaveQuotePayload {
   place: Place;
@@ -44,7 +44,6 @@ interface StoredQuoteRequest extends SaveQuotePayload {
 
 const pendingQuoteKey = "beaumont:pending-quote";
 const quoteContactKey = "beaumont:quote-contact";
-const quoteReturnPath = "/quote?completeQuote=1";
 
 /** Step + option ids and structure live here; all display copy is pulled from
  *  the dictionary at render time (keyed by the `copy` id below). */
@@ -124,7 +123,6 @@ export function QuoteBuilder({
     ok: boolean;
     title: string;
     message?: string;
-    needsAccount?: boolean;
   }>(null);
   const [pending, startTransition] = useTransition();
   const resumedRequest = useRef(false);
@@ -213,36 +211,14 @@ export function QuoteBuilder({
               updatedAt: Date.now(),
             }),
           );
-          setResult({
-            ok: true,
-            needsAccount: true,
-            title: tqResults.createdTitle,
-            message: tqResults.createdMessage,
-          });
+          window.location.assign(`${quoteThankYouPath}?flow=quote`);
           return;
         }
         if (response.ok) {
           window.localStorage.removeItem(pendingQuoteKey);
-          window.history.replaceState({}, "", window.location.pathname);
-          const delivered = response.notificationStatus === "sent";
-          // Signed-in visitors already have the request saved to their account;
-          // send them to their quotes panel rather than the public end card.
-          if (signedIn) {
-            setResult({
-              ok: true,
-              title: tqResults.savedToAccountTitle,
-              message: tqResults.savedToAccountMessage,
-            });
-            window.location.assign(dashboardQuotesPath);
-            return;
-          }
-          setResult({
-            ok: true,
-            title: tqResults.goodHandsTitle,
-            message: delivered
-              ? tqResults.deliveredMessage
-              : tqResults.savedMessage,
-          });
+          const delivery = response.notificationStatus === "sent" ? "sent" : "saved";
+          window.location.assign(`${quoteThankYouPath}?flow=quote&delivery=${delivery}`);
+          return;
         } else {
           setResult({
             ok: false,
@@ -258,7 +234,7 @@ export function QuoteBuilder({
         });
       }
     });
-  }, [tqResults, signedIn]);
+  }, [tqResults]);
 
   useEffect(() => {
     if (resumedRequest.current) return;
@@ -738,18 +714,14 @@ export function QuoteBuilder({
                       headingRef={headingRef}
                       overline={tq.step3.overlineReady}
                       title={
-                        result?.needsAccount
-                          ? tq.step3.titleSave
-                          : result?.ok
+                        result?.ok
                             ? tq.step3.titleReceived
                             : signedIn
                               ? tq.step3.titleSignedIn
                               : tq.step3.titleDefault
                       }
                       copy={
-                        result?.needsAccount
-                          ? tq.step3.copySave
-                          : result?.ok
+                        result?.ok
                           ? tq.step3.copyReceived
                           : signedIn
                             ? tq.step3.copySignedIn
@@ -782,36 +754,9 @@ export function QuoteBuilder({
                             {result.message}
                           </p>
                         )}
-                        {result.needsAccount ? (
-                          <div className="mt-7 flex flex-col items-center gap-3">
-                            <Button
-                              size="lg"
-                              onClick={() =>
-                                window.location.assign(
-                                  `/login?mode=signup&quote=ready&next=${encodeURIComponent(quoteReturnPath)}`,
-                                )
-                              }
-                            >
-                              {tq.step3.createAccount}
-                              <Arrow />
-                            </Button>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                window.location.assign(
-                                  `/login?quote=ready&next=${encodeURIComponent(quoteReturnPath)}`,
-                                )
-                              }
-                              className="text-sm font-semibold text-oak underline decoration-oak/25 underline-offset-4 hover:decoration-oak"
-                            >
-                              {tq.step3.alreadyHaveAccount}
-                            </button>
-                          </div>
-                        ) : (
-                          <Button className="mt-7" variant="outline" onClick={result.ok ? reset : () => setResult(null)}>
-                            {result.ok ? tq.step3.startAnother : tq.step3.tryAgain}
-                          </Button>
-                        )}
+                        <Button className="mt-7" variant="outline" onClick={result.ok ? reset : () => setResult(null)}>
+                          {result.ok ? tq.step3.startAnother : tq.step3.tryAgain}
+                        </Button>
                       </motion.div>
                     ) : (
                       <>

@@ -64,9 +64,9 @@ export function Hero() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_48%,rgba(28,28,26,.18),rgba(17,15,12,.62)_72%,rgba(17,15,12,.82)_100%)]" />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(17,15,12,.46)_0%,rgba(17,15,12,.12)_30%,rgba(17,15,12,.38)_68%,rgba(17,15,12,.78)_100%)]" />
       <div className="hero-film-grain absolute inset-0 opacity-[.13]" aria-hidden="true" />
-      <div className="pointer-events-none absolute bottom-4 left-4 right-4 top-[100px] rounded-[1.5rem] border border-ivory/14 md:bottom-6 md:left-6 md:right-6 md:top-[108px] md:rounded-[2.25rem]" />
+      <div className="pointer-events-none absolute bottom-3 left-1 right-1 top-3 rounded-[1.5rem] border border-ivory/14 md:bottom-6 md:left-6 md:right-6 md:top-[108px] md:rounded-[2.25rem]" />
 
-      <Container className="relative flex min-h-[100svh] items-center justify-center pb-[12rem] pt-32 md:pb-[15rem] md:pt-32">
+      <Container className="relative flex min-h-[100svh] items-center justify-center pb-[7.5rem] pt-[6.75rem] md:pb-[15rem] md:pt-32">
         <motion.div
           className="mx-auto flex max-w-[74rem] flex-col items-center text-center"
           style={{ y: contentY, opacity: contentOpacity }}
@@ -120,7 +120,7 @@ export function Hero() {
       </Container>
 
       <motion.div
-        className="absolute inset-x-0 bottom-6 z-20 md:bottom-9"
+        className="absolute inset-x-0 bottom-6 z-20 hidden md:block md:bottom-9"
         style={{ opacity: contentOpacity }}
       >
         <div className="mb-5 hidden items-center justify-center gap-4 text-[9px] font-semibold uppercase tracking-[0.28em] text-ivory/55 md:flex">

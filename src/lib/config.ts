@@ -21,6 +21,7 @@ export const nav = [
   { href: "#quote", key: "quote", label: "Free Estimate" },
   { href: "/terms", key: "terms", label: "Terms" },
   { href: "/partners", key: "partners", label: "Partners" },
+  { href: "/hiring", key: "hiring", label: "Hiring" },
 ] as const;
 
 /** Frequencies offered for recurring service. */
